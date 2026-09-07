@@ -41,8 +41,8 @@ svg{display:block;flex:none}
 .topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40}
 .topbar-inner{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:28px;height:60px}
 .brand{display:flex;align-items:center;gap:9px;flex:none}
-.brand-mark{width:26px;height:26px;border-radius:7px;background:var(--brand)}
-.brand-word{font-weight:700;font-size:15px;white-space:nowrap;letter-spacing:-.01em}
+.brand-logo{height:28px;width:auto;display:block}
+.login-card .brand-logo{height:32px;margin:0 auto}
 .pubnav{display:flex;align-items:center;gap:4px}
 .pubnav button{padding:8px 4px;font-size:14px;font-weight:500;color:var(--ink-soft);border-bottom:2px solid transparent;position:relative}
 .pubnav button.active{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
@@ -909,7 +909,7 @@ function topNav(active){
   return `
   <div class="topbar">
     <div class="topbar-inner">
-      <div class="brand"><div class="brand-mark"></div><span class="brand-word">TruckerPath Parking</span></div>
+      <div class="brand"><img class="brand-logo" src="images/trucker-path-logo.svg" alt="TruckerPath Parking"></div>
       <nav class="pubnav">
         <button class="${active==='book'?'active':''}" data-go="homepage">Book Parking</button>
         <button class="${active==='orders'?'active':''}" data-go="orders">My Orders</button>
@@ -1074,10 +1074,10 @@ function screenAllListings(){
 ============================================================ */
 function screenLogin(){
   return `
-  <div class="topbar"><div class="topbar-inner"><div class="brand"><div class="brand-mark"></div><span class="brand-word">TruckerPath Parking</span></div></div></div>
+  <div class="topbar"><div class="topbar-inner"><div class="brand"><img class="brand-logo" src="images/trucker-path-logo.svg" alt="TruckerPath Parking"></div></div></div>
   <div class="login-wrap">
     <div class="login-card">
-      <div class="brand"><div class="brand-mark"></div><span class="brand-word">TRUCKER PATH</span></div>
+      <div class="brand"><img class="brand-logo" src="images/trucker-path-logo.svg" alt="TruckerPath Parking"></div>
       <div class="login-tabs">
         <button class="login-tab ${S.loginTab==='login'?'on':''}" data-tab="login">Log in</button>
         <button class="login-tab ${S.loginTab==='create'?'on':''}" data-tab="create">Create account</button>
