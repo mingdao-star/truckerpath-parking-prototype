@@ -1,0 +1,23 @@
+Homepage lot photos — sourced from Wikimedia Commons, real photos used as stand-in imagery
+(none of these depict the actual Eloy/Maricopa/Glendale lots — they're generic, thematically
+correct truck-parking photos, not verified location photography).
+
+lot-eloy.jpg
+  "Estes Express Lines Freight Truck in Parking Lot" by Mike Mozart
+  License: CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Estes_Express_Lines_Freight_Truck_in_Parking_Lot_-_28792595115.jpg
+
+lot-maricopa.jpg
+  "Parking lot with semi truck, Penn Mar Shopping Center" by Ser_Amantio_di_Nicolao
+  License: CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:Parking_lot_with_semi_truck,_Penn_Mar_Shopping_Center.jpg
+
+lot-glendale1.jpg
+  "Terminal Freight warehouse aerial view" by David E. Lucas (DPLA)
+  License: Public domain
+  https://commons.wikimedia.org/wiki/File:Terminal_Freight_warehouse_aerial_view_-_DPLA_-_f8b1f9748a4daa447aa56afaefe3386d.jpg
+
+lot-glendale2.jpg
+  "Estes Express Lines Freight Truck in Parking Lot" by Mike Mozart
+  License: CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Estes_Express_Lines_Freight_Truck_in_Parking_Lot_-_28715453241.jpg
