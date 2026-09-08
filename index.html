@@ -138,6 +138,8 @@ select.control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg x
 .listing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:24px}
 .listing-card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer;transition:box-shadow .18s ease,transform .18s ease;padding:14px}
 .listing-card:hover{box-shadow:var(--shadow-md);transform:translateY(-3px)}
+.listing-card.browse-only{cursor:default}
+.listing-card.browse-only:hover{box-shadow:var(--shadow-sm);transform:none}
 .listing-thumb{height:130px;border-radius:10px;position:relative;overflow:hidden;background:linear-gradient(135deg,#3a4a3f,#5c7a63 55%,#8a9d6f);margin-bottom:12px}
 .listing-thumb::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.1'%3E%3Crect x='4' y='4' width='16' height='16' rx='3'/%3E%3Cpath d='M10 16V8h3.2a2.4 2.4 0 0 1 0 4.8H10'/%3E%3C/svg%3E") no-repeat center/32% auto,radial-gradient(120% 140% at 15% -10%,rgba(255,255,255,.35),transparent 60%);opacity:.9;pointer-events:none}
 .listing-badge{position:absolute;top:12px;left:12px;background:var(--green);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px}
@@ -430,7 +432,7 @@ const S = {
   batch: { bookingType:'Daily', uploading:false, uploadPct:0 },
   // presenter-only demo control — not part of the product design, see screenBatchDetails
   presenterTool: { rowCount: null },
-  directory: { state: null, search: '' },
+  directory: { state: null, search: '', listingPage: 1 },
   importTab: 'all',
   importSearch: '',
   confirmSearch: '',
@@ -1040,6 +1042,26 @@ function screenAllListings(){
   const statesWithData = US_STATES.filter(([,abbr])=>stateCounts[abbr]>0);
 
   if(S.directory.state) directoryRows = directoryRows.filter(p=>p.state===S.directory.state);
+
+  // photo-card grid: the real bookable lots first, then every other filtered location — paginated,
+  // since the full directory is ~180 rows. Only the real lots are wired to the booking flow; the
+  // rest stay browse-only (no data-lot), consistent with this page's real-locations-are-browse-only scope
+  const LISTING_PAGE_SIZE = 12;
+  const bookableCards = Object.entries(LOTS).map(([id,l])=>({
+    id, bookable:true, name:l.name, city:l.city, avail:l.avail, rating:l.rating,
+    price: id==='eloy' ? 'Free' : `$${lotRate(l,'Daily').toFixed(0)}/day`,
+  }));
+  const partnerCards = directoryRows.map(p=>({
+    id:null, bookable:false, name:p.name, city:p.city||'—', avail:p.avail, rating:null,
+    price:`$${p.day}/day`,
+  }));
+  const allListingCards = [...bookableCards, ...partnerCards];
+  const listingPages = Math.max(1, Math.ceil(allListingCards.length/LISTING_PAGE_SIZE));
+  const listingPage = Math.min(S.directory.listingPage||1, listingPages);
+  const pageCards = allListingCards.slice((listingPage-1)*LISTING_PAGE_SIZE, listingPage*LISTING_PAGE_SIZE);
+  let listingPageBtns = '';
+  for(let i=1;i<=listingPages;i++) listingPageBtns += `<button class="page-btn ${i===listingPage?'on':''}" data-lp="${i}">${i}</button>`;
+
   return `
   ${topNav('book')}
   <div class="page">
@@ -1061,20 +1083,28 @@ function screenAllListings(){
       </div>
     </div>
     <div class="listing-grid" id="allListingsGrid">
-      ${Object.entries(LOTS).map(([id,l])=>`
-        <div class="listing-card" data-lot="${id}">
-          <div class="listing-thumb"><span class="listing-badge">${l.avail}</span></div>
-          <div class="listing-title">${l.name}</div>
+      ${pageCards.map(c=>`
+        <div class="listing-card ${c.bookable?'':'browse-only'}" ${c.bookable?`data-lot="${c.id}"`:''}>
+          <div class="listing-thumb"><span class="listing-badge">${c.avail}</span></div>
+          <div class="listing-title">${c.name}</div>
           <div class="listing-meta-row">
-            <span class="listing-city">${l.city}</span>
-            <span class="listing-rating">★&nbsp;<b>4.3</b><span>(12)</span></span>
+            <span class="listing-city">${c.city}</span>
+            ${c.rating!=null ? `<span class="listing-rating">★&nbsp;<b>${c.rating.toFixed(1)}</b></span>` : ''}
           </div>
           <div class="listing-divider"></div>
           <div class="listing-footer">
-            <span class="listing-avail">${l.avail} space(s) left</span>
-            <span class="listing-price">${id==='eloy'?'Free':`$${lotRate(l,'Daily').toFixed(0)}/day`}</span>
+            <span class="listing-avail">${c.avail} space(s) left</span>
+            <span class="listing-price">${c.price}</span>
           </div>
         </div>`).join('')}
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+      <span style="font-size:12.5px;color:var(--ink-soft)">${allListingCards.length} total locations · page ${listingPage} of ${listingPages}</span>
+      <div class="pager">
+        <button class="page-btn" data-lp="${listingPage-1}" ${listingPage<=1?'disabled':''}>‹</button>
+        ${listingPageBtns}
+        <button class="page-btn" data-lp="${listingPage+1}" ${listingPage>=listingPages?'disabled':''}>›</button>
+      </div>
     </div>
     <div class="state-section">
       <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:16px">
@@ -1810,6 +1840,7 @@ function wireScreen(root){
 
   /* ---- all listings (browse by state) ---- */
   root.querySelectorAll('#allListingsGrid [data-lot]').forEach(c=>c.addEventListener('click',()=>{ selectLot(c.dataset.lot); S.detailPanelOpen=true; go('book1'); }));
+  root.querySelectorAll('[data-lp]').forEach(b=>b.addEventListener('click',()=>{ const n=parseInt(b.dataset.lp,10); if(n>=1){ S.directory.listingPage=n; render(); } }));
   const alSearchBtn = root.querySelector('#alSearchBtn'); if(alSearchBtn) alSearchBtn.addEventListener('click',()=>{ S.resultsHeading = S.search.location.split(',')[0] || S.resultsHeading; go('book1'); });
   bindText(root,'alLocation', v=>S.search.location=v);
   bindSelect(root,'alBookingType', v=>S.search.bookingType=v);
