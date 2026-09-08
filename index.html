@@ -153,7 +153,7 @@ select.control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg x
 .listing-price{font-size:16px;font-weight:700;font-family:var(--font-display)}
 .state-section{margin-top:32px;border-top:1px solid var(--line);padding-top:28px}
 .state-grid{display:flex;flex-wrap:wrap;gap:12px}
-.state-btn{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:13px;text-align:left;min-width:150px;transition:background .12s,border-color .12s}
+.state-btn{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:13px;font-weight:600;text-align:center;width:92px;transition:background .12s,border-color .12s}
 .state-btn:hover{background:var(--paper-dim);border-color:var(--border-input)}
 .state-btn.selected{background:var(--brand-tint);border-color:var(--brand);color:var(--brand);font-weight:600}
 .footer{border-top:1px solid var(--line);padding:16px 24px;display:flex;justify-content:space-between;color:var(--ink-soft);font-size:12.5px}
@@ -1028,10 +1028,16 @@ function screenAllListings(){
   const [priceMin, priceMax] = parsePriceRangeLabel(S.search.priceRange);
   directoryRows = directoryRows.filter(p=>p.day>=priceMin && (priceMax===null || p.day<=priceMax));
 
-  // the state-grid buttons and the directory's own search box narrow it further
-  if(S.directory.state) directoryRows = directoryRows.filter(p=>p.state===S.directory.state);
+  // the directory's own search box narrows it further too — apply before the state-grid split so
+  // per-state counts reflect the other active filters without being biased by the state filter itself
   const dq = S.directory.search.trim().toLowerCase();
   if(dq) directoryRows = directoryRows.filter(p=>(p.name+' '+p.partner+' '+p.city).toLowerCase().includes(dq));
+
+  const stateCounts = {};
+  directoryRows.forEach(p=>{ if(p.state) stateCounts[p.state] = (stateCounts[p.state]||0)+1; });
+  const statesWithData = US_STATES.filter(([,abbr])=>stateCounts[abbr]>0);
+
+  if(S.directory.state) directoryRows = directoryRows.filter(p=>p.state===S.directory.state);
   return `
   ${topNav('book')}
   <div class="page">
@@ -1074,7 +1080,7 @@ function screenAllListings(){
         <span style="font-size:13px;font-weight:600;color:var(--ink-soft);letter-spacing:.03em">USA</span>
       </div>
       <div class="state-grid">
-        ${US_STATES.map(([name,abbr])=>`<button class="state-btn ${S.directory.state===abbr?'selected':''}" data-state="${name}" data-abbr="${abbr}">${name} (${abbr})</button>`).join('')}
+        ${statesWithData.map(([name,abbr])=>`<button class="state-btn ${S.directory.state===abbr?'selected':''}" data-state="${name}" data-abbr="${abbr}">${abbr} (${stateCounts[abbr]})</button>`).join('')}
       </div>
     </div>
     <div class="state-section">
