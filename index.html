@@ -216,6 +216,15 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .avail-note{background:var(--green-tint);border-radius:var(--r-md);padding:9px 12px;font-size:12.5px}
 .avail-note b{color:var(--green-deep)}
 .avail-note .refresh{color:var(--orange-deep);display:block;font-size:11px;margin-top:2px}
+.rate-cards{display:flex;gap:10px;margin-bottom:16px}
+.rate-card{flex:1;background:var(--paper-dim);border-radius:10px;padding:10px 12px}
+.rate-card .k{font-size:12px;color:var(--ink-soft);font-weight:600;margin-bottom:2px}
+.rate-card .v{font-size:18px;font-weight:700;color:var(--ink);display:flex;align-items:baseline;gap:2px}
+.rate-card .v span{font-size:12px;font-weight:400;color:var(--ink-soft)}
+.hours-banner{display:flex;align-items:center;gap:8px;background:var(--brand-tint);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px}
+.hours-banner b{color:var(--green-deep);flex:1;font-size:13.5px}
+.hours-banner span{color:var(--green-deep);font-size:12.5px}
+.hours-dot{width:8px;height:8px;border-radius:999px;background:var(--brand);flex:none}
 .total-row{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 .total-row b{font-size:16px;font-family:var(--font-display)}
 .stepper-inline{display:flex;align-items:center;border:1px solid var(--border-input);border-radius:var(--r-md);overflow:hidden;width:fit-content}
@@ -280,6 +289,7 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .vtype-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--paper-dim);margin-bottom:8px}
 .vtype-row.disabled{opacity:.55}
 .vtype-price-pill{background:#fff;border:1px solid var(--line);padding:5px 12px;border-radius:999px;font-weight:700;font-size:13px;white-space:nowrap}
+.fitrig-pill{background:var(--paper-dim);border:1px solid var(--line);padding:6px 12px;border-radius:999px;font-weight:600;font-size:12.5px;white-space:nowrap;color:var(--ink)}
 
 /* ---- shared section-header icon treatment ---- */
 .card-icon-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
@@ -357,7 +367,6 @@ table.orders tbody tr:hover td{background:var(--paper-dim)}
   .pay-grid,.wallet-grid{grid-template-columns:1fr}
 }
 .leaflet-pin-badge{background:#fff;color:#0E0F0C;border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:700;box-shadow:0 8px 24px rgba(14,19,47,.16);border:2px solid transparent;white-space:nowrap;display:inline-block;cursor:pointer;font-family:'Inter',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;transition:transform .12s}
-.leaflet-pin-badge.own{background:#1C3755;color:#fff}
 .leaflet-pin-badge.selected{border-color:#1FA971;transform:scale(1.14)}
 .leaflet-pin-badge:hover{transform:scale(1.08)}
 #leafletHost{width:100%;height:100%}
@@ -400,6 +409,7 @@ const ic = {
   scale:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7"/><path d="M12 13 15 9"/><path d="M9 5h6"/></svg>',
   atm:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 8v8M9.6 10a2 2 0 0 1 2-1.5h1a2 2 0 0 1 0 4h-1a2 2 0 0 0 0 4h1a2 2 0 0 0 2-1.5"/></svg>',
   mail:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>',
+  qr:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3v4h4M19 14v3M19 21h.01" stroke-linecap="round"/></svg>',
 };
 
 /* ============================================================
@@ -457,23 +467,23 @@ const S = {
 };
 
 const LOTS = {
-  eloy:{name:'Eloy, AZ Truck & Trailer Parking at PICACHO RV & TRUCK PARK', city:'Eloy, AZ', avail:9, day:15, week:150, month:300, lat:32.7519, lng:-111.5468,
-    rating:4.1, address:'4501 W Sunland Gin Rd, Eloy, AZ 85131', highway:'I-10, Exit 226', phone:'1(520) 466-7710',
+  eloy:{name:'Eloy, AZ Truck & Trailer Parking at PICACHO RV & TRUCK PARK', city:'Eloy, AZ', avail:9, totalSpots:12, day:15, week:150, month:300, lat:32.7519, lng:-111.5468,
+    rating:4.1, address:'4501 W Sunland Gin Rd, Eloy, AZ 85131', highway:'I-10, Exit 226', phone:'1(520) 466-7710', staffedHours:null,
     reports:[{cls:'some',label:'SOME',time:'12m ago'},{cls:'many',label:'MANY',time:'25m ago'},{cls:'paid',label:'PAID ONLY',time:'2h ago'}],
     freeSpots:9, wifi:true, scales:false, atmCount:0, vtypeAvail:{'Truck + Trailer':6,'Trailer Only':3},
     instructions:'Own yard — pull into any open spot marked with a green flag. No check-in required.'},
-  maricopa:{name:'Maricopa, AZ Truck & Trailer Parking on N White Rd', city:'Maricopa, AZ', avail:12, day:18, week:85, month:320, lat:33.0581, lng:-112.0476,
-    rating:4.4, address:'41215 N White Rd, Maricopa, AZ 85138', highway:'AZ-347, Exit 12', phone:'1(520) 568-4420',
+  maricopa:{name:'Maricopa, AZ Truck & Trailer Parking on N White Rd', city:'Maricopa, AZ', avail:12, totalSpots:15, day:18, week:85, month:320, lat:33.0581, lng:-112.0476,
+    rating:4.4, address:'41215 N White Rd, Maricopa, AZ 85138', highway:'AZ-347, Exit 12', phone:'1(520) 568-4420', staffedHours:'6:00 AM – 10:00 PM',
     reports:[{cls:'some',label:'SOME',time:'6m ago'},{cls:'many',label:'MANY',time:'18m ago'},{cls:'paid',label:'PAID ONLY',time:'45m ago'}],
     freeSpots:4, wifi:true, scales:true, atmCount:1, vtypeAvail:{'Truck + Trailer':7,'Trailer Only':5},
     instructions:'Check in at the site office before 9pm. After hours, use the drop-box for your paperwork.'},
-  glendale1:{name:'Glendale-Litchfield Park, AZ at PHX1 Logistics Plus', city:'Glendale, AZ', avail:50, day:14, week:65, month:250, lat:33.5387, lng:-112.3576,
-    rating:4.6, address:'6900 N 43rd Ave, Glendale, AZ 85301', highway:'I-17, Exit 205', phone:'1(623) 847-1190',
+  glendale1:{name:'Glendale-Litchfield Park, AZ at PHX1 Logistics Plus', city:'Glendale, AZ', avail:50, totalSpots:60, day:14, week:65, month:250, lat:33.5387, lng:-112.3576,
+    rating:4.6, address:'6900 N 43rd Ave, Glendale, AZ 85301', highway:'I-17, Exit 205', phone:'1(623) 847-1190', staffedHours:'6:00 AM – 10:00 PM',
     reports:[{cls:'some',label:'SOME',time:'3m ago'},{cls:'many',label:'MANY',time:'15m ago'},{cls:'paid',label:'PAID ONLY',time:'1h ago'}],
     freeSpots:20, wifi:false, scales:true, atmCount:1, vtypeAvail:{'Truck + Trailer':30,'Trailer Only':20},
     instructions:'Enter via the north gate on 43rd Ave. Show your booking confirmation to the attendant.'},
-  glendale2:{name:'Glendale, AZ Truck and Trailer Parking at PHX2 Logistics Plus', city:'Glendale, AZ', avail:50, day:16, week:74, month:270, lat:33.5722, lng:-112.1943,
-    rating:4.3, address:'8747 N 91st Ave, Glendale, AZ 85305', highway:'I-17, Exit 208', phone:'1(623) 435-2280',
+  glendale2:{name:'Glendale, AZ Truck and Trailer Parking at PHX2 Logistics Plus', city:'Glendale, AZ', avail:50, totalSpots:65, day:16, week:74, month:270, lat:33.5722, lng:-112.1943,
+    rating:4.3, address:'8747 N 91st Ave, Glendale, AZ 85305', highway:'I-17, Exit 208', phone:'1(623) 435-2280', staffedHours:null,
     reports:[{cls:'some',label:'SOME',time:'4m ago'},{cls:'many',label:'MANY',time:'10m ago'},{cls:'paid',label:'PAID ONLY',time:'1h ago'}],
     freeSpots:15, wifi:true, scales:false, atmCount:0, vtypeAvail:{'Truck + Trailer':35,'Trailer Only':15},
     instructions:'Enter via the south gate on 91st Ave. A gate code is texted 1 hour before arrival.'},
@@ -499,7 +509,19 @@ function poiInfoBlock(l){
     { ic:ic.scale, label:'Scales', on:l.scales },
     { ic:ic.atm, label:'ATM', count:l.atmCount, on:l.atmCount>0 },
   ];
-  return `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+  return `<div class="rate-cards">
+      <div class="rate-card"><div class="k">Daily Rate</div><div class="v"><b class="tabular">$${l.day}</b><span>/day</span></div></div>
+      <div class="rate-card"><div class="k">Monthly Rate</div><div class="v"><b class="tabular">$${l.month}</b><span>/month</span></div></div>
+    </div>
+    <div class="section-label" style="color:var(--ink)">Operating Hours</div>
+    <div class="hours-banner">
+      <span class="hours-dot"></span>
+      <b>Open now</b>
+      <span>Gate access: 24 hours</span>
+    </div>
+    <div class="info-row"><span class="k">Staffed Security</span><span>${l.staffedHours ? l.staffedHours : 'Unstaffed — QR gate entry only'}</span></div>
+    <div style="font-size:11.5px;color:var(--ink-soft);margin:2px 0 14px">Mon–Sun · same hours every day</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <div class="section-label" style="color:var(--ink);margin:0">Last Parking Status</div>
       <a href="#" class="btn-text" style="font-size:12px;display:flex;align-items:center;gap:2px" data-toast="Opening status trend…">Trend ${ic.chevRight}</a>
     </div>
@@ -512,8 +534,12 @@ function poiInfoBlock(l){
     <div class="info-row"><span class="k">Lat/Lng</span><span>${l.lat.toFixed(6)}, ${l.lng.toFixed(6)}</span></div>
     <div class="info-row"><span class="k">Call</span><span><a href="tel:${l.phone.replace(/\D/g,'')}" style="color:var(--brand)">${l.phone}</a></span></div>
     <div class="info-row"><span class="k">Weather</span><span><a href="#" style="color:var(--brand)" data-toast="Opening weather details…">View Details</a></span></div>
-    <div class="section-label" style="color:var(--ink);margin-top:12px">Parking Instructions</div>
-    <div style="font-size:12.5px;color:var(--ink-soft);line-height:1.5">${l.instructions}</div>
+    <div class="section-label" style="color:var(--ink);margin-top:12px">Access &amp; Check-in</div>
+    <div style="display:flex;gap:10px;align-items:flex-start">
+      <div class="card-icon-badge" style="flex:none">${ic.qr}</div>
+      <div><div style="font-weight:600;font-size:13px;margin-bottom:2px">Scan QR to enter</div>
+      <div style="font-size:12.5px;color:var(--ink-soft);line-height:1.5">${l.instructions}</div></div>
+    </div>
     <div class="section-label" style="color:var(--ink);margin-top:12px">Amenities</div>
     <div class="amenities-grid">
       ${amenities.map(a=>`<div class="amenity ${a.on?'':'off'}">
@@ -924,10 +950,9 @@ function initLeafletMap(){
   }).addTo(leafletMap);
 
   Object.entries(LOTS).forEach(([id,l])=>{
-    const isOwn = id==='eloy';
     const label = `$${lotRate(l,'Daily').toFixed(0)}/day`;
     const icon = L.divIcon({
-      className:'', html:`<div class="leaflet-pin-badge ${isOwn?'own':''}" data-lot="${id}">${label}</div>`,
+      className:'', html:`<div class="leaflet-pin-badge" data-lot="${id}">${label}</div>`,
       iconSize:[90,30], iconAnchor:[45,30],
     });
     const marker = L.marker([l.lat, l.lng], { icon }).addTo(leafletMap);
@@ -1241,7 +1266,10 @@ function screenBookStep1(){
             <button class="dp-close" id="dpClose">${ic.x}</button>
           </div>
           <div class="poi-head-divider"></div>
-          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:14px"><b style="color:var(--ink)">Supported vehicle types:</b> ${Object.keys(l.vtypeAvail).join(', ')}</div>
+          <div class="section-label" style="color:var(--ink);margin:0 0 8px">Fits Your Rig</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+            ${Object.keys(l.vtypeAvail).map(v=>`<span class="fitrig-pill">${v}</span>`).join('')}
+          </div>
           <div class="field" style="max-width:260px;margin-top:0"><label>Booking Mode</label><select class="pill-select" id="bookingModeSelect">
             <option value="single" ${S.bookingMode==='single'?'selected':''}>Single spot</option>
             <option value="multiple" ${S.bookingMode==='multiple'?'selected':''}>Multiple spots (fleet)</option>
@@ -1268,10 +1296,11 @@ function screenBookStep1(){
           `}
           <div class="avail-note" style="margin-top:14px">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-              <b>${l.avail} spaces left for your date range</b>
+              <b><span class="tabular">${l.avail}</span> of ${l.totalSpots} spots available today</b>
               <button class="btn-text" id="refreshAvailBtn" style="font-size:11.5px;white-space:nowrap">↻ Refresh</button>
             </div>
-            ${Object.keys(l.vtypeAvail).length>1 ? `<div style="display:flex;gap:16px;margin-top:6px;font-size:12px">
+            <div class="progress-track" style="margin-top:8px"><div class="progress-fill" style="width:${Math.round(l.avail/l.totalSpots*100)}%"></div></div>
+            ${Object.keys(l.vtypeAvail).length>1 ? `<div style="display:flex;gap:16px;margin-top:8px;font-size:12px">
               ${Object.entries(l.vtypeAvail).map(([vt,n])=>`<span>${vt}: <b class="tabular">${n}</b></span>`).join('')}
             </div>` : ''}
             <span class="refresh">Last refreshed ${timeAgo(S.availRefreshedAt)}</span>
