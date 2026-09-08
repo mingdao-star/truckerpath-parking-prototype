@@ -138,8 +138,8 @@ select.control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg x
 .listing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:24px}
 .listing-card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer;transition:box-shadow .18s ease,transform .18s ease;padding:14px}
 .listing-card:hover{box-shadow:var(--shadow-md);transform:translateY(-3px)}
-.listing-thumb{height:130px;border-radius:10px;position:relative;overflow:hidden;background:linear-gradient(135deg,#3a4a3f,#5c7a63 55%,#8a9d6f);margin-bottom:12px}
-.listing-thumb::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.1'%3E%3Crect x='4' y='4' width='16' height='16' rx='3'/%3E%3Cpath d='M10 16V8h3.2a2.4 2.4 0 0 1 0 4.8H10'/%3E%3C/svg%3E") no-repeat center/32% auto,radial-gradient(120% 140% at 15% -10%,rgba(255,255,255,.35),transparent 60%);opacity:.9;pointer-events:none}
+.listing-thumb{height:130px;border-radius:10px;position:relative;overflow:hidden;background:linear-gradient(135deg,#3a4a3f,#5c7a63 55%,#8a9d6f);background-size:cover;background-position:center;margin-bottom:12px}
+.listing-thumb::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 140% at 15% -10%,rgba(255,255,255,.22),transparent 55%),linear-gradient(180deg,rgba(0,0,0,0) 60%,rgba(0,0,0,.22) 100%);pointer-events:none}
 .listing-badge{position:absolute;top:12px;left:12px;background:var(--green);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px}
 .listing-title{font-size:14px;font-weight:700;margin:0 0 8px;line-height:1.3}
 .listing-meta-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
@@ -203,9 +203,6 @@ select.control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg x
 .amenity.off{opacity:.4}
 .amenity-ic{position:relative;width:34px;height:34px;border:1px solid var(--line);border-radius:var(--r-md);display:grid;place-items:center;color:var(--ink-soft)}
 .amenity-count{position:absolute;top:-6px;right:-8px;background:var(--brand);color:#fff;font-size:9px;font-weight:700;padding:1px 4px;border-radius:999px;line-height:1.3}
-.toggle-row{display:flex;gap:4px;background:var(--paper-dim);border-radius:10px;padding:4px}
-.toggle-btn{flex:1;text-align:center;padding:9px 0;border-radius:8px;font-size:13px;font-weight:600;color:var(--ink-soft)}
-.toggle-btn.on{background:#fff;color:var(--brand);box-shadow:var(--shadow-sm)}
 .beige-field{display:flex;align-items:center;gap:8px;background:var(--paper-dim);border-radius:8px;height:38px;padding:0 12px;font-size:13.5px;font-weight:500;color:var(--ink)}
 select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38px;border:none;border-radius:8px;background-color:var(--paper-dim);padding:0 32px 0 12px;font-size:13.5px;font-weight:500;color:var(--ink);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23676F67' stroke-width='1.7'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
 .stars-row{display:flex;gap:2px}
@@ -342,11 +339,8 @@ table.orders tbody tr:hover td{background:var(--paper-dim)}
 
 /* ---- wallet ---- */
 .wallet-grid{display:grid;grid-template-columns:340px 1fr;gap:20px}
-.saved-methods .saved-card{cursor:default}
-.add-card-dash{border:2px dashed var(--border-input);border-radius:var(--r-md);padding:14px;text-align:center;color:var(--ink-soft);font-size:13px;cursor:pointer}
-.add-card-dash:hover{border-color:var(--brand);color:var(--brand)}
-.set-default-btn{font-size:11px;color:var(--brand);font-weight:600;margin-left:6px}
-
+.modal-overlay{position:fixed;inset:0;background:rgba(14,15,12,.45);display:flex;align-items:center;justify-content:center;z-index:60}
+.modal-box{background:#fff;border-radius:var(--r-xl);box-shadow:var(--shadow-lg);padding:24px;width:420px;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);overflow-y:auto}
 /* ---- order detail ---- */
 .od-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
 .copy-btn{background:var(--orange);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px}
@@ -401,6 +395,7 @@ const ic = {
   wifi:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 8.5a16 16 0 0 1 20 0"/><path d="M5.5 12.5a11 11 0 0 1 13 0"/><path d="M9 16.5a5.5 5.5 0 0 1 6 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor" stroke="none"/></svg>',
   scale:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7"/><path d="M12 13 15 9"/><path d="M9 5h6"/></svg>',
   atm:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 8v8M9.6 10a2 2 0 0 1 2-1.5h1a2 2 0 0 1 0 4h-1a2 2 0 0 0 0 4h1a2 2 0 0 0 2-1.5"/></svg>',
+  mail:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>',
 };
 
 /* ============================================================
@@ -413,8 +408,10 @@ const S = {
   profileOpen: false,
   loginForm: { email:'', password:'' },
   loginErr: '',
+  postLoginGoto: null,
 
-  search: { location:'Dallas, Texas', bookingType:'Daily', checkIn:'2026-07-17', checkOut:'2026-07-19', vehicleType:'Truck + Trailer', priceRange:'$10–$25 / day' },
+  // All Listings must land blank (no pre-filtered state) — see screenAllListings
+  search: { location:'', bookingType:'Daily', checkIn:'2026-07-17', checkOut:'2026-07-19', vehicleType:'Truck + Trailer', priceRange:'Any Price' },
   resultsHeading: 'Brookville, PA',
 
   bookingMode: 'single',
@@ -423,12 +420,13 @@ const S = {
   step2VehicleType: 'Truck + Trailer',
   step2BookingType: 'Daily',
   spots: 5,
+  availRefreshedAt: Date.now(),
 
   vehicleForm: { truckCompany:'', truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' },
 
   payment: { context:'single', selectedCardId:'card_visa', showNewCard:false, newCard:{ name:'', number:'', exp:'', cvc:'', zip:'' } },
 
-  batch: { bookingType:'Daily', uploading:false, uploadPct:0 },
+  batch: { bookingType:'Daily', uploading:false, uploadPct:0, editingRow:null },
   // presenter-only demo control — not part of the product design, see screenBatchDetails
   presenterTool: { rowCount: null },
   directory: { state: null, search: '', listingPage: 1 },
@@ -436,18 +434,20 @@ const S = {
   importSearch: '',
   confirmSearch: '',
   confirmPage: 1,
+  selectedOrderId: null,
 
   walletCards: [
     { id:'card_visa', brand:'VISA', name:'MING DAO', last4:'4242', exp:'09/29', default:true },
     { id:'card_mc', brand:'MC', name:'MING DAO', last4:'8831', exp:'03/27', default:false },
   ],
   walletNewCard: { name:'', number:'', exp:'', cvc:'', zip:'' },
+  wallet: { selectedCardId:null, showAddModal:false },
 
   ordersHistory: [
     {id:'FP-20260708-4417', loc:'TA Travel Center, SecurSpace Yard', dates:'Jul 14 – Jul 17, 2026', spots:500, total:'$27,732.78', status:'Paid', type:'batch'},
     {id:'FP-20260622-3108', loc:"Pilot Flying J — Fort Worth", dates:'Jun 22 – Jun 25, 2026', spots:180, total:'$8,370.00', status:'Paid', type:'batch'},
     {id:'FP-20260530-2984', loc:"Love's Truck Stop — Mesquite", dates:'May 30 – Jun 2, 2026', spots:60, total:'$2,520.00', status:'Refunded', type:'batch'},
-    {id:'RP-88214-JX', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', dates:'Jul 31 – Aug 7, 2026', spots:1, total:'$154.50', status:'Paid', type:'single'},
+    {id:'RP-88214-JX', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', dates:'Jul 31 – Aug 7, 2026', spots:1, total:'$166.65', status:'Paid', type:'single'},
     {id:'FP-20260801-4602', loc:'TA Travel Center — Dallas South', dates:'Aug 10 – Aug 13, 2026', spots:320, total:'$17,280.00', status:'Draft', type:'batch'},
   ],
 };
@@ -456,19 +456,23 @@ const LOTS = {
   eloy:{name:'Eloy, AZ Truck & Trailer Parking at PICACHO RV & TRUCK PARK', city:'Eloy, AZ', avail:9, day:null, week:150, month:300, lat:32.7519, lng:-111.5468,
     rating:4.1, address:'4501 W Sunland Gin Rd, Eloy, AZ 85131', highway:'I-10, Exit 226', phone:'1(520) 466-7710',
     reports:[{cls:'some',label:'SOME',time:'12m ago'},{cls:'many',label:'MANY',time:'25m ago'},{cls:'paid',label:'PAID ONLY',time:'2h ago'}],
-    freeSpots:9, wifi:true, scales:false, atmCount:0},
+    freeSpots:9, wifi:true, scales:false, atmCount:0, vtypeAvail:{'Truck + Trailer':6,'Trailer Only':3},
+    instructions:'Own yard — pull into any open spot marked with a green flag. No check-in required.'},
   maricopa:{name:'Maricopa, AZ Truck & Trailer Parking on N White Rd', city:'Maricopa, AZ', avail:12, day:18, week:85, month:320, lat:33.0581, lng:-112.0476,
     rating:4.4, address:'41215 N White Rd, Maricopa, AZ 85138', highway:'AZ-347, Exit 12', phone:'1(520) 568-4420',
     reports:[{cls:'some',label:'SOME',time:'6m ago'},{cls:'many',label:'MANY',time:'18m ago'},{cls:'paid',label:'PAID ONLY',time:'45m ago'}],
-    freeSpots:4, wifi:true, scales:true, atmCount:1},
+    freeSpots:4, wifi:true, scales:true, atmCount:1, vtypeAvail:{'Truck + Trailer':7,'Trailer Only':5},
+    instructions:'Check in at the site office before 9pm. After hours, use the drop-box for your paperwork.'},
   glendale1:{name:'Glendale-Litchfield Park, AZ at PHX1 Logistics Plus', city:'Glendale, AZ', avail:50, day:14, week:65, month:250, lat:33.5387, lng:-112.3576,
     rating:4.6, address:'6900 N 43rd Ave, Glendale, AZ 85301', highway:'I-17, Exit 205', phone:'1(623) 847-1190',
     reports:[{cls:'some',label:'SOME',time:'3m ago'},{cls:'many',label:'MANY',time:'15m ago'},{cls:'paid',label:'PAID ONLY',time:'1h ago'}],
-    freeSpots:20, wifi:false, scales:true, atmCount:1},
+    freeSpots:20, wifi:false, scales:true, atmCount:1, vtypeAvail:{'Truck + Trailer':30,'Trailer Only':20},
+    instructions:'Enter via the north gate on 43rd Ave. Show your booking confirmation to the attendant.'},
   glendale2:{name:'Glendale, AZ Truck and Trailer Parking at PHX2 Logistics Plus', city:'Glendale, AZ', avail:50, day:16, week:74, month:270, lat:33.5722, lng:-112.1943,
     rating:4.3, address:'8747 N 91st Ave, Glendale, AZ 85305', highway:'I-17, Exit 208', phone:'1(623) 435-2280',
     reports:[{cls:'some',label:'SOME',time:'4m ago'},{cls:'many',label:'MANY',time:'10m ago'},{cls:'paid',label:'PAID ONLY',time:'1h ago'}],
-    freeSpots:15, wifi:true, scales:false, atmCount:0},
+    freeSpots:15, wifi:true, scales:false, atmCount:0, vtypeAvail:{'Truck + Trailer':35,'Trailer Only':15},
+    instructions:'Enter via the south gate on 91st Ave. A gate code is texted 1 hour before arrival.'},
 };
 
 function starsHtml(rating){
@@ -504,6 +508,8 @@ function poiInfoBlock(l){
     <div class="info-row"><span class="k">Lat/Lng</span><span>${l.lat.toFixed(6)}, ${l.lng.toFixed(6)}</span></div>
     <div class="info-row"><span class="k">Call</span><span><a href="tel:${l.phone.replace(/\D/g,'')}" style="color:var(--brand)">${l.phone}</a></span></div>
     <div class="info-row"><span class="k">Weather</span><span><a href="#" style="color:var(--brand)" data-toast="Opening weather details…">View Details</a></span></div>
+    <div class="section-label" style="color:var(--ink);margin-top:12px">Parking Instructions</div>
+    <div style="font-size:12.5px;color:var(--ink-soft);line-height:1.5">${l.instructions}</div>
     <div class="section-label" style="color:var(--ink);margin-top:12px">Amenities</div>
     <div class="amenities-grid">
       ${amenities.map(a=>`<div class="amenity ${a.on?'':'off'}">
@@ -804,6 +810,17 @@ function rerenderKeepFocus(){
   }
 }
 
+// real elapsed-time label for "last refreshed" — no fake ML prediction, just how long since the
+// inventory numbers were last pulled
+function timeAgo(ts){
+  const s = Math.floor((Date.now()-ts)/1000);
+  if(s < 10) return 'Just now';
+  if(s < 60) return `${s}s ago`;
+  const m = Math.floor(s/60);
+  if(m < 60) return `${m}m ago`;
+  const h = Math.floor(m/60);
+  return `${h}h ago`;
+}
 function lotRate(l, bookingType){
   if(bookingType==='Weekly') return l.week;
   if(bookingType==='Monthly') return l.month;
@@ -832,6 +849,9 @@ const BATCH_VEHICLE_RATES = {
 function batchVehicleRate(vtype, bookingType){ return BATCH_VEHICLE_RATES[vtype][bookingType]; }
 function batchRateUnit(bookingType){ return bookingType==='Weekly' ? 'week' : bookingType==='Monthly' ? 'month' : 'day'; }
 
+// flat AZ-style sales tax used across both the single-spot and batch order summaries
+const TAX_RATE = 0.081;
+
 function computeBatchOrder(){
   const roster = getImportRoster();
   const validRows = roster.filter(d=>d.status==='ok');
@@ -845,12 +865,22 @@ function computeBatchOrder(){
   const subtotal = truckTrailerPrice + trailerOnlyPrice;
   const discount = subtotal * 0.05;
   const serviceFee = subtotal * 0.02;
-  const total = subtotal - discount + serviceFee;
+  const tax = (subtotal - discount) * TAX_RATE;
+  const total = subtotal - discount + serviceFee + tax;
   return {
     roster, validCount: validRows.length, truckTrailerCount, trailerOnlyCount, unit,
-    truckTrailerPrice, trailerOnlyPrice, subtotal, discount, serviceFee, total,
+    truckTrailerPrice, trailerOnlyPrice, subtotal, discount, serviceFee, tax, total,
     spotsReserved: S.spots || 0,
   };
+}
+// single-spot flow uses one fixed demo scenario (weekly rate at Eloy) — computed once so the tax
+// line stays consistent everywhere this total is shown (payment, confirmation, order detail, orders list)
+function singleSpotOrder(){
+  const weeklyRate = 150.00;
+  const serviceFee = 4.50;
+  const tax = +(weeklyRate * TAX_RATE).toFixed(2);
+  const total = +(weeklyRate + serviceFee + tax).toFixed(2);
+  return { weeklyRate, serviceFee, tax, total };
 }
 function computeStep2Total(){
   const l = LOTS[S.selectedLotId];
@@ -935,7 +965,6 @@ function topNav(active){
         <button class="pm-row" data-go="orders">${ic.orders} My Orders</button>
         <button class="pm-row" data-go="wallet">${ic.wallet} My Wallet</button>
         <button class="pm-row" id="pmSettings">${ic.settings} Account Settings</button>
-        <button class="pm-row" id="pmHelp">${ic.help} Help &amp; Support</button>
         <div class="pm-divider"></div>
         <button class="pm-row destructive" id="signOutBtn">${ic.signout} Sign out</button>
       </div>
@@ -963,7 +992,6 @@ function wireNav(root){
   const signOut = root.querySelector('#signOutBtn');
   if(signOut) signOut.addEventListener('click',()=>{ S.loggedIn=false; go('homepage'); toast('Signed out'); });
   const pmSettings = root.querySelector('#pmSettings'); if(pmSettings) pmSettings.addEventListener('click',()=>{ S.profileOpen=false; render(); toast('Account Settings — coming soon'); });
-  const pmHelp = root.querySelector('#pmHelp'); if(pmHelp) pmHelp.addEventListener('click',()=>{ S.profileOpen=false; render(); toast('Opening Help & Support…'); });
 }
 
 /* ============================================================
@@ -1084,7 +1112,7 @@ function screenAllListings(){
     <div class="listing-grid" id="allListingsGrid">
       ${pageCards.map(c=>`
         <div class="listing-card" ${c.bookable?`data-lot="${c.id}"`:''}>
-          <div class="listing-thumb"><span class="listing-badge">${c.avail}</span></div>
+          <div class="listing-thumb" style="background-image:url('${c.bookable ? lotPhotoUrl(c.id) : 'images/lot-glendale1.jpg'}'),linear-gradient(135deg,#3a4a3f,#5c7a63 55%,#8a9d6f)"><span class="listing-badge">${c.avail}</span></div>
           <div class="listing-title">${c.name}</div>
           <div class="listing-meta-row">
             <span class="listing-city">${c.city}</span>
@@ -1118,7 +1146,6 @@ function screenAllListings(){
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
         <div style="font-size:12.5px;color:var(--ink-soft)">${directoryRows.length} of ${PARTNER_LOCATIONS.length} locations${S.directory.state ? ` in ${S.directory.state}` : ''}</div>
         <div style="display:flex;align-items:center;gap:10px">
-          ${S.directory.state ? `<button class="pill-warn" style="border:none" id="clearStateFilter">Clear ${S.directory.state} filter ✕</button>` : ''}
           <div class="search-box" style="margin-bottom:0;max-width:280px">${ic.search}<input id="directorySearch" placeholder="Search name, city, partner" value="${S.directory.search}"></div>
         </div>
       </div>
@@ -1212,11 +1239,11 @@ function screenBookStep1(){
             <button class="dp-close" id="dpClose">${ic.x}</button>
           </div>
           <div class="poi-head-divider"></div>
-          <div class="section-label" style="margin-top:0">Booking Mode</div>
-          <div class="toggle-row">
-            <button class="toggle-btn ${S.bookingMode==='single'?'on':''}" data-mode="single">Single spot</button>
-            <button class="toggle-btn ${S.bookingMode==='multiple'?'on':''}" data-mode="multiple">Multiple spots</button>
-          </div>
+          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:14px"><b style="color:var(--ink)">Supported vehicle types:</b> ${Object.keys(l.vtypeAvail).join(', ')}</div>
+          <div class="field" style="max-width:260px;margin-top:0"><label>Booking Mode</label><select class="pill-select" id="bookingModeSelect">
+            <option value="single" ${S.bookingMode==='single'?'selected':''}>Single spot</option>
+            <option value="multiple" ${S.bookingMode==='multiple'?'selected':''}>Multiple spots (fleet)</option>
+          </select></div>
           ${S.bookingMode==='multiple' ? `
             <div class="field" style="margin-top:12px"><label>Number of spots (max ${l.avail} available)</label>
               <div class="stepper-inline">
@@ -1237,7 +1264,16 @@ function screenBookStep1(){
               <div class="beige-field">${ic.clock}<span>${S.search.checkIn} → ${S.search.checkOut}</span></div>
             </div>
           `}
-          <div class="avail-note" style="margin-top:14px"><b>${l.avail} spaces left for your date range</b><span class="refresh">↻ Availability has been refreshed</span></div>
+          <div class="avail-note" style="margin-top:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+              <b>${l.avail} spaces left for your date range</b>
+              <button class="btn-text" id="refreshAvailBtn" style="font-size:11.5px;white-space:nowrap">↻ Refresh</button>
+            </div>
+            ${Object.keys(l.vtypeAvail).length>1 ? `<div style="display:flex;gap:16px;margin-top:6px;font-size:12px">
+              ${Object.entries(l.vtypeAvail).map(([vt,n])=>`<span>${vt}: <b class="tabular">${n}</b></span>`).join('')}
+            </div>` : ''}
+            <span class="refresh">Last refreshed ${timeAgo(S.availRefreshedAt)}</span>
+          </div>
           <div class="total-row"><span>Total</span><b class="tabular">$${total.toFixed(2)}</b></div>
           <button class="btn btn-primary btn-lg" style="width:100%;margin-top:14px" id="step2Continue">${S.bookingMode==='multiple' ? 'Continue to fleet details →' : 'Continue to vehicle info →'}</button>
           <div class="poi-head-divider" style="margin:18px 0"></div>
@@ -1331,11 +1367,13 @@ function screenPayment(context){
   const brand = nc.number ? ccBrand(nc.number) : '';
   const useNew = S.payment.showNewCard;
   const batchOrder = context==='batch' ? computeBatchOrder() : null;
-  const total = context==='single' ? 154.50 : batchOrder.total;
+  const singleOrder = context==='single' ? singleSpotOrder() : null;
+  const total = context==='single' ? singleOrder.total : batchOrder.total;
   const summary = context==='single' ? `
-    <div class="orderline"><span>Weekly rate (1 week)</span><span>$150.00</span></div>
-    <div class="orderline"><span>Service fee</span><span>$4.50</span></div>
-    <div class="orderline total"><span>Total due today</span><span>$154.50</span></div>
+    <div class="orderline"><span>Weekly rate (1 week)</span><span>$${singleOrder.weeklyRate.toFixed(2)}</span></div>
+    <div class="orderline"><span>Service fee</span><span>$${singleOrder.serviceFee.toFixed(2)}</span></div>
+    <div class="orderline"><span>Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${singleOrder.tax.toFixed(2)}</span></div>
+    <div class="orderline total"><span>Total due today</span><span>$${singleOrder.total.toFixed(2)}</span></div>
   ` : `
     <div style="font-size:11px;color:var(--green-deep);font-weight:700;margin-bottom:2px">✓ VALID DRIVERS</div>
     <div style="margin-bottom:8px">${batchOrder.validCount} of ${batchOrder.roster.length} rows imported</div>
@@ -1345,6 +1383,7 @@ function screenPayment(context){
     ${batchOrder.truckTrailerCount>0 ? `<div class="orderline"><span>Truck + Trailer parking</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div><div class="orderline-detail">${batchOrder.truckTrailerCount} driver(s) × billed ${batchOrder.unit}</div>` : ''}
     <div class="orderline"><span>Fleet discount (5%)</span><span class="green">−$${batchOrder.discount.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
     <div class="orderline"><span>Service fee (2%)</span><span>$${batchOrder.serviceFee.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+    <div class="orderline"><span>Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
     <div class="orderline total"><span>Total</span><span>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
   `;
   const headBadge = context==='single' ? `<span class="step-pill">STEP 3 OF 3</span>` : '';
@@ -1397,6 +1436,7 @@ function screenBookStep5Confirm(){
   const phone = S.vehicleForm.driverPhone;
   const l = LOTS.eloy;
   const shortName = l.name.split(' at ').pop();
+  const singleOrder = singleSpotOrder();
   return `
   ${topNav('book')}
   <div class="page">
@@ -1410,7 +1450,7 @@ function screenBookStep5Confirm(){
           <div class="chip"><div class="k">Location</div><div class="v">Eloy, AZ</div></div>
           <div class="chip"><div class="k">Dates</div><div class="v">Jul 31 – Aug 7</div></div>
           <div class="chip"><div class="k">Access</div><div class="v">24/7 gate — no code needed</div></div>
-          <div class="chip"><div class="k">Total Paid</div><div class="v">$154.50</div></div>
+          <div class="chip"><div class="k">Total Paid</div><div class="v">$${singleOrder.total.toFixed(2)}</div></div>
         </div>
         <div class="card"><div class="card-body">
           <div style="font-size:13px;margin-bottom:6px">Address: 3100 S Barrett Rd, Eloy, AZ 85131 <button class="copy-btn" data-copy="3100 S Barrett Rd, Eloy, AZ 85131">Copy</button></div>
@@ -1484,9 +1524,6 @@ function screenBatchDetails(){
     </div></div>
     <div class="card"><div class="card-body">
       <div class="card-icon-head"><div class="card-icon-badge">${ic.settings}</div><b>Booking configuration</b></div>
-      <div class="field" style="max-width:300px;margin-bottom:18px"><label>Booking type</label><select class="control" id="batchBookingType">
-        ${['Daily','Weekly','Monthly'].map(v=>`<option ${S.batch.bookingType===v?'selected':''}>${v}</option>`).join('')}
-      </select></div>
       <div style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Supported Vehicle</div>
       <div class="vtype-row"><span>Truck + Trailer</span><span class="vtype-price-pill">$${batchVehicleRate('Truck + Trailer', S.batch.bookingType).toFixed(2)} / ${unit}</span></div>
       <div class="vtype-row"><span>Trailer Only</span><span class="vtype-price-pill">$${batchVehicleRate('Trailer Only', S.batch.bookingType).toFixed(2)} / ${unit}</span></div>
@@ -1495,11 +1532,16 @@ function screenBatchDetails(){
     </div></div>
     <div class="card"><div class="card-body">
       <div class="card-icon-head"><div class="card-icon-badge">${ic.file}</div><b>Driver import</b></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="step-num">1</span><span style="font-weight:600;font-size:13px">Download the template</span></div>
-      <div style="font-size:12px;color:var(--ink-soft);margin:0 0 12px 28px">One row per driver: Driver Name, Driver ID, Plate Number, State, Vehicle Type. Phone is optional — needed only for SMS delivery.</div>
+      <div style="display:flex;align-items:flex-end;gap:16px;margin-bottom:6px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:8px"><span class="step-num">1</span><span style="font-weight:600;font-size:13px">Download the template</span></div>
+        <div class="field" style="width:180px;margin:0 0 0 auto"><label>Booking type</label><select class="control" id="batchBookingType">
+          ${['Daily','Weekly','Monthly'].map(v=>`<option ${S.batch.bookingType===v?'selected':''}>${v}</option>`).join('')}
+        </select></div>
+      </div>
+      <div style="font-size:12px;color:var(--ink-soft);margin:0 0 12px 28px">One row per driver: Driver Name, Driver ID, Plate Number, State, Vehicle Type. Phone is optional — needed only for SMS delivery. Template reflects the booking type selected above.</div>
       <div style="display:flex;gap:8px;margin:0 0 20px 28px">
-        <button class="btn btn-outline" data-toast="CSV template downloaded">${ic.download}&nbsp;CSV template</button>
-        <button class="btn btn-outline" data-toast="XLSX template downloaded">${ic.download}&nbsp;XLSX template</button>
+        <button class="btn btn-outline" data-toast="CSV template downloaded (${S.batch.bookingType} billing)">${ic.download}&nbsp;CSV template</button>
+        <button class="btn btn-outline" data-toast="XLSX template downloaded (${S.batch.bookingType} billing)">${ic.download}&nbsp;XLSX template</button>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span class="step-num">2</span><span style="font-weight:600;font-size:13px">Upload your driver list</span></div>
       <div style="margin-left:28px">
@@ -1532,6 +1574,33 @@ function screenBatchDetails(){
   </div>`;
 }
 
+// error rows can be fixed inline (instead of forcing a full re-upload) — edit mode swaps the row's
+// cells for inputs; Save validates and flips status to 'ok' in place on the same roster array object
+function importRowHtml(d){
+  const isEditing = S.batch.editingRow === d.row;
+  if(!isEditing){
+    return `<tr class="${d.status==='err'?'warn':''}">
+      <td>${d.row}</td><td>${d.name||'—'}</td><td>${d.vtype||'—'}</td><td>${d.plate||'—'}</td><td>${d.state||'—'}</td>
+      <td>${d.status==='err'
+        ? `<div style="display:flex;align-items:center;gap:6px"><span class="pill-warn">${d.msg}</span><button class="btn-text" style="font-size:11.5px" data-editrow="${d.row}">Edit</button></div>`
+        : '<span class="pill-ok">Valid</span>'}</td>
+    </tr>`;
+  }
+  return `<tr class="warn">
+    <td>${d.row}</td>
+    <td><input class="control" style="height:30px;font-size:12.5px" id="editName_${d.row}" value="${d.name||''}" placeholder="Driver name"></td>
+    <td><select class="control" style="height:30px;font-size:12.5px" id="editVtype_${d.row}">
+      <option value="">Select…</option>
+      ${VTYPES.filter(v=>v!=='Bobtail').map(v=>`<option ${d.vtype===v?'selected':''}>${v}</option>`).join('')}
+    </select></td>
+    <td><input class="control" style="height:30px;font-size:12.5px" id="editPlate_${d.row}" value="${d.plate||''}" placeholder="Plate #"></td>
+    <td><select class="control" style="height:30px;font-size:12.5px" id="editState_${d.row}">
+      <option value="">--</option>
+      ${STATES.map(s=>`<option ${d.state===s?'selected':''}>${s}</option>`).join('')}
+    </select></td>
+    <td><div style="display:flex;gap:6px"><button class="btn btn-primary" style="height:30px;padding:0 10px;font-size:12px" data-saverow="${d.row}">Save</button><button class="btn btn-outline" style="height:30px;padding:0 10px;font-size:12px" data-cancelrow="${d.row}">Cancel</button></div></td>
+  </tr>`;
+}
 function screenBatchImport(){
   const q = S.importSearch.trim().toLowerCase();
   const activeRoster = getImportRoster();
@@ -1553,7 +1622,7 @@ function screenBatchImport(){
         <button class="btn-text" id="reuploadBtn">Re-upload file</button>
       </div>
       <div class="stat-tiles">
-        <div class="stat-tile"><div class="n">${activeRoster.length}</div><div class="l">Sample rows shown</div></div>
+        <div class="stat-tile"><div class="n">${activeRoster.length}</div><div class="l">Rows uploaded</div></div>
         <div class="stat-tile"><div class="n" style="color:var(--green-deep)">${validCount}</div><div class="l">Valid</div></div>
         <div class="stat-tile"><div class="n" style="color:var(--red)">${errCount}</div><div class="l">Errors — excluded</div></div>
       </div>
@@ -1561,7 +1630,7 @@ function screenBatchImport(){
       <div style="background:var(--red-tint);border:1px solid #f3c6b4;border-radius:var(--r-md);padding:10px 14px;margin-bottom:12px;font-size:12.5px;color:var(--red)">
         <b>⚠ ${validCount} valid drivers found, but only ${spotsReserved} spot${spotsReserved===1?'':'s'} reserved.</b> You can't continue to payment until this is fixed — go back and reserve more spots, or upload a file with ${spotsReserved} or fewer drivers.
       </div>` : ''}
-      <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px">Drivers are assigned to your locations in order: own yards first, then marketplace lots. (Full order covers 500 rows; this sample shows ${activeRoster.length}.)</div>
+      <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px">Drivers are assigned to your locations in order: own yards first, then marketplace lots. All ${activeRoster.length} uploaded rows are shown below.</div>
       <div class="tabs-row">
         <button class="tab-btn ${S.importTab==='all'?'on':''}" data-itab="all">All rows</button>
         <button class="tab-btn ${S.importTab==='errors'?'on':''}" data-itab="errors">Errors (${errCount})</button>
@@ -1569,7 +1638,7 @@ function screenBatchImport(){
       <div class="search-box">${ic.search}<input id="importSearchInput" placeholder="Search driver name, ID, or plate" value="${S.importSearch}"></div>
       <div class="dtable-scroll"><table class="dtable">
         <thead><tr><th>Row</th><th>Driver Name</th><th>Vehicle Type</th><th>Plate</th><th>State</th><th>Status</th></tr></thead>
-        <tbody>${rows.length ? rows.map(d=>`<tr class="${d.status==='err'?'warn':''}"><td>${d.row}</td><td>${d.name||'—'}</td><td>${d.vtype||'—'}</td><td>${d.plate||'—'}</td><td>${d.state||'—'}</td><td>${d.status==='err'?`<span class="pill-warn">${d.msg}</span>`:'<span class="pill-ok">Valid</span>'}</td></tr>`).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:16px">No rows match your search.</td></tr>'}</tbody>
+        <tbody>${rows.length ? rows.map(importRowHtml).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:16px">No rows match your search.</td></tr>'}</tbody>
       </table></div>
     </div></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
@@ -1606,18 +1675,17 @@ function screenBatchConfirm(){
       <div class="chip"><div class="k">Gate — Memphis</div><div class="v">1199# <button class="copy-btn" data-copy="1199#" style="margin-left:4px">Copy</button></div></div>
     </div>
     <div class="card">
-      <div class="card-head"><h2 class="card-title">Driver instructions</h2>
+      <div class="card-head"><h2 class="card-title">Booking Details</h2>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-outline" data-toast="Generating PDFs for ${batchOrder.validCount} drivers…">${ic.file}&nbsp;PDF per driver</button>
           <button class="btn btn-outline" data-toast="CSV exported (${batchOrder.validCount} rows)">${ic.download}&nbsp;Export CSV</button>
-          <button class="btn btn-primary" data-toast="SMS queued to ${batchOrder.validCount} drivers">${ic.sms}&nbsp;Send SMS to all drivers</button>
+          <button class="btn btn-primary" data-toast="Email queued to ${batchOrder.validCount} drivers">${ic.mail}&nbsp;Send email to all drivers</button>
         </div>
       </div>
       <div class="card-body">
         <div class="search-box">${ic.search}<input id="confirmSearchInput" placeholder="Search driver, ID, plate, or spot" value="${S.confirmSearch}"></div>
         <div class="dtable-scroll"><table class="dtable">
-          <thead><tr><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle</th><th>Gate</th><th>PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th></tr></thead>
-          <tbody>${slice.length ? slice.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td>${d.gate}</td><td class="tabular">${d.pin}</td><td>${d.ci}</td><td>${d.co}</td><td><span class="pill-ok">Assigned</span></td></tr>`).join('') : '<tr><td colspan="9" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
+          <thead><tr><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle</th><th>PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th><th></th></tr></thead>
+          <tbody>${slice.length ? slice.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td class="tabular">${d.pin}</td><td>${d.ci}</td><td>${d.co}</td><td><span class="pill-ok">Assigned</span></td><td><button class="icon-btn" data-pdfrow="${d.name}" title="Download this driver's PDF">${ic.download}</button></td></tr>`).join('') : '<tr><td colspan="9" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
         </table></div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
           <span style="font-size:12.5px;color:var(--ink-soft)">${rows.length ? (page-1)*per+1 : 0}–${Math.min(page*per,rows.length)} of ${rows.length} (${batchOrder.validCount} total in this order)</span>
@@ -1656,6 +1724,33 @@ function screenOrders(){
 function screenWallet(){
   const nc = S.walletNewCard;
   const brand = nc.number ? ccBrand(nc.number) : '';
+  if(!S.wallet.selectedCardId && S.walletCards.length){
+    S.wallet.selectedCardId = (S.walletCards.find(c=>c.default) || S.walletCards[0]).id;
+  }
+  const selected = S.walletCards.find(c=>c.id===S.wallet.selectedCardId);
+  const addCardModal = S.wallet.showAddModal ? `
+    <div class="modal-overlay" id="addCardOverlay">
+      <div class="modal-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font-weight:700;font-size:15px">Add a new card</div>
+          <button class="dp-close" id="closeAddCardModal">${ic.x}</button>
+        </div>
+        <div class="cc" style="max-width:340px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between"><div class="cc-chip"></div><b style="font-style:italic">${brand||'CARD'}</b></div>
+          <div class="cc-num">${nc.number ? groupCard(nc.number) : '•••• •••• •••• ••••'}</div>
+          <div class="cc-row"><span>CARDHOLDER<br><b style="font-size:12px">${nc.name||'YOUR NAME'}</b></span><span>EXPIRES<br><b style="font-size:12px">${nc.exp||'MM/YY'}</b></span></div>
+        </div>
+        <div class="grid-2">
+          <div class="field" style="grid-column:span 2"><label>Cardholder name</label><input class="control" id="wcName" value="${nc.name}" placeholder="MING DAO"></div>
+          <div class="field" style="grid-column:span 2"><label>Card number</label><input class="control" id="wcNumber" value="${groupCard(nc.number)}" maxlength="19" placeholder="4242 4242 4242 4242"></div>
+          <div class="field"><label>Expiry</label><input class="control" id="wcExp" value="${nc.exp}" maxlength="5" placeholder="09/29"></div>
+          <div class="field"><label>CVC</label><input class="control" id="wcCvc" value="${nc.cvc}" maxlength="4" placeholder="123"></div>
+          <div class="field" style="grid-column:span 2"><label>ZIP</label><input class="control" id="wcZip" value="${nc.zip}" placeholder="90051"></div>
+        </div>
+        <div style="font-size:11px;color:var(--ink-soft);margin-top:10px">${ic.lock} Simulates a Stripe card-entry popup — details are encrypted.</div>
+        <button class="btn btn-primary btn-lg" style="width:100%;margin-top:14px" id="saveCardBtn">Save card</button>
+      </div>
+    </div>` : '';
   return `
   ${topNav(null)}
   <div class="page">
@@ -1663,38 +1758,43 @@ function screenWallet(){
     <p style="color:var(--ink-soft);margin-top:-10px">Manage your payment methods</p>
     <div class="wallet-grid">
       <div class="card"><div class="card-body saved-methods">
-        <div style="font-weight:700;margin-bottom:10px">Saved payment methods</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-weight:700">Saved payment methods</div>
+          <button class="btn btn-outline" id="openAddCardModal">+ Add New Card</button>
+        </div>
         ${S.walletCards.length ? S.walletCards.map(c=>`
-          <div class="saved-card ${c.default?'default':''}">
+          <div class="saved-card ${c.default?'default':''} ${S.wallet.selectedCardId===c.id?'chosen':''}" data-selectcard="${c.id}">
             <div class="card-brand">${c.brand}</div>
-            <div style="flex:1"><div style="font-weight:600;font-size:13px">${c.brand==='VISA'?'Visa':c.brand==='MC'?'Mastercard':c.brand} •••• ${c.last4} ${c.default?'<span class="badge-default">Default</span>':'<button class=\"set-default-btn\" data-setdefault=\"'+c.id+'\">Set as default</button>'}</div><div style="font-size:11.5px;color:var(--ink-soft)">Expires ${c.exp}</div></div>
-            <button class="icon-btn" data-removecard="${c.id}">${ic.trash}</button>
+            <div style="flex:1"><div style="font-weight:600;font-size:13px">${c.brand==='VISA'?'Visa':c.brand==='MC'?'Mastercard':c.brand} •••• ${c.last4} ${c.default?'<span class="badge-default">Default</span>':''}</div><div style="font-size:11.5px;color:var(--ink-soft)">Expires ${c.exp}</div></div>
           </div>`).join('') : '<div style="font-size:13px;color:var(--ink-soft);padding:8px 0">No saved cards yet.</div>'}
-        <div class="add-card-dash" id="scrollToAddCard">+ Add new card</div>
       </div></div>
       <div class="card"><div class="card-body">
-        <div style="font-weight:700;margin-bottom:14px">Add a new card</div>
-        <div class="cc" style="max-width:340px;margin-bottom:16px">
-          <div style="display:flex;justify-content:space-between"><div class="cc-chip"></div><b style="font-style:italic">${brand||'CARD'}</b></div>
-          <div class="cc-num">${nc.number ? groupCard(nc.number) : '•••• •••• •••• ••••'}</div>
-          <div class="cc-row"><span>CARDHOLDER<br><b style="font-size:12px">${nc.name||'YOUR NAME'}</b></span><span>EXPIRES<br><b style="font-size:12px">${nc.exp||'MM/YY'}</b></span></div>
-        </div>
-        <div class="grid-2" style="max-width:520px">
-          <div class="field" style="grid-column:span 2"><label>Cardholder name</label><input class="control" id="wcName" value="${nc.name}" placeholder="MING DAO"></div>
-          <div class="field" style="grid-column:span 2"><label>Card number</label><input class="control" id="wcNumber" value="${groupCard(nc.number)}" maxlength="19" placeholder="4242 4242 4242 4242"></div>
-          <div class="field"><label>Expiry</label><input class="control" id="wcExp" value="${nc.exp}" maxlength="5" placeholder="09/29"></div>
-          <div class="field"><label>CVC</label><input class="control" id="wcCvc" value="${nc.cvc}" maxlength="4" placeholder="123"></div>
-          <div class="field" style="grid-column:span 2"><label>ZIP</label><input class="control" id="wcZip" value="${nc.zip}" placeholder="90051"></div>
-        </div>
-        <button class="btn btn-primary btn-lg" style="margin-top:14px" id="saveCardBtn">Save changes</button>
+        <div style="font-weight:700;margin-bottom:14px">Card details</div>
+        ${selected ? `
+          <div class="cc" style="max-width:340px;margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between"><div class="cc-chip"></div><b style="font-style:italic">${selected.brand}</b></div>
+            <div class="cc-num">•••• •••• •••• ${selected.last4}</div>
+            <div class="cc-row"><span>CARDHOLDER<br><b style="font-size:12px">${selected.name}</b></span><span>EXPIRES<br><b style="font-size:12px">${selected.exp}</b></span></div>
+          </div>
+          <div class="info-row"><span class="k">Brand</span><span>${selected.brand==='VISA'?'Visa':selected.brand==='MC'?'Mastercard':selected.brand}</span></div>
+          <div class="info-row"><span class="k">Card number</span><span>•••• ${selected.last4}</span></div>
+          <div class="info-row"><span class="k">Expires</span><span>${selected.exp}</span></div>
+          <div class="info-row"><span class="k">Status</span><span>${selected.default ? 'Default payment method' : 'Not default'}</span></div>
+          <div style="display:flex;gap:8px;margin-top:16px">
+            ${!selected.default ? `<button class="btn btn-outline" data-setdefault="${selected.id}">Set as default</button>` : ''}
+            <button class="btn btn-outline" data-removecard="${selected.id}">${ic.trash}&nbsp;Remove card</button>
+          </div>
+        ` : `<div style="font-size:13px;color:var(--ink-soft)">Select a saved card on the left to see its details.</div>`}
       </div></div>
     </div>
-  </div>`;
+  </div>
+  ${addCardModal}`;
 }
 
 function screenOrderDetailSingle(){
   const l = LOTS.eloy;
   const shortName = l.name.split(' at ').pop();
+  const singleOrder = singleSpotOrder();
   return `
   ${topNav('orders')}
   <div class="page">
@@ -1708,7 +1808,7 @@ function screenOrderDetailSingle(){
           <div class="chip"><div class="k">Location</div><div class="v">Eloy, AZ</div></div>
           <div class="chip"><div class="k">Dates</div><div class="v">Jul 31 – Aug 7</div></div>
           <div class="chip"><div class="k">Access</div><div class="v">24/7 gate — no code needed</div></div>
-          <div class="chip"><div class="k">Total Paid</div><div class="v">$154.50</div></div>
+          <div class="chip"><div class="k">Total Paid</div><div class="v">$${singleOrder.total.toFixed(2)}</div></div>
         </div>
         <div class="card"><div class="card-body">
           <div style="font-size:13px;margin-bottom:6px">Address: 3100 S Barrett Rd, Eloy, AZ 85131 <button class="copy-btn" data-copy="3100 S Barrett Rd, Eloy, AZ 85131">Copy</button></div>
@@ -1743,36 +1843,40 @@ function screenOrderDetailSingle(){
 }
 
 function screenOrderDetailBatch(){
+  const order = S.ordersHistory.find(o=>o.id===S.selectedOrderId && o.type==='batch') || S.ordersHistory.find(o=>o.type==='batch');
   const q = S.confirmSearch.trim().toLowerCase();
   let rows = VALID_ROSTER;
   if(q) rows = rows.filter(d => (d.name+' '+d.id+' '+d.plate).toLowerCase().includes(q));
   return `
   ${topNav('orders')}
   <div class="page">
-    <div class="card"><div class="card-body">
-      <div class="od-top">
-        <div><h2 class="card-title">Order details — FP-20260708-4417</h2><p style="color:var(--ink-soft);margin:4px 0 0">Review and manage this order for 498 drivers at one parking location.</p></div>
-      </div>
-      <div class="chips-row" style="margin-top:12px">
-        <div class="chip"><div class="k">Spots</div><div class="v">500 booked · 498 assigned</div></div>
-        <div class="chip"><div class="k">Gate — Memphis</div><div class="v">1199# <button class="copy-btn" data-copy="1199#" style="margin-left:4px">Copy</button></div></div>
-      </div>
-    </div></div>
+    <div class="orderdetail-banner">
+      <div class="orderdetail-ic">${ic.checkW}</div>
+      <h2 class="card-title" style="margin:0;font-size:18px">Order details — ${order.id}</h2>
+    </div>
+    <div class="chips-row">
+      <div class="chip"><div class="k">Location</div><div class="v">${order.loc}</div></div>
+      <div class="chip"><div class="k">Dates</div><div class="v">${order.dates}</div></div>
+      <div class="chip"><div class="k">Spots reserved</div><div class="v">${order.spots}</div></div>
+      <div class="chip"><div class="k">Total Paid</div><div class="v">${order.total}</div></div>
+    </div>
     <div class="card">
-      <div class="card-head"><h2 class="card-title">Driver instructions</h2>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-outline" data-toast="Generating PDFs…">${ic.file}&nbsp;PDF per driver</button>
-          <button class="btn btn-outline" data-toast="CSV exported">${ic.download}&nbsp;Export CSV</button>
-          <button class="btn btn-primary" data-toast="SMS queued to all drivers">${ic.sms}&nbsp;Send SMS to all drivers</button>
+      <div class="card-head"><h2 class="card-title">Booking Details</h2>
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:12.5px;color:var(--ink-soft)">Gate — Memphis: <b class="tabular" style="color:var(--ink)">1199#</b> <button class="copy-btn" data-copy="1199#" style="margin-left:2px">Copy</button></span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-outline" data-toast="CSV exported">${ic.download}&nbsp;Export CSV</button>
+            <button class="btn btn-primary" data-toast="Email queued to all drivers">${ic.mail}&nbsp;Send email to all drivers</button>
+          </div>
         </div>
       </div>
       <div class="card-body">
         <div class="search-box">${ic.search}<input id="odSearchInput" placeholder="Search driver, ID, plate, or spot" value="${S.confirmSearch}"></div>
         <div class="dtable-scroll"><table class="dtable">
-          <thead><tr><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle</th><th>Gate</th><th>PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th></tr></thead>
-          <tbody>${rows.length ? rows.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td>${d.gate}</td><td class="tabular">${d.pin}</td><td>${d.ci}</td><td>${d.co}</td><td><span class="pill-ok">Assigned</span></td></tr>`).join('') : '<tr><td colspan="9" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
+          <thead><tr><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle</th><th>PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th><th></th></tr></thead>
+          <tbody>${rows.length ? rows.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td class="tabular">${d.pin}</td><td>${d.ci}</td><td>${d.co}</td><td><span class="pill-ok">Assigned</span></td><td><button class="icon-btn" data-pdfrow="${d.name}" title="Download this driver's PDF">${ic.download}</button></td></tr>`).join('') : '<tr><td colspan="9" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
         </table></div>
-        <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">${rows.length} of 498 drivers (sample)</div>
+        <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${VALID_ROSTER.length} drivers assigned to this order.</div>
       </div>
     </div>
     <button class="btn btn-outline" style="margin-top:16px" id="backToOrders2">← Back to Orders</button>
@@ -1857,7 +1961,6 @@ function wireScreen(root){
     toast(`Showing parking in ${b.dataset.state} (${abbr})`);
     render();
   }));
-  const clearStateFilter = root.querySelector('#clearStateFilter'); if(clearStateFilter) clearStateFilter.addEventListener('click',()=>{ S.directory.state=null; render(); });
   const directorySearchInput = root.querySelector('#directorySearch');
   if(directorySearchInput) directorySearchInput.addEventListener('input',()=>{ S.directory.search = directorySearchInput.value; rerenderKeepFocus(); });
 
@@ -1869,11 +1972,13 @@ function wireScreen(root){
   bindText(root,'loginPassword', v=>{ S.loginForm.password=v; S.loginErr=''; });
   const loginSubmit = root.querySelector('#loginSubmit');
   if(loginSubmit) loginSubmit.addEventListener('click',()=>{
+    const dest = S.postLoginGoto || 'book1';
+    S.postLoginGoto = null;
     if(S.loginTab==='login'){
       if(!S.loginForm.email || !S.loginForm.password){ S.loginErr='Enter your email and password to continue.'; rerenderKeepFocus(); return; }
-      S.loggedIn=true; toast('Welcome back, Ming'); go('book1');
+      S.loggedIn=true; toast('Welcome back, Ming'); go(dest);
     } else {
-      S.loggedIn=true; toast('Account created — welcome to TruckerPath fleet'); go('book1');
+      S.loggedIn=true; toast('Account created — welcome to TruckerPath fleet'); go(dest);
     }
   });
 
@@ -1885,7 +1990,8 @@ function wireScreen(root){
   bindText(root,'b1CheckOut', v=>S.search.checkOut=v);
   bindSelect(root,'b1BookingType', v=>S.search.bookingType=v);
   bindSelect(root,'b1VehicleType', v=>S.search.vehicleType=v);
-  root.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{ S.bookingMode=b.dataset.mode; render(); }));
+  bindSelect(root,'bookingModeSelect', v=>S.bookingMode=v);
+  const refreshAvailBtn = root.querySelector('#refreshAvailBtn'); if(refreshAvailBtn) refreshAvailBtn.addEventListener('click',()=>{ S.availRefreshedAt=Date.now(); render(); toast('Availability refreshed'); });
   const dpClose = root.querySelector('#dpClose'); if(dpClose) dpClose.addEventListener('click',()=>{ S.detailPanelOpen=false; render(); });
   bindSelect(root,'step2VehicleType', v=>S.step2VehicleType=v);
   const step2BT = root.querySelector('#step2BookingType');
@@ -1926,7 +2032,7 @@ function wireScreen(root){
   const payBtn = root.querySelector('#payBtn');
   if(payBtn) payBtn.addEventListener('click',()=>{
     const isBatch = S.payment.context==='batch';
-    const total = isBatch ? '$20,548.68' : '$154.50';
+    const total = '$' + (isBatch ? computeBatchOrder().total : singleSpotOrder().total).toLocaleString('en-US',{minimumFractionDigits:2});
     payBtn.textContent='Processing…'; payBtn.disabled=true;
     setTimeout(()=>{ toast('Payment confirmed — '+total); go(isBatch?'batchConfirm':'book5'); },800);
   });
@@ -1939,7 +2045,7 @@ function wireScreen(root){
 
   /* ---- batch flow ---- */
   const batchBack1 = root.querySelector('#batchBack1'); if(batchBack1) batchBack1.addEventListener('click',()=>go('book1'));
-  bindSelect(root,'batchBookingType', v=>S.batch.bookingType=v);
+  bindSelect(root,'batchBookingType', v=>{ S.batch.bookingType=v; toast(`Template reloaded for ${v} billing`); });
   bindText(root,'presenterRowCount', v=>{
     const n = v.trim()==='' ? null : parseInt(v.replace(/\D/g,''),10);
     S.presenterTool.rowCount = (n===null || isNaN(n)) ? null : n;
@@ -1962,40 +2068,66 @@ function wireScreen(root){
   root.querySelectorAll('[data-itab]').forEach(b=>b.addEventListener('click',()=>{ S.importTab=b.dataset.itab; render(); }));
   const importSearchInput = root.querySelector('#importSearchInput');
   if(importSearchInput) importSearchInput.addEventListener('input',()=>{ S.importSearch=importSearchInput.value; rerenderKeepFocus(); });
+  root.querySelectorAll('[data-editrow]').forEach(b=>b.addEventListener('click',()=>{ S.batch.editingRow=parseInt(b.dataset.editrow,10); render(); }));
+  root.querySelectorAll('[data-cancelrow]').forEach(b=>b.addEventListener('click',()=>{ S.batch.editingRow=null; render(); }));
+  root.querySelectorAll('[data-saverow]').forEach(b=>b.addEventListener('click',()=>{
+    const row = parseInt(b.dataset.saverow,10);
+    const name = (root.querySelector(`#editName_${row}`).value||'').trim();
+    const vtype = root.querySelector(`#editVtype_${row}`).value;
+    const plate = (root.querySelector(`#editPlate_${row}`).value||'').trim();
+    const state = root.querySelector(`#editState_${row}`).value;
+    if(!name || !vtype || !plate || !state){ toast('Fill in every field before saving'); return; }
+    const entry = getImportRoster().find(d=>d.row===row);
+    if(entry){ entry.name=name; entry.vtype=vtype; entry.plate=plate; entry.state=state; entry.status='ok'; entry.msg=''; }
+    S.batch.editingRow=null; render(); toast(`Row ${row} fixed and marked valid`);
+  }));
   const reuploadBtn = root.querySelector('#reuploadBtn'); if(reuploadBtn) reuploadBtn.addEventListener('click',()=>go('batchDetails'));
   const batchBack2 = root.querySelector('#batchBack2'); if(batchBack2) batchBack2.addEventListener('click',()=>go('batchDetails'));
-  const batchToPayment = root.querySelector('#batchToPayment'); if(batchToPayment && !batchToPayment.disabled) batchToPayment.addEventListener('click',()=>go('batchPayment'));
+  const batchToPayment = root.querySelector('#batchToPayment'); if(batchToPayment && !batchToPayment.disabled) batchToPayment.addEventListener('click',()=>{
+    if(!S.loggedIn){ S.postLoginGoto='batchPayment'; toast('Please sign in to continue to payment'); go('login'); return; }
+    go('batchPayment');
+  });
 
   const confirmSearchInput = root.querySelector('#confirmSearchInput');
   if(confirmSearchInput) confirmSearchInput.addEventListener('input',()=>{ S.confirmSearch=confirmSearchInput.value; S.confirmPage=1; rerenderKeepFocus(); });
   const odSearchInput = root.querySelector('#odSearchInput');
   if(odSearchInput) odSearchInput.addEventListener('input',()=>{ S.confirmSearch=odSearchInput.value; rerenderKeepFocus(); });
   root.querySelectorAll('[data-pg]').forEach(b=>b.addEventListener('click',()=>{ const n=parseInt(b.dataset.pg,10); if(n>=1){ S.confirmPage=n; render(); } }));
+  root.querySelectorAll('[data-pdfrow]').forEach(b=>b.addEventListener('click',()=>toast(`Downloading PDF for ${b.dataset.pdfrow}`)));
 
   /* ---- orders ---- */
   root.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{
     const order = S.ordersHistory.find(o=>o.id===b.dataset.view);
     S.confirmSearch='';
+    S.selectedOrderId = order.id;
     go(order.type==='single' ? 'orderDetailSingle' : 'orderDetailBatch');
   }));
   const backToOrders = root.querySelector('#backToOrders'); if(backToOrders) backToOrders.addEventListener('click',()=>go('orders'));
   const backToOrders2 = root.querySelector('#backToOrders2'); if(backToOrders2) backToOrders2.addEventListener('click',()=>go('orders'));
 
   /* ---- wallet ---- */
-  root.querySelectorAll('[data-removecard]').forEach(b=>b.addEventListener('click',()=>{
+  root.querySelectorAll('[data-selectcard]').forEach(row=>row.addEventListener('click',()=>{ S.wallet.selectedCardId=row.dataset.selectcard; render(); }));
+  root.querySelectorAll('[data-removecard]').forEach(b=>b.addEventListener('click',(e)=>{
+    e.stopPropagation();
     const id = b.dataset.removecard;
     const wasDefault = S.walletCards.find(c=>c.id===id) && S.walletCards.find(c=>c.id===id).default;
     S.walletCards = S.walletCards.filter(c=>c.id!==id);
     if(wasDefault && S.walletCards.length) S.walletCards[0].default = true;
+    if(S.wallet.selectedCardId===id) S.wallet.selectedCardId = S.walletCards.length ? S.walletCards[0].id : null;
     render(); toast('Card removed');
   }));
-  root.querySelectorAll('[data-setdefault]').forEach(b=>b.addEventListener('click',()=>{
+  root.querySelectorAll('[data-setdefault]').forEach(b=>b.addEventListener('click',(e)=>{
+    e.stopPropagation();
     const id = b.dataset.setdefault;
     S.walletCards.forEach(c=>c.default = (c.id===id));
     render(); toast('Default card updated');
   }));
-  const scrollToAddCard = root.querySelector('#scrollToAddCard');
-  if(scrollToAddCard) scrollToAddCard.addEventListener('click',()=>{ const el=document.getElementById('wcName'); if(el) el.focus(); });
+  const openAddCardModal = root.querySelector('#openAddCardModal');
+  if(openAddCardModal) openAddCardModal.addEventListener('click',()=>{ S.wallet.showAddModal=true; render(); });
+  const closeAddCardModal = root.querySelector('#closeAddCardModal');
+  if(closeAddCardModal) closeAddCardModal.addEventListener('click',()=>{ S.wallet.showAddModal=false; render(); });
+  const addCardOverlay = root.querySelector('#addCardOverlay');
+  if(addCardOverlay) addCardOverlay.addEventListener('click',(e)=>{ if(e.target===addCardOverlay){ S.wallet.showAddModal=false; render(); } });
   bindText(root,'wcName', v=>S.walletNewCard.name=v, {rerender:true});
   const wcNumber = root.querySelector('#wcNumber');
   if(wcNumber) wcNumber.addEventListener('input',()=>{ S.walletNewCard.number = wcNumber.value.replace(/\D/g,'').slice(0,16); rerenderKeepFocus(); });
@@ -2006,8 +2138,11 @@ function wireScreen(root){
   if(saveCardBtn) saveCardBtn.addEventListener('click',()=>{
     const nc = S.walletNewCard;
     if(!nc.number || nc.number.length < 12){ toast('Enter a valid card number first'); return; }
-    S.walletCards.push({ id:'card_'+Date.now(), brand:ccBrand(nc.number), name:nc.name||'MING DAO', last4:nc.number.slice(-4), exp:nc.exp||'—', default: S.walletCards.length===0 });
+    const newId = 'card_'+Date.now();
+    S.walletCards.push({ id:newId, brand:ccBrand(nc.number), name:nc.name||'MING DAO', last4:nc.number.slice(-4), exp:nc.exp||'—', default: S.walletCards.length===0 });
     S.walletNewCard = { name:'', number:'', exp:'', cvc:'', zip:'' };
+    S.wallet.selectedCardId = newId;
+    S.wallet.showAddModal = false;
     render(); toast('Card added to your wallet');
   });
 }
