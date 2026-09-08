@@ -1028,13 +1028,15 @@ function screenAllListings(){
   const [priceMin, priceMax] = parsePriceRangeLabel(S.search.priceRange);
   directoryRows = directoryRows.filter(p=>p.day>=priceMin && (priceMax===null || p.day<=priceMax));
 
-  // the directory's own search box narrows it further too — apply before the state-grid split so
-  // per-state counts reflect the other active filters without being biased by the state filter itself
   const dq = S.directory.search.trim().toLowerCase();
   if(dq) directoryRows = directoryRows.filter(p=>(p.name+' '+p.partner+' '+p.city).toLowerCase().includes(dq));
 
+  // the state grid always reflects the real, full dataset — not the top search card's prefilled
+  // Location/Vehicle Type/Price filters, which would otherwise hide states that just don't happen
+  // to match today's default search (e.g. the default "Dallas, Texas" + price band wiping out states
+  // that have plenty of real rows in PARTNER_LOCATIONS but none matching those defaults)
   const stateCounts = {};
-  directoryRows.forEach(p=>{ if(p.state) stateCounts[p.state] = (stateCounts[p.state]||0)+1; });
+  PARTNER_LOCATIONS.forEach(p=>{ if(p.state) stateCounts[p.state] = (stateCounts[p.state]||0)+1; });
   const statesWithData = US_STATES.filter(([,abbr])=>stateCounts[abbr]>0);
 
   if(S.directory.state) directoryRows = directoryRows.filter(p=>p.state===S.directory.state);
