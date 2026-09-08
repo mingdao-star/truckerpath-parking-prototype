@@ -1175,12 +1175,7 @@ function screenBookStep1(){
             <button class="dp-close" id="dpClose">${ic.x}</button>
           </div>
           <div class="poi-head-divider"></div>
-          <div style="display:flex;gap:8px;margin-bottom:16px">
-            <button class="btn btn-primary" style="flex:1" data-toast="Opening directions…">${ic.route}&nbsp;Plan Route</button>
-            <button class="btn btn-outline" style="flex:1" data-toast="Address saved">${ic.starOutline}&nbsp;Save Address</button>
-          </div>
-          ${poiInfoBlock(l)}
-          <div class="section-label" style="margin-top:16px">Booking Mode</div>
+          <div class="section-label" style="margin-top:0">Booking Mode</div>
           <div class="toggle-row">
             <button class="toggle-btn ${S.bookingMode==='single'?'on':''}" data-mode="single">Single spot</button>
             <button class="toggle-btn ${S.bookingMode==='multiple'?'on':''}" data-mode="multiple">Multiple spots</button>
@@ -1208,6 +1203,8 @@ function screenBookStep1(){
           <div class="avail-note" style="margin-top:14px"><b>${l.avail} spaces left for your date range</b><span class="refresh">↻ Availability has been refreshed</span></div>
           <div class="total-row"><span>Total</span><b class="tabular">$${total.toFixed(2)}</b></div>
           <button class="btn btn-primary btn-lg" style="width:100%;margin-top:14px" id="step2Continue">${S.bookingMode==='multiple' ? 'Continue to fleet details →' : 'Continue to vehicle info →'}</button>
+          <div class="poi-head-divider" style="margin:18px 0"></div>
+          ${poiInfoBlock(l)}
         </div>
       </div>` : '';
   return `
