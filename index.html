@@ -457,7 +457,7 @@ const S = {
 };
 
 const LOTS = {
-  eloy:{name:'Eloy, AZ Truck & Trailer Parking at PICACHO RV & TRUCK PARK', city:'Eloy, AZ', avail:9, day:null, week:150, month:300, lat:32.7519, lng:-111.5468,
+  eloy:{name:'Eloy, AZ Truck & Trailer Parking at PICACHO RV & TRUCK PARK', city:'Eloy, AZ', avail:9, day:15, week:150, month:300, lat:32.7519, lng:-111.5468,
     rating:4.1, address:'4501 W Sunland Gin Rd, Eloy, AZ 85131', highway:'I-10, Exit 226', phone:'1(520) 466-7710',
     reports:[{cls:'some',label:'SOME',time:'12m ago'},{cls:'many',label:'MANY',time:'25m ago'},{cls:'paid',label:'PAID ONLY',time:'2h ago'}],
     freeSpots:9, wifi:true, scales:false, atmCount:0, vtypeAvail:{'Truck + Trailer':6,'Trailer Only':3},
@@ -925,7 +925,7 @@ function initLeafletMap(){
 
   Object.entries(LOTS).forEach(([id,l])=>{
     const isOwn = id==='eloy';
-    const label = isOwn ? 'FREE' : `$${lotRate(l,'Daily').toFixed(0)}/day`;
+    const label = `$${lotRate(l,'Daily').toFixed(0)}/day`;
     const icon = L.divIcon({
       className:'', html:`<div class="leaflet-pin-badge ${isOwn?'own':''}" data-lot="${id}">${label}</div>`,
       iconSize:[90,30], iconAnchor:[45,30],
@@ -1024,7 +1024,7 @@ function screenHomepage(){
     <div class="results-head"><h2 class="page-title" style="margin:0">Popular parking near Phoenix, AZ</h2><button class="btn-text" id="seeAllBtn">See all parking →</button></div>
     <div class="lot-grid" id="homeLotGrid">
       ${Object.entries(LOTS).map(([id,l])=>`
-        <div class="lot-card" data-lot="${id}"><div class="lot-photo" style="background-image:url('${lotPhotoUrl(id)}'),linear-gradient(135deg,#3a4a3f,#5c7a63 55%,#8a9d6f);background-position:${lotPhotoPos(id)}"><span class="avail-badge">${l.avail}</span></div><div class="lot-body"><div class="lot-name">${l.name}</div><div class="lot-bottom"><span class="lot-avail">${l.avail} space(s) available</span><span class="lot-price">${id==='eloy'?'Free (own yard)':`$${lotRate(l,'Daily').toFixed(0)}/day`}</span></div></div></div>`).join('')}
+        <div class="lot-card" data-lot="${id}"><div class="lot-photo" style="background-image:url('${lotPhotoUrl(id)}'),linear-gradient(135deg,#3a4a3f,#5c7a63 55%,#8a9d6f);background-position:${lotPhotoPos(id)}"><span class="avail-badge">${l.avail}</span></div><div class="lot-body"><div class="lot-name">${l.name}</div><div class="lot-bottom"><span class="lot-avail">${l.avail} space(s) available</span><span class="lot-price">$${lotRate(l,'Daily').toFixed(0)}/day</span></div></div></div>`).join('')}
     </div>
     <div class="mapview" id="liveMapSlot"></div>
   </div>
@@ -1080,7 +1080,7 @@ function screenAllListings(){
   const LISTING_PAGE_SIZE = 12;
   const bookableCards = Object.entries(LOTS).map(([id,l])=>({
     id, bookable:true, name:l.name, city:l.city, avail:l.avail, rating:l.rating,
-    price: id==='eloy' ? 'Free' : `$${lotRate(l,'Daily').toFixed(0)}/day`,
+    price: `$${lotRate(l,'Daily').toFixed(0)}/day`,
   }));
   const partnerCards = directoryRows.map(p=>({
     id:null, bookable:false, name:p.name, city:p.city||'—', avail:p.avail, rating:null,
@@ -1205,10 +1205,8 @@ function screenLogin(){
 /* ============================================================
    Book Step 1 — Search Results
 ============================================================ */
-// single, prominent price matching the searched booking type (falls back to a day-equivalent
-// rate when the lot has no daily rate) — own-yard lots are shown as Free rather than priced
+// single, prominent price matching the searched booking type — every lot is paid parking
 function resultPriceTag(id, l){
-  if(id==='eloy') return 'Free';
   const unit = S.search.bookingType==='Weekly' ? '/wk' : S.search.bookingType==='Monthly' ? '/mo' : '/day';
   return `$${lotRate(l, S.search.bookingType).toFixed(0)}${unit}`;
 }
