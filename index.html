@@ -138,8 +138,6 @@ select.control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg x
 .listing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:24px}
 .listing-card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer;transition:box-shadow .18s ease,transform .18s ease;padding:14px}
 .listing-card:hover{box-shadow:var(--shadow-md);transform:translateY(-3px)}
-.listing-card.browse-only{cursor:default}
-.listing-card.browse-only:hover{box-shadow:var(--shadow-sm);transform:none}
 .listing-thumb{height:130px;border-radius:10px;position:relative;overflow:hidden;background:linear-gradient(135deg,#3a4a3f,#5c7a63 55%,#8a9d6f);margin-bottom:12px}
 .listing-thumb::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.1'%3E%3Crect x='4' y='4' width='16' height='16' rx='3'/%3E%3Cpath d='M10 16V8h3.2a2.4 2.4 0 0 1 0 4.8H10'/%3E%3C/svg%3E") no-repeat center/32% auto,radial-gradient(120% 140% at 15% -10%,rgba(255,255,255,.35),transparent 60%);opacity:.9;pointer-events:none}
 .listing-badge{position:absolute;top:12px;left:12px;background:var(--green);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px}
@@ -307,6 +305,7 @@ table.dtable{width:100%;border-collapse:collapse;font-size:12.5px}
 table.dtable th{text-align:left;font-size:10.5px;text-transform:uppercase;color:var(--ink-soft);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
 table.dtable td{padding:8px 10px;border-bottom:1px solid #f0f0ee;white-space:nowrap;font-variant-numeric:tabular-nums}
 table.dtable tbody tr{transition:background .1s}
+table.dtable tbody tr.dir-row{cursor:pointer}
 table.dtable tbody tr:hover td{background:var(--paper-dim)}
 table.dtable tr.warn td{background:#fff8ef}
 table.dtable tr.warn:hover td{background:#fdf1de}
@@ -1084,7 +1083,7 @@ function screenAllListings(){
     </div>
     <div class="listing-grid" id="allListingsGrid">
       ${pageCards.map(c=>`
-        <div class="listing-card ${c.bookable?'':'browse-only'}" ${c.bookable?`data-lot="${c.id}"`:''}>
+        <div class="listing-card" ${c.bookable?`data-lot="${c.id}"`:''}>
           <div class="listing-thumb"><span class="listing-badge">${c.avail}</span></div>
           <div class="listing-title">${c.name}</div>
           <div class="listing-meta-row">
@@ -1125,7 +1124,7 @@ function screenAllListings(){
       </div>
       <div class="dtable-scroll"><table class="dtable">
         <thead><tr><th>Business Name</th><th>Partner</th><th>City</th><th>State</th><th>Spaces</th><th>Rate</th></tr></thead>
-        <tbody>${directoryRows.length ? directoryRows.map(p=>`<tr>
+        <tbody>${directoryRows.length ? directoryRows.map(p=>`<tr class="dir-row">
           <td>${p.name}</td>
           <td>${p.partner}</td>
           <td>${p.city||'—'}</td>
@@ -1839,7 +1838,11 @@ function wireScreen(root){
   bindSelect(root,'hVehicleType', v=>S.search.vehicleType=v);
 
   /* ---- all listings (browse by state) ---- */
-  root.querySelectorAll('#allListingsGrid [data-lot]').forEach(c=>c.addEventListener('click',()=>{ selectLot(c.dataset.lot); S.detailPanelOpen=true; go('book1'); }));
+  root.querySelectorAll('#allListingsGrid .listing-card').forEach(c=>c.addEventListener('click',()=>{
+    if(c.dataset.lot){ selectLot(c.dataset.lot); S.detailPanelOpen=true; }
+    go('book1');
+  }));
+  root.querySelectorAll('.dir-row').forEach(tr=>tr.addEventListener('click',()=>go('book1')));
   root.querySelectorAll('[data-lp]').forEach(b=>b.addEventListener('click',()=>{ const n=parseInt(b.dataset.lp,10); if(n>=1){ S.directory.listingPage=n; render(); } }));
   const alSearchBtn = root.querySelector('#alSearchBtn'); if(alSearchBtn) alSearchBtn.addEventListener('click',()=>{ S.resultsHeading = S.search.location.split(',')[0] || S.resultsHeading; go('book1'); });
   bindText(root,'alLocation', v=>S.search.location=v);
