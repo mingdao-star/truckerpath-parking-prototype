@@ -192,13 +192,6 @@ select.control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg x
 .dp-close{width:26px;height:26px;border-radius:999px;display:grid;place-items:center;color:var(--ink-soft)}
 .dp-close:hover{background:var(--paper-dim)}
 .rating{color:var(--orange-deep);font-weight:700;font-size:13px;font-family:var(--font-display)}
-.report-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.report-tile{border-radius:var(--r-md);padding:8px 10px}
-.report-tile.some{background:var(--orange-tint)}
-.report-tile.many{background:var(--green-tint)}
-.report-tile.paid{background:var(--red-tint)}
-.report-tile b{display:block;font-size:12.5px}
-.report-tile span{font-size:10.5px;color:var(--ink-soft)}
 .info-row{display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #f0f0ee}
 .info-row:last-child{border-bottom:none}
 .info-row .k{color:var(--ink-soft)}
@@ -289,7 +282,9 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .vtype-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--paper-dim);margin-bottom:8px}
 .vtype-row.disabled{opacity:.55}
 .vtype-price-pill{background:#fff;border:1px solid var(--line);padding:5px 12px;border-radius:999px;font-weight:700;font-size:13px;white-space:nowrap}
-.fitrig-pill{background:var(--paper-dim);border:1px solid var(--line);padding:6px 12px;border-radius:999px;font-weight:600;font-size:12.5px;white-space:nowrap;color:var(--ink)}
+.mode-toggle-row{display:flex;background:var(--paper-dim);border-radius:8px;padding:3px;gap:3px}
+.mode-toggle-btn{flex:1;padding:8px 10px;border-radius:6px;font-size:12.5px;font-weight:600;color:var(--ink-soft);background:transparent;white-space:nowrap;transition:background .12s,color .12s}
+.mode-toggle-btn.on{background:#fff;color:var(--ink);box-shadow:var(--shadow-sm)}
 
 /* ---- shared section-header icon treatment ---- */
 .card-icon-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
@@ -521,13 +516,6 @@ function poiInfoBlock(l){
     </div>
     <div class="info-row"><span class="k">Staffed Security</span><span>${l.staffedHours ? l.staffedHours : 'Unstaffed — QR gate entry only'}</span></div>
     <div style="font-size:11.5px;color:var(--ink-soft);margin:2px 0 14px">Mon–Sun · same hours every day</div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="section-label" style="color:var(--ink);margin:0">Last Parking Status</div>
-      <a href="#" class="btn-text" style="font-size:12px;display:flex;align-items:center;gap:2px" data-toast="Opening status trend…">Trend ${ic.chevRight}</a>
-    </div>
-    <div style="margin-bottom:14px"><div class="report-row">
-      ${l.reports.map(r=>`<div class="report-tile ${r.cls}"><b>${r.label}</b><span>${r.time}</span></div>`).join('')}
-    </div></div>
     <div class="section-label" style="color:var(--ink)">General Info</div>
     <div class="info-row"><span class="k">Address</span><span>${l.address}</span></div>
     <div class="info-row"><span class="k">Highway</span><span>${l.highway}</span></div>
@@ -1266,14 +1254,12 @@ function screenBookStep1(){
             <button class="dp-close" id="dpClose">${ic.x}</button>
           </div>
           <div class="poi-head-divider"></div>
-          <div class="section-label" style="color:var(--ink);margin:0 0 8px">Fits Your Rig</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
-            ${Object.keys(l.vtypeAvail).map(v=>`<span class="fitrig-pill">${v}</span>`).join('')}
+          <div class="field" style="margin-top:0"><label>Booking Mode</label>
+            <div class="mode-toggle-row">
+              <button type="button" class="mode-toggle-btn ${S.bookingMode==='single'?'on':''}" data-bookingmode="single">Single spot</button>
+              <button type="button" class="mode-toggle-btn ${S.bookingMode==='multiple'?'on':''}" data-bookingmode="multiple">Multiple spots (fleet)</button>
+            </div>
           </div>
-          <div class="field" style="max-width:260px;margin-top:0"><label>Booking Mode</label><select class="pill-select" id="bookingModeSelect">
-            <option value="single" ${S.bookingMode==='single'?'selected':''}>Single spot</option>
-            <option value="multiple" ${S.bookingMode==='multiple'?'selected':''}>Multiple spots (fleet)</option>
-          </select></div>
           ${S.bookingMode==='multiple' ? `
             <div class="field" style="margin-top:12px"><label>Number of spots (max ${l.avail} available)</label>
               <div class="stepper-inline">
@@ -2021,7 +2007,7 @@ function wireScreen(root){
   bindText(root,'b1CheckOut', v=>S.search.checkOut=v);
   bindSelect(root,'b1BookingType', v=>S.search.bookingType=v);
   bindSelect(root,'b1VehicleType', v=>S.search.vehicleType=v);
-  bindSelect(root,'bookingModeSelect', v=>S.bookingMode=v);
+  root.querySelectorAll('[data-bookingmode]').forEach(b=>b.addEventListener('click',()=>{ S.bookingMode=b.dataset.bookingmode; render(); }));
   const refreshAvailBtn = root.querySelector('#refreshAvailBtn'); if(refreshAvailBtn) refreshAvailBtn.addEventListener('click',()=>{ S.availRefreshedAt=Date.now(); render(); toast('Availability refreshed'); });
   const dpClose = root.querySelector('#dpClose'); if(dpClose) dpClose.addEventListener('click',()=>{ S.detailPanelOpen=false; render(); });
   bindSelect(root,'step2VehicleType', v=>S.step2VehicleType=v);
