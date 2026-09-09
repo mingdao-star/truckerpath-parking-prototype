@@ -275,15 +275,14 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .chip{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:8px 12px;box-shadow:var(--shadow-sm)}
 .chip .k{font-size:10px;text-transform:uppercase;color:var(--ink-soft);font-weight:700;letter-spacing:.03em}
 .chip .v{font-size:13.5px;font-weight:700}
-.qr-box{width:120px;height:120px;margin:0 auto;border-radius:var(--r-md);background:repeating-linear-gradient(90deg,#0E0F0C 0 5px,transparent 5px 10px),repeating-linear-gradient(0deg,#0E0F0C 0 5px,transparent 5px 10px);background-blend-mode:multiply;background-color:#fff;border:1px solid var(--line)}
-
-/* ---- order detail (single) — location preview card ---- */
+/* ---- order detail (single) ---- */
 .orderdetail-banner{background:var(--paper-dim);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;display:flex;gap:14px;align-items:center;margin-bottom:16px}
 .orderdetail-ic{width:44px;height:44px;border-radius:999px;background:var(--brand);display:grid;place-items:center;flex:none}
-.odloc-card{width:312px;flex:none;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
-.odloc-map{height:144px;background:linear-gradient(135deg,#3a4a3f,#5c7a63 55%,#8a9d6f);display:flex;align-items:center;justify-content:center}
-.odloc-marker{width:36px;height:36px;border-radius:999px;background:var(--brand);box-shadow:0 4px 12px rgba(31,169,113,.25);display:grid;place-items:center}
-.odloc-badge{display:inline-block;background:var(--brand-tint);color:var(--brand);font-size:11px;font-weight:700;text-transform:uppercase;padding:4px 8px;border-radius:6px;margin-bottom:8px}
+.yard-tag{display:inline-block;background:var(--brand-tint);color:var(--brand);font-size:11px;font-weight:700;text-transform:uppercase;padding:4px 8px;border-radius:6px;margin-top:4px}
+.od-single-grid{display:flex;gap:32px;flex-wrap:wrap}
+.od-single-grid>div:first-child{flex:1;min-width:280px}
+.checkin-box{width:220px;flex:none;text-align:center;padding:18px;background:var(--paper-dim);border-radius:var(--r-lg)}
+.checkin-code{font-size:30px;font-weight:800;letter-spacing:3px}
 
 /* ---- batch flow specific ---- */
 .batch-title{font-size:19px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em}
@@ -1464,11 +1463,46 @@ const screenBatchPayment = () => screenPayment('batch');
 /* ============================================================
    Book Step 5 — Confirmation
 ============================================================ */
-function screenBookStep5Confirm(){
-  const phone = S.vehicleForm.driverPhone;
+// shared body for the single-spot "just booked" screen and its My Orders detail view —
+// they show the same booking, just under a different banner and back-button destination
+function singleOrderDetailBody(){
   const l = LOTS.eloy;
   const shortName = l.name.split(' at ').pop();
   const singleOrder = singleSpotOrder();
+  return `
+    <div class="chips-row">
+      <div class="chip"><div class="k">Location</div><div class="v">Eloy, AZ</div></div>
+      <div class="chip"><div class="k">Dates</div><div class="v">Jul 31 – Aug 7</div></div>
+      <div class="chip"><div class="k">Access</div><div class="v">24/7 gate — no code needed</div></div>
+      <div class="chip"><div class="k">Total Paid</div><div class="v">$${singleOrder.total.toFixed(2)}</div></div>
+    </div>
+    <div class="card"><div class="card-body">
+      <div class="od-single-grid">
+        <div>
+          <div class="section-label" style="color:var(--ink);margin:0 0 4px">Location</div>
+          <div style="font-weight:700;font-size:16px">${shortName}</div>
+          <span class="yard-tag">Own Yard</span>
+          <div class="poi-head-divider" style="margin:12px 0"></div>
+          <div class="info-row"><span class="k">Address</span><span>3100 S Barrett Rd, Eloy, AZ 85131 <button class="copy-btn" data-copy="3100 S Barrett Rd, Eloy, AZ 85131">Copy</button></span></div>
+          <div class="info-row"><span class="k">Coordinates</span><span>32.701693, -111.516104 <button class="copy-btn" data-copy="32.701693, -111.516104">Copy</button></span></div>
+          <div class="info-row"><span class="k">Total Spaces Available</span><span>${l.avail} space(s)</span></div>
+          <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — no code needed</span></div>
+        </div>
+        <div class="checkin-box">
+          <div class="section-label" style="color:var(--ink);margin:0 0 10px">Check-in Code</div>
+          <div class="checkin-code tabular">1234</div>
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:8px">Show this code at the gate</div>
+        </div>
+      </div>
+    </div></div>
+    <div style="display:flex;gap:10px;margin:16px 0">
+      <button class="btn btn-outline" data-toast="Opening directions…">Get directions</button>
+      <button class="btn btn-outline" data-toast="Added to calendar">Add to calendar</button>
+      <button class="btn btn-outline" data-toast="Receipt downloaded">Download receipt</button>
+    </div>`;
+}
+function screenBookStep5Confirm(){
+  const phone = S.vehicleForm.driverPhone;
   return `
   ${topNav('book')}
   <div class="page">
@@ -1476,44 +1510,8 @@ function screenBookStep5Confirm(){
       <div class="confirm-ic">${ic.checkW}</div>
       <div><div style="font-weight:700;font-size:16px">You're booked — RP-88214-JX</div><div style="color:var(--green-deep);font-size:13px">Confirmation sent to ${phone ? phone : 'your phone'}. Show your check-in code at the gate.</div></div>
     </div>
-    <div class="results-row" style="align-items:flex-start">
-      <div style="flex:1;min-width:0">
-        <div class="chips-row">
-          <div class="chip"><div class="k">Location</div><div class="v">Eloy, AZ</div></div>
-          <div class="chip"><div class="k">Dates</div><div class="v">Jul 31 – Aug 7</div></div>
-          <div class="chip"><div class="k">Access</div><div class="v">24/7 gate — no code needed</div></div>
-          <div class="chip"><div class="k">Total Paid</div><div class="v">$${singleOrder.total.toFixed(2)}</div></div>
-        </div>
-        <div class="card"><div class="card-body">
-          <div style="font-size:13px;margin-bottom:6px">Address: 3100 S Barrett Rd, Eloy, AZ 85131 <button class="copy-btn" data-copy="3100 S Barrett Rd, Eloy, AZ 85131">Copy</button></div>
-          <div style="font-size:13px">Coordinates: 32.701693, -111.516104 <button class="copy-btn" data-copy="32.701693, -111.516104">Copy</button></div>
-        </div></div>
-        <div style="display:flex;gap:10px;margin:12px 0 16px">
-          <button class="btn btn-outline" data-toast="Opening directions…">Get directions</button>
-          <button class="btn btn-outline" data-toast="Added to calendar">Add to calendar</button>
-          <button class="btn btn-outline" data-toast="Receipt downloaded">Download receipt</button>
-        </div>
-        <button class="btn btn-primary" id="backHomeBtn">Back to Book Parking</button>
-      </div>
-      <div style="width:312px;flex:none;display:flex;flex-direction:column;gap:16px">
-        <div class="odloc-card">
-          <div class="odloc-map"><div class="odloc-marker">${ic.pinW}</div></div>
-          <div style="padding:16px">
-            <span class="odloc-badge">Own Yard</span>
-            <div style="font-size:18px;font-weight:700;color:var(--ink);margin-bottom:4px">${shortName}</div>
-            <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px">3100 S Barrett Rd, Eloy, AZ 85131</div>
-            <div class="poi-head-divider"></div>
-            <div class="info-row"><span class="k">Total Spaces Available</span><span>${l.avail} space(s)</span></div>
-            <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — no code needed</span></div>
-          </div>
-        </div>
-        <div class="card"><div class="card-body" style="text-align:center">
-          <div style="font-size:11px;text-transform:uppercase;color:var(--ink-soft);font-weight:700;letter-spacing:.04em;margin-bottom:10px">Check-in code</div>
-          <div class="qr-box"></div>
-          <div style="font-size:20px;font-weight:700;margin-top:10px" class="tabular">1234</div>
-        </div></div>
-      </div>
-    </div>
+    ${singleOrderDetailBody()}
+    <button class="btn btn-primary" id="backHomeBtn">Back to Book Parking</button>
   </div>`;
 }
 
@@ -1832,9 +1830,6 @@ function screenWallet(){
 }
 
 function screenOrderDetailSingle(){
-  const l = LOTS.eloy;
-  const shortName = l.name.split(' at ').pop();
-  const singleOrder = singleSpotOrder();
   return `
   ${topNav('orders')}
   <div class="page">
@@ -1842,43 +1837,8 @@ function screenOrderDetailSingle(){
       <div class="orderdetail-ic">${ic.checkW}</div>
       <h2 class="card-title" style="margin:0;font-size:18px">Order details — RP-88214-JX</h2>
     </div>
-    <div class="results-row" style="align-items:flex-start">
-      <div style="flex:1;min-width:0">
-        <div class="chips-row">
-          <div class="chip"><div class="k">Location</div><div class="v">Eloy, AZ</div></div>
-          <div class="chip"><div class="k">Dates</div><div class="v">Jul 31 – Aug 7</div></div>
-          <div class="chip"><div class="k">Access</div><div class="v">24/7 gate — no code needed</div></div>
-          <div class="chip"><div class="k">Total Paid</div><div class="v">$${singleOrder.total.toFixed(2)}</div></div>
-        </div>
-        <div class="card"><div class="card-body">
-          <div style="font-size:13px;margin-bottom:6px">Address: 3100 S Barrett Rd, Eloy, AZ 85131 <button class="copy-btn" data-copy="3100 S Barrett Rd, Eloy, AZ 85131">Copy</button></div>
-          <div style="font-size:13px">Coordinates: 32.701693, -111.516104 <button class="copy-btn" data-copy="32.701693, -111.516104">Copy</button></div>
-        </div></div>
-        <div style="display:flex;gap:10px;margin:12px 0 16px">
-          <button class="btn btn-outline" data-toast="Opening directions…">Get directions</button>
-          <button class="btn btn-outline" data-toast="Added to calendar">Add to calendar</button>
-          <button class="btn btn-outline" data-toast="Receipt downloaded">Download receipt</button>
-        </div>
-        <button class="btn btn-outline" id="backToOrders">← Back to Orders</button>
-      </div>
-      <div style="width:312px;flex:none;display:flex;flex-direction:column;gap:16px">
-        <div class="odloc-card">
-          <div class="odloc-map"><div class="odloc-marker">${ic.pinW}</div></div>
-          <div style="padding:16px">
-            <span class="odloc-badge">Own Yard</span>
-            <div style="font-size:18px;font-weight:700;color:var(--ink);margin-bottom:4px">${shortName}</div>
-            <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px">3100 S Barrett Rd, Eloy, AZ 85131</div>
-            <div class="poi-head-divider"></div>
-            <div class="info-row"><span class="k">Total Spaces Available</span><span>${l.avail} space(s)</span></div>
-            <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — no code needed</span></div>
-          </div>
-        </div>
-        <div class="card"><div class="card-body" style="text-align:center">
-          <div style="font-size:11px;text-transform:uppercase;color:var(--ink-soft);font-weight:700;letter-spacing:.04em;margin-bottom:10px">Check-in code</div>
-          <div style="font-size:20px;font-weight:700" class="tabular">1234</div>
-        </div></div>
-      </div>
-    </div>
+    ${singleOrderDetailBody()}
+    <button class="btn btn-outline" id="backToOrders">← Back to Orders</button>
   </div>`;
 }
 
