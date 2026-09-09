@@ -9,6 +9,8 @@
 <!-- Real map: Leaflet + OpenStreetMap (free, no API key). Requires internet access when opened locally. -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Real "Add to Calendar" button — https://www.addevent.com/c/documentation/add-to-calendar-button -->
+<script type="text/javascript" src="https://cdn.addevent.com/libs/atc/1.6.1/atc.min.js" async defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Reddit+Sans:wght@700&display=swap" rel="stylesheet">
@@ -283,6 +285,8 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .od-single-grid>div:first-child{flex:1;min-width:280px}
 .checkin-box{width:220px;flex:none;text-align:center;padding:18px;background:var(--paper-dim);border-radius:var(--r-lg)}
 .checkin-code{font-size:30px;font-weight:800;letter-spacing:3px}
+.addeventatc{cursor:pointer;position:relative}
+.addeventatc span{display:none}
 
 /* ---- batch flow specific ---- */
 .batch-title{font-size:19px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em}
@@ -1497,7 +1501,15 @@ function singleOrderDetailBody(){
     </div></div>
     <div style="display:flex;gap:10px;margin:16px 0">
       <button class="btn btn-outline" data-toast="Opening directions…">Get directions</button>
-      <button class="btn btn-outline" data-toast="Added to calendar">Add to calendar</button>
+      <div title="Add to Calendar" class="btn btn-outline addeventatc">
+        Add to calendar
+        <span class="start">07/31/2026 12:00 PM</span>
+        <span class="end">08/07/2026 12:00 PM</span>
+        <span class="timezone">America/Phoenix</span>
+        <span class="title">${shortName} — Parking Reservation</span>
+        <span class="description">TruckerPath Parking reservation. Check-in code: 1234.</span>
+        <span class="location">3100 S Barrett Rd, Eloy, AZ 85131</span>
+      </div>
       <button class="btn btn-outline" data-toast="Receipt downloaded">Download receipt</button>
     </div>`;
 }
@@ -1910,6 +1922,9 @@ function render(){
   wireScreen(app);
   syncLeafletMap();
   bindOutsideClickOnce();
+  // re-scan for the AddEvent "Add to Calendar" button — it's inserted dynamically by this SPA's
+  // own re-render, after atc.min.js already did its one-time page scan on load
+  if(window.addeventatc) addeventatc.refresh();
 }
 
 function bindText(root, id, setter, opts){
