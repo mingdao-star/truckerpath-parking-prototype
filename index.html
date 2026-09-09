@@ -1559,6 +1559,9 @@ function screenBatchDetails(){
     <h1 class="batch-title">Batch Fleet Parking</h1>
     <div class="card"><div class="card-body">
       <div class="card-icon-head"><div class="card-icon-badge">${ic.settings}</div><b>Booking configuration</b></div>
+      <div class="field" style="max-width:220px;margin-bottom:14px"><label>Booking Type</label><select class="pill-select" id="batchBookingType">
+        ${['Daily','Weekly','Monthly'].map(v=>`<option ${S.batch.bookingType===v?'selected':''}>${v}</option>`).join('')}
+      </select></div>
       <div class="fleet-pricing-box">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
           <div class="section-label" style="color:var(--ink);margin:0">Pricing &amp; Inventory by Vehicle Type</div>
@@ -1576,13 +1579,8 @@ function screenBatchDetails(){
     </div></div>
     <div class="card"><div class="card-body">
       <div class="card-icon-head"><div class="card-icon-badge">${ic.file}</div><b>Driver import</b></div>
-      <div style="display:flex;align-items:flex-end;gap:16px;margin-bottom:6px;flex-wrap:wrap">
-        <div style="display:flex;align-items:center;gap:8px"><span class="step-num">1</span><span style="font-weight:600;font-size:13px">Download the template</span></div>
-        <div class="field" style="width:180px;margin:0 0 0 auto"><label>Booking type</label><select class="control" id="batchBookingType">
-          ${['Daily','Weekly','Monthly'].map(v=>`<option ${S.batch.bookingType===v?'selected':''}>${v}</option>`).join('')}
-        </select></div>
-      </div>
-      <div style="font-size:12px;color:var(--ink-soft);margin:0 0 12px 28px">One row per driver: Driver Name, Driver ID, Plate Number, State, Vehicle Type. Phone is optional — needed only for SMS delivery. Template reflects the booking type selected above.</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="step-num">1</span><span style="font-weight:600;font-size:13px">Download the template</span></div>
+      <div style="font-size:12px;color:var(--ink-soft);margin:0 0 12px 28px">One row per driver: Driver Name, Driver ID, Plate Number, State, Vehicle Type. Phone is optional — needed only for SMS delivery. Template reflects the booking type selected in Booking configuration above.</div>
       <div style="display:flex;gap:8px;margin:0 0 20px 28px">
         <button class="btn btn-outline" data-toast="CSV template downloaded (${S.batch.bookingType} billing)">${ic.download}&nbsp;CSV template</button>
         <button class="btn btn-outline" data-toast="XLSX template downloaded (${S.batch.bookingType} billing)">${ic.download}&nbsp;XLSX template</button>
