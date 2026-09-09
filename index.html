@@ -211,15 +211,16 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .avail-note .refresh{color:var(--orange-deep);display:block;font-size:11px;margin-top:2px}
 .fleet-pricing-box{border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px}
 .fleet-pricing-box .refresh{color:var(--orange-deep);display:block;font-size:11px;margin-top:6px}
-.fleet-price-row{display:flex;align-items:center;gap:10px;background:var(--paper-dim);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:12.5px;cursor:pointer;border:1.5px solid transparent}
-.fleet-price-row:hover{background:var(--line)}
-.fleet-price-row.active{background:var(--brand-tint);border-color:var(--brand)}
-.fleet-price-row.active:hover{background:var(--brand-tint)}
-.fleet-price-row.readonly{cursor:default}
-.fleet-price-row.readonly:hover{background:var(--paper-dim)}
+.fleet-price-row{display:flex;align-items:center;gap:10px;background:var(--paper-dim);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:12.5px}
 .fleet-price-row .fp-type{flex:1;font-weight:600;color:var(--ink)}
 .fleet-price-row .fp-rate{font-weight:700;color:var(--ink)}
 .fleet-price-row .fp-avail{color:var(--ink-soft);min-width:88px;text-align:right}
+.fleet-price-row.stepped{flex-direction:column;align-items:stretch;gap:6px}
+.fleet-price-row.stepped .fp-line{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.fleet-price-row.stepped .fp-avail{min-width:0}
+.stepper-inline.sm button{width:28px;height:30px;font-size:14px}
+.stepper-inline.sm input{width:40px;height:30px;font-size:12.5px}
+.fleet-spots-total{font-weight:700;font-size:13px;color:var(--ink);margin:4px 0 6px}
 .rate-cards{display:flex;gap:10px;margin-bottom:16px}
 .rate-card{flex:1;background:var(--paper-dim);border-radius:10px;padding:10px 12px}
 .rate-card .k{font-size:12px;color:var(--ink-soft);font-weight:600;margin-bottom:2px}
@@ -432,6 +433,7 @@ const S = {
   detailPanelOpen: false,
   step2VehicleType: 'Truck + Trailer',
   step2BookingType: 'Daily',
+  fleetSpots: { 'Truck + Trailer': 3, 'Trailer Only': 2 },
   spots: 5,
   availRefreshedAt: Date.now(),
 
@@ -906,14 +908,21 @@ function singleSpotOrder(){
 }
 function computeStep2Total(){
   const l = LOTS[S.selectedLotId];
-  if(S.bookingMode==='multiple') return batchVehicleRate(S.step2VehicleType, S.step2BookingType) * Math.max(1, S.spots||1);
+  if(S.bookingMode==='multiple'){
+    return Object.entries(l.vtypeAvail).reduce((sum,[vt,n])=>sum + batchVehicleRate(vt, S.step2BookingType) * (S.fleetSpots[vt]||0), 0);
+  }
   return lotRate(l, S.step2BookingType);
 }
 
-// selecting a lot with fewer available spots than currently requested clamps the request down
+// selecting a lot with fewer available spots (per vehicle type) than currently requested clamps the request down
 function selectLot(id){
   S.selectedLotId = id;
-  if(S.spots > LOTS[id].avail) S.spots = LOTS[id].avail;
+  const l = LOTS[id];
+  Object.keys(S.fleetSpots).forEach(vt=>{
+    const max = l.vtypeAvail[vt]||0;
+    if(S.fleetSpots[vt] > max) S.fleetSpots[vt] = max;
+  });
+  S.spots = Object.values(S.fleetSpots).reduce((a,b)=>a+b,0);
 }
 
 /* ============================================================
@@ -1265,28 +1274,34 @@ function screenBookStep1(){
           </div>
           ${S.bookingMode==='multiple' ? `
             <div class="field" style="margin-top:12px"><label>Booking Type</label><select class="pill-select" id="step2BookingType">
-              ${rateOptions.map(v=>`<option ${S.step2BookingType===v?'selected':''}>${v} — $${batchVehicleRate(S.step2VehicleType,v).toFixed(2)}</option>`).join('')}
+              ${rateOptions.map(v=>`<option ${S.step2BookingType===v?'selected':''}>${v}</option>`).join('')}
             </select></div>
             <div class="fleet-pricing-box" style="margin-top:10px">
               <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
                 <div class="section-label" style="color:var(--ink);margin:0">Pricing &amp; Inventory by Vehicle Type</div>
                 <button class="btn-text" id="refreshAvailBtn" style="font-size:11.5px;white-space:nowrap">↻ Refresh</button>
               </div>
-              <div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px">Tap a vehicle type to reserve spots for it</div>
-              ${Object.entries(l.vtypeAvail).map(([vt,n])=>`
-                <div class="fleet-price-row ${vt===S.step2VehicleType?'active':''}" data-fleettype="${vt}">
-                  <span class="fp-type">${vt}</span>
-                  <span class="fp-rate tabular">$${batchVehicleRate(vt,S.step2BookingType).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</span>
-                  <span class="fp-avail tabular">${n} available</span>
-                </div>`).join('')}
+              <div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px">Set how many spots you need for each vehicle type</div>
+              ${Object.entries(l.vtypeAvail).map(([vt,n])=>{
+                const count = S.fleetSpots[vt]||0;
+                return `
+                <div class="fleet-price-row stepped">
+                  <div class="fp-line">
+                    <span class="fp-type">${vt}</span>
+                    <span class="fp-avail tabular">${n} available</span>
+                  </div>
+                  <div class="fp-line">
+                    <span class="fp-rate tabular">$${batchVehicleRate(vt,S.step2BookingType).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</span>
+                    <div class="stepper-inline sm">
+                      <button type="button" data-fleetspotminus="${vt}" ${count<=0?'disabled':''}>−</button>
+                      <input data-fleetspotinput="${vt}" value="${count}" inputmode="numeric">
+                      <button type="button" data-fleetspotplus="${vt}" ${count>=n?'disabled':''}>+</button>
+                    </div>
+                  </div>
+                </div>`;
+              }).join('')}
+              <div class="fleet-spots-total">${S.spots} spot${S.spots===1?'':'s'} selected</div>
               <span class="refresh">Last refreshed ${timeAgo(S.availRefreshedAt)}</span>
-            </div>
-            <div class="field" style="margin-top:12px"><label>Number of spots — ${S.step2VehicleType} (max ${l.vtypeAvail[S.step2VehicleType]||0} available)</label>
-              <div class="stepper-inline">
-                <button id="spotsMinus" type="button">−</button>
-                <input id="spotsInput" value="${S.spots}" inputmode="numeric">
-                <button id="spotsPlus" type="button" ${S.spots>=(l.vtypeAvail[S.step2VehicleType]||0)?'disabled':''}>+</button>
-              </div>
             </div>
           ` : `
             <div class="field" style="margin-top:12px"><label>Vehicle Type</label><select class="pill-select" id="step2VehicleType">
@@ -1550,7 +1565,7 @@ function screenBatchDetails(){
           <button class="btn-text" id="refreshAvailBtn" style="font-size:11.5px;white-space:nowrap">↻ Refresh</button>
         </div>
         ${Object.entries(l.vtypeAvail).map(([vt,n])=>`
-          <div class="fleet-price-row readonly">
+          <div class="fleet-price-row">
             <span class="fp-type">${vt}</span>
             <span class="fp-rate tabular">$${batchVehicleRate(vt,S.batch.bookingType).toFixed(2)}/${unit}</span>
             <span class="fp-avail tabular">${n} available</span>
@@ -2022,29 +2037,28 @@ function wireScreen(root){
   root.querySelectorAll('[data-bookingmode]').forEach(b=>b.addEventListener('click',()=>{ S.bookingMode=b.dataset.bookingmode; render(); }));
   const refreshAvailBtn = root.querySelector('#refreshAvailBtn'); if(refreshAvailBtn) refreshAvailBtn.addEventListener('click',()=>{ S.availRefreshedAt=Date.now(); render(); toast('Availability refreshed'); });
   const dpClose = root.querySelector('#dpClose'); if(dpClose) dpClose.addEventListener('click',()=>{ S.detailPanelOpen=false; render(); });
-  function spotsMax(){
-    const l = LOTS[S.selectedLotId];
-    return S.bookingMode==='multiple' ? (l.vtypeAvail[S.step2VehicleType]||0) : l.avail;
-  }
-  bindSelect(root,'step2VehicleType', v=>{ S.step2VehicleType=v; if(S.spots>spotsMax()) S.spots=spotsMax(); });
-  root.querySelectorAll('[data-fleettype]').forEach(row=>row.addEventListener('click',()=>{
-    S.step2VehicleType = row.dataset.fleettype;
-    if(S.spots>spotsMax()) S.spots=spotsMax();
-    render();
-  }));
+  bindSelect(root,'step2VehicleType', v=>S.step2VehicleType=v);
   const step2BT = root.querySelector('#step2BookingType');
   if(step2BT) step2BT.addEventListener('change',()=>{ S.step2BookingType = step2BT.value.split(' — ')[0]; render(); });
-  const spotsInput = root.querySelector('#spotsInput');
-  if(spotsInput) spotsInput.addEventListener('input',()=>{
-    const max = spotsMax();
-    const n = parseInt(spotsInput.value.replace(/\D/g,''),10);
-    const clamped = isNaN(n) ? 0 : Math.min(n, max);
-    if(!isNaN(n) && n > max) toast(`Only ${max} spot(s) available`);
-    S.spots = clamped;
+  function setFleetSpots(vt, n){
+    const max = LOTS[S.selectedLotId].vtypeAvail[vt]||0;
+    S.fleetSpots[vt] = isNaN(n) ? 0 : Math.max(0, Math.min(n, max));
+    S.spots = Object.values(S.fleetSpots).reduce((a,b)=>a+b,0);
+  }
+  root.querySelectorAll('[data-fleetspotminus]').forEach(b=>b.addEventListener('click',()=>{
+    const vt = b.dataset.fleetspotminus; setFleetSpots(vt, (S.fleetSpots[vt]||0)-1); render();
+  }));
+  root.querySelectorAll('[data-fleetspotplus]').forEach(b=>b.addEventListener('click',()=>{
+    const vt = b.dataset.fleetspotplus; setFleetSpots(vt, (S.fleetSpots[vt]||0)+1); render();
+  }));
+  root.querySelectorAll('[data-fleetspotinput]').forEach(inp=>inp.addEventListener('input',()=>{
+    const vt = inp.dataset.fleetspotinput;
+    const max = LOTS[S.selectedLotId].vtypeAvail[vt]||0;
+    const n = parseInt(inp.value.replace(/\D/g,''),10);
+    if(!isNaN(n) && n > max) toast(`Only ${max} spot(s) available for ${vt}`);
+    setFleetSpots(vt, n);
     rerenderKeepFocus();
-  });
-  const spotsMinus = root.querySelector('#spotsMinus'); if(spotsMinus) spotsMinus.addEventListener('click',()=>{ S.spots=Math.max(1,(S.spots||1)-1); render(); });
-  const spotsPlus = root.querySelector('#spotsPlus'); if(spotsPlus) spotsPlus.addEventListener('click',()=>{ S.spots=Math.min(spotsMax(), (S.spots||0)+1); render(); });
+  }));
   const step2Continue = root.querySelector('#step2Continue');
   if(step2Continue) step2Continue.addEventListener('click',()=>{ go(S.bookingMode==='multiple' ? 'batchDetails' : 'book3'); });
 
