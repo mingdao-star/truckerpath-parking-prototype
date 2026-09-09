@@ -756,7 +756,8 @@ function buildRoster(count){
     let status = 'ok', msg = '';
     if(includeErrors && i===0){ vtype='Bobtail'; status='err'; msg='Vehicle not supported'; }
     if(includeErrors && i===1){ rows.push({row:i+1,name:'',id:'',vtype:'',plate:'',state:'',status:'err',msg:'Missing information'}); continue; }
-    rows.push({row:i+1, name, id, vtype, plate, state, status, msg, gate:'1199#', pin:String(300000+i*4113), ci:'Jul 14, '+(16+(i%6))+':00', co:'Jul 17, 0'+(5+(i%3))+':30'});
+    const note = status==='ok' && i%10===0 ? 'Reefer — powered spot' : null;
+    rows.push({row:i+1, name, id, vtype, plate, state, status, msg, note, gate:'1199#', pin:String(300000+i*4113), ci:'Jul 14, '+(16+(i%6))+':00', co:'Jul 17, 0'+(5+(i%3))+':30'});
   }
   return rows;
 }
@@ -1625,7 +1626,7 @@ function importRowHtml(d){
       <td>${d.row}</td><td>${d.name||'—'}</td><td>${d.vtype||'—'}</td><td>${d.plate||'—'}</td><td>${d.state||'—'}</td>
       <td>${d.status==='err'
         ? `<div style="display:flex;align-items:center;gap:6px"><span class="pill-warn">${d.msg}</span><button class="btn-text" style="font-size:11.5px" data-editrow="${d.row}">Edit</button></div>`
-        : '<span class="pill-ok">Valid</span>'}</td>
+        : d.note ? `<span class="pill-warn">${d.note}</span>` : '<span class="pill-ok">Valid</span>'}</td>
     </tr>`;
   }
   return `<tr class="warn">
@@ -1726,8 +1727,8 @@ function screenBatchConfirm(){
       <div class="card-body">
         <div class="search-box">${ic.search}<input id="confirmSearchInput" placeholder="Search driver, ID, plate, or spot" value="${S.confirmSearch}"></div>
         <div class="dtable-scroll"><table class="dtable">
-          <thead><tr><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle</th><th>PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th><th></th></tr></thead>
-          <tbody>${slice.length ? slice.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td class="tabular">${d.pin}</td><td>${d.ci}</td><td>${d.co}</td><td><span class="pill-ok">Assigned</span></td><td><button class="icon-btn" data-pdfrow="${d.name}" title="Download this driver's PDF">${ic.download}</button></td></tr>`).join('') : '<tr><td colspan="9" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
+          <thead><tr><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle Type</th><th>Gate Code</th><th>Access PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th><th></th></tr></thead>
+          <tbody>${slice.length ? slice.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td class="tabular">${d.gate}</td><td class="tabular">${d.pin}</td><td>${d.ci}</td><td>${d.co}</td><td>${d.note ? `<span class="pill-warn">${d.note}</span>` : '<span class="pill-ok">Assigned</span>'}</td><td><button class="icon-btn" data-pdfrow="${d.name}" title="Download this driver's PDF">${ic.download}</button></td></tr>`).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
         </table></div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
           <span style="font-size:12.5px;color:var(--ink-soft)">${rows.length ? (page-1)*per+1 : 0}–${Math.min(page*per,rows.length)} of ${rows.length} (${batchOrder.validCount} total in this order)</span>
@@ -1915,8 +1916,8 @@ function screenOrderDetailBatch(){
       <div class="card-body">
         <div class="search-box">${ic.search}<input id="odSearchInput" placeholder="Search driver, ID, plate, or spot" value="${S.confirmSearch}"></div>
         <div class="dtable-scroll"><table class="dtable">
-          <thead><tr><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle</th><th>PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th><th></th></tr></thead>
-          <tbody>${rows.length ? rows.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td class="tabular">${d.pin}</td><td>${d.ci}</td><td>${d.co}</td><td><span class="pill-ok">Assigned</span></td><td><button class="icon-btn" data-pdfrow="${d.name}" title="Download this driver's PDF">${ic.download}</button></td></tr>`).join('') : '<tr><td colspan="9" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
+          <thead><tr><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle Type</th><th>Gate Code</th><th>Access PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th><th></th></tr></thead>
+          <tbody>${rows.length ? rows.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td class="tabular">${d.gate}</td><td class="tabular">${d.pin}</td><td>${d.ci}</td><td>${d.co}</td><td>${d.note ? `<span class="pill-warn">${d.note}</span>` : '<span class="pill-ok">Assigned</span>'}</td><td><button class="icon-btn" data-pdfrow="${d.name}" title="Download this driver's PDF">${ic.download}</button></td></tr>`).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
         </table></div>
         <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${VALID_ROSTER.length} drivers assigned to this order.</div>
       </div>
