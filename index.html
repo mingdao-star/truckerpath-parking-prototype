@@ -1987,12 +1987,18 @@ function wireScreen(root){
   bindText(root,'loginPassword', v=>{ S.loginForm.password=v; S.loginErr=''; });
   const loginSubmit = root.querySelector('#loginSubmit');
   if(loginSubmit) loginSubmit.addEventListener('click',()=>{
-    const dest = S.postLoginGoto || 'book1';
-    S.postLoginGoto = null;
+    // only consume postLoginGoto once login actually succeeds — clearing it before the
+    // validation check meant a failed first attempt (e.g. a typo) would silently drop the
+    // resume destination, so retrying after fixing the error dumped you back at book1 instead
+    // of wherever you were trying to go (e.g. payment)
     if(S.loginTab==='login'){
       if(!S.loginForm.email || !S.loginForm.password){ S.loginErr='Enter your email and password to continue.'; rerenderKeepFocus(); return; }
+      const dest = S.postLoginGoto || 'book1';
+      S.postLoginGoto = null;
       S.loggedIn=true; toast('Welcome back, Ming'); go(dest);
     } else {
+      const dest = S.postLoginGoto || 'book1';
+      S.postLoginGoto = null;
       S.loggedIn=true; toast('Account created — welcome to TruckerPath fleet'); go(dest);
     }
   });
@@ -2041,7 +2047,10 @@ function wireScreen(root){
       if(badge){ badge.classList.add('show'); clearTimeout(window.__autosaveTimer); window.__autosaveTimer=setTimeout(()=>badge.classList.remove('show'),1200); }
     });
   });
-  const step3Continue = root.querySelector('#step3Continue'); if(step3Continue) step3Continue.addEventListener('click',()=>go('book4'));
+  const step3Continue = root.querySelector('#step3Continue'); if(step3Continue) step3Continue.addEventListener('click',()=>{
+    if(!S.loggedIn){ S.postLoginGoto='book4'; toast('Please sign in to continue to payment'); go('login'); return; }
+    go('book4');
+  });
 
   /* ---- payment (single + batch share this) ---- */
   root.querySelectorAll('.saved-card[data-card]').forEach(c=>c.addEventListener('click',()=>{ S.payment.selectedCardId=c.dataset.card; render(); }));
