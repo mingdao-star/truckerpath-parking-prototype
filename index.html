@@ -255,7 +255,6 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .autosaved.show{opacity:1}
 
 /* ---- payment ---- */
-.pay-grid{display:grid;grid-template-columns:280px 1fr;gap:22px;align-items:start}
 .cc{width:100%;aspect-ratio:1.62;border-radius:14px;color:#fff;padding:18px;background:linear-gradient(135deg,#12235c,#22398d 55%,#4066d4 130%);display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-lg)}
 .cc-chip{width:32px;height:23px;border-radius:5px;background:linear-gradient(135deg,#e8c56a,#c9a044)}
 .cc-num{font-size:15px;letter-spacing:.1em;font-weight:500}
@@ -364,7 +363,7 @@ table.orders tbody tr:hover td{background:var(--paper-dim)}
   .lot-grid,.listing-grid{grid-template-columns:repeat(2,1fr)}
   .results-row{flex-direction:column}
   .results-list,.mapcol{width:100%}
-  .pay-grid,.wallet-grid{grid-template-columns:1fr}
+  .wallet-grid{grid-template-columns:1fr}
 }
 .leaflet-pin-badge{background:#fff;color:#0E0F0C;border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:700;box-shadow:0 8px 24px rgba(14,19,47,.16);border:2px solid transparent;white-space:nowrap;display:inline-block;cursor:pointer;font-family:'Inter',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;transition:transform .12s}
 .leaflet-pin-badge.selected{border-color:#1FA971;transform:scale(1.14)}
@@ -439,7 +438,7 @@ const S = {
 
   vehicleForm: { truckCompany:'', truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' },
 
-  payment: { context:'single', selectedCardId:'card_visa', showNewCard:false, newCard:{ name:'', number:'', exp:'', cvc:'', zip:'' } },
+  payment: { context:'single', selectedCardId:'card_visa' },
 
   batch: { bookingType:'Daily', uploading:false, uploadPct:0, editingRow:null },
   // presenter-only demo control — not part of the product design, see screenBatchDetails
@@ -1407,17 +1406,14 @@ function screenBookStep3Vehicle(){
 ============================================================ */
 function paymentCardsList(){
   return S.walletCards.map(c => `
-    <div class="saved-card ${S.payment.selectedCardId===c.id && !S.payment.showNewCard ? 'chosen':''}" data-card="${c.id}">
-      <div class="radio-dot ${S.payment.selectedCardId===c.id && !S.payment.showNewCard?'on':''}"></div>
+    <div class="saved-card ${S.payment.selectedCardId===c.id ? 'chosen':''}" data-card="${c.id}">
+      <div class="radio-dot ${S.payment.selectedCardId===c.id?'on':''}"></div>
       <div class="card-brand">${c.brand}</div>
       <div style="flex:1"><div style="font-weight:600;font-size:13px">${c.brand==='VISA'?'Visa':c.brand==='MC'?'Mastercard':c.brand} •••• ${c.last4} ${c.default?'<span class="badge-default">Default</span>':''}</div><div style="font-size:11.5px;color:var(--ink-soft)">Expires ${c.exp}</div></div>
     </div>`).join('');
 }
 function screenPayment(context){
   S.payment.context = context;
-  const nc = S.payment.newCard;
-  const brand = nc.number ? ccBrand(nc.number) : '';
-  const useNew = S.payment.showNewCard;
   const batchOrder = context==='batch' ? computeBatchOrder() : null;
   const singleOrder = context==='single' ? singleSpotOrder() : null;
   const total = context==='single' ? singleOrder.total : batchOrder.total;
@@ -1447,27 +1443,11 @@ function screenPayment(context){
       <div class="card" style="flex:1">
         <div class="card-head"><h2 class="card-title">Payment</h2>${headBadge}</div>
         <div class="card-body">
-          <div style="font-size:13px;font-weight:600;margin-bottom:8px">Saved cards</div>
-          ${paymentCardsList()}
-          <button class="btn-text" style="font-size:12.5px;margin-bottom:12px" id="useNewCardBtn">${useNew?'− Hide new card form':'+ Use a new card'}</button>
-          <div class="${useNew?'':'hidden'}">
-            <div class="pay-grid" style="grid-template-columns:280px 1fr">
-              <div>
-                <div class="cc">
-                  <div style="display:flex;justify-content:space-between"><div class="cc-chip"></div><b style="font-style:italic">${brand||'CARD'}</b></div>
-                  <div class="cc-num">${nc.number ? groupCard(nc.number) : '•••• •••• •••• ••••'}</div>
-                  <div class="cc-row"><span>CARDHOLDER<br><b style="font-size:12px">${nc.name||'YOUR NAME'}</b></span><span>EXPIRES<br><b style="font-size:12px">${nc.exp||'MM/YY'}</b></span></div>
-                </div>
-                <div style="font-size:11px;color:var(--ink-soft);margin-top:8px">${ic.lock} Card details are encrypted.</div>
-              </div>
-              <div>
-                <div class="grid-2" style="margin-bottom:12px"><div class="field" style="grid-column:span 2"><label>Cardholder name</label><input class="control" id="pcName" value="${nc.name}" placeholder="Name as printed on card"></div></div>
-                <div class="grid-2" style="margin-bottom:12px"><div class="field" style="grid-column:span 2"><label>Card number</label><input class="control" id="pcNumber" value="${groupCard(nc.number)}" maxlength="19" inputmode="numeric" placeholder="1234 5678 9012 3456"></div></div>
-                <div class="grid-2"><div class="field"><label>Expiry</label><input class="control" id="pcExp" value="${nc.exp}" maxlength="5" placeholder="MM/YY"></div><div class="field"><label>CVC</label><input class="control" id="pcCvc" value="${nc.cvc}" maxlength="4" placeholder="123"></div></div>
-                <div class="field" style="margin-top:12px"><label>Receipt email</label><input class="control" id="pcZip" value="${nc.zip}" placeholder="ZIP / receipt email"></div>
-              </div>
-            </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div style="font-size:13px;font-weight:600">Saved cards</div>
+            <button class="btn btn-outline" id="openAddCardModal">+ Add New Card</button>
           </div>
+          ${paymentCardsList()}
         </div>
       </div>
       <div class="rail card payment-rail"><div class="card-body">
@@ -1476,6 +1456,7 @@ function screenPayment(context){
         <button class="btn btn-primary btn-lg" style="width:100%;margin-top:12px" id="payBtn">${ic.lock}&nbsp;Pay $${total.toLocaleString('en-US',{minimumFractionDigits:2})}</button>
       </div></div>
     </div>
+    ${addCardModalHtml()}
   </div>`;
 }
 const screenBookStep4Payment = () => screenPayment('single');
@@ -1764,14 +1745,13 @@ function screenOrders(){
   </div>`;
 }
 
-function screenWallet(){
+// shared "Add a new card" popup — simulates a Stripe card-entry modal; used by both the Wallet
+// screen and the Payment screen so adding a card looks and behaves identically in both places
+function addCardModalHtml(){
+  if(!S.wallet.showAddModal) return '';
   const nc = S.walletNewCard;
   const brand = nc.number ? ccBrand(nc.number) : '';
-  if(!S.wallet.selectedCardId && S.walletCards.length){
-    S.wallet.selectedCardId = (S.walletCards.find(c=>c.default) || S.walletCards[0]).id;
-  }
-  const selected = S.walletCards.find(c=>c.id===S.wallet.selectedCardId);
-  const addCardModal = S.wallet.showAddModal ? `
+  return `
     <div class="modal-overlay" id="addCardOverlay">
       <div class="modal-box">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -1793,7 +1773,14 @@ function screenWallet(){
         <div style="font-size:11px;color:var(--ink-soft);margin-top:10px">${ic.lock} Simulates a Stripe card-entry popup — details are encrypted.</div>
         <button class="btn btn-primary btn-lg" style="width:100%;margin-top:14px" id="saveCardBtn">Save card</button>
       </div>
-    </div>` : '';
+    </div>`;
+}
+function screenWallet(){
+  if(!S.wallet.selectedCardId && S.walletCards.length){
+    S.wallet.selectedCardId = (S.walletCards.find(c=>c.default) || S.walletCards[0]).id;
+  }
+  const selected = S.walletCards.find(c=>c.id===S.wallet.selectedCardId);
+  const addCardModal = addCardModalHtml();
   return `
   ${topNav(null)}
   <div class="page">
@@ -2072,14 +2059,7 @@ function wireScreen(root){
   const step3Continue = root.querySelector('#step3Continue'); if(step3Continue) step3Continue.addEventListener('click',()=>go('book4'));
 
   /* ---- payment (single + batch share this) ---- */
-  root.querySelectorAll('.saved-card[data-card]').forEach(c=>c.addEventListener('click',()=>{ S.payment.selectedCardId=c.dataset.card; S.payment.showNewCard=false; render(); }));
-  const useNewCardBtn = root.querySelector('#useNewCardBtn'); if(useNewCardBtn) useNewCardBtn.addEventListener('click',()=>{ S.payment.showNewCard=!S.payment.showNewCard; render(); });
-  bindText(root,'pcName', v=>S.payment.newCard.name=v, {rerender:true});
-  const pcNumber = root.querySelector('#pcNumber');
-  if(pcNumber) pcNumber.addEventListener('input',()=>{ S.payment.newCard.number = pcNumber.value.replace(/\D/g,'').slice(0,16); rerenderKeepFocus(); });
-  bindText(root,'pcExp', v=>{ S.payment.newCard.exp = v.replace(/[^0-9/]/g,''); }, {rerender:true});
-  bindText(root,'pcCvc', v=>S.payment.newCard.cvc=v.replace(/\D/g,''), {rerender:true});
-  bindText(root,'pcZip', v=>S.payment.newCard.zip=v, {rerender:false});
+  root.querySelectorAll('.saved-card[data-card]').forEach(c=>c.addEventListener('click',()=>{ S.payment.selectedCardId=c.dataset.card; render(); }));
   const payBtn = root.querySelector('#payBtn');
   if(payBtn) payBtn.addEventListener('click',()=>{
     const isBatch = S.payment.context==='batch';
@@ -2193,6 +2173,7 @@ function wireScreen(root){
     S.walletCards.push({ id:newId, brand:ccBrand(nc.number), name:nc.name||'MING DAO', last4:nc.number.slice(-4), exp:nc.exp||'—', default: S.walletCards.length===0 });
     S.walletNewCard = { name:'', number:'', exp:'', cvc:'', zip:'' };
     S.wallet.selectedCardId = newId;
+    S.payment.selectedCardId = newId;
     S.wallet.showAddModal = false;
     render(); toast('Card added to your wallet');
   });
