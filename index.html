@@ -211,8 +211,10 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .avail-note .refresh{color:var(--orange-deep);display:block;font-size:11px;margin-top:2px}
 .fleet-pricing-box{border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px}
 .fleet-pricing-box .refresh{color:var(--orange-deep);display:block;font-size:11px;margin-top:6px}
-.fleet-price-row{display:flex;align-items:center;gap:10px;background:var(--paper-dim);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:12.5px}
-.fleet-price-row.active{background:var(--brand-tint)}
+.fleet-price-row{display:flex;align-items:center;gap:10px;background:var(--paper-dim);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:12.5px;cursor:pointer;border:1.5px solid transparent}
+.fleet-price-row:hover{background:var(--line)}
+.fleet-price-row.active{background:var(--brand-tint);border-color:var(--brand)}
+.fleet-price-row.active:hover{background:var(--brand-tint)}
 .fleet-price-row .fp-type{flex:1;font-weight:600;color:var(--ink)}
 .fleet-price-row .fp-rate{font-weight:700;color:var(--ink)}
 .fleet-price-row .fp-avail{color:var(--ink-soft);min-width:88px;text-align:right}
@@ -1267,31 +1269,29 @@ function screenBookStep1(){
             </div>
           </div>
           ${S.bookingMode==='multiple' ? `
-            <div class="field" style="margin-top:12px"><label>Vehicle Type</label><select class="pill-select" id="step2VehicleType">
-              ${Object.keys(l.vtypeAvail).map(v=>`<option ${S.step2VehicleType===v?'selected':''}>${v}</option>`).join('')}
-            </select></div>
-            <div class="field" style="margin-top:10px"><label>Booking Type</label><select class="pill-select" id="step2BookingType">
+            <div class="field" style="margin-top:12px"><label>Booking Type</label><select class="pill-select" id="step2BookingType">
               ${rateOptions.map(v=>`<option ${S.step2BookingType===v?'selected':''}>${v} — $${batchVehicleRate(S.step2VehicleType,v).toFixed(2)}</option>`).join('')}
             </select></div>
-            <div class="field" style="margin-top:10px"><label>Number of spots (max ${l.vtypeAvail[S.step2VehicleType]||0} available)</label>
-              <div class="stepper-inline">
-                <button id="spotsMinus" type="button">−</button>
-                <input id="spotsInput" value="${S.spots}" inputmode="numeric">
-                <button id="spotsPlus" type="button" ${S.spots>=(l.vtypeAvail[S.step2VehicleType]||0)?'disabled':''}>+</button>
-              </div>
-            </div>
-            <div class="fleet-pricing-box" style="margin-top:14px">
+            <div class="fleet-pricing-box" style="margin-top:10px">
               <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
                 <div class="section-label" style="color:var(--ink);margin:0">Pricing &amp; Inventory by Vehicle Type</div>
                 <button class="btn-text" id="refreshAvailBtn" style="font-size:11.5px;white-space:nowrap">↻ Refresh</button>
               </div>
+              <div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px">Tap a vehicle type to reserve spots for it</div>
               ${Object.entries(l.vtypeAvail).map(([vt,n])=>`
-                <div class="fleet-price-row ${vt===S.step2VehicleType?'active':''}">
+                <div class="fleet-price-row ${vt===S.step2VehicleType?'active':''}" data-fleettype="${vt}">
                   <span class="fp-type">${vt}</span>
                   <span class="fp-rate tabular">$${batchVehicleRate(vt,S.step2BookingType).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</span>
                   <span class="fp-avail tabular">${n} available</span>
                 </div>`).join('')}
               <span class="refresh">Last refreshed ${timeAgo(S.availRefreshedAt)}</span>
+            </div>
+            <div class="field" style="margin-top:12px"><label>Number of spots — ${S.step2VehicleType} (max ${l.vtypeAvail[S.step2VehicleType]||0} available)</label>
+              <div class="stepper-inline">
+                <button id="spotsMinus" type="button">−</button>
+                <input id="spotsInput" value="${S.spots}" inputmode="numeric">
+                <button id="spotsPlus" type="button" ${S.spots>=(l.vtypeAvail[S.step2VehicleType]||0)?'disabled':''}>+</button>
+              </div>
             </div>
           ` : `
             <div class="field" style="margin-top:12px"><label>Vehicle Type</label><select class="pill-select" id="step2VehicleType">
@@ -2039,6 +2039,11 @@ function wireScreen(root){
     return S.bookingMode==='multiple' ? (l.vtypeAvail[S.step2VehicleType]||0) : l.avail;
   }
   bindSelect(root,'step2VehicleType', v=>{ S.step2VehicleType=v; if(S.spots>spotsMax()) S.spots=spotsMax(); });
+  root.querySelectorAll('[data-fleettype]').forEach(row=>row.addEventListener('click',()=>{
+    S.step2VehicleType = row.dataset.fleettype;
+    if(S.spots>spotsMax()) S.spots=spotsMax();
+    render();
+  }));
   const step2BT = root.querySelector('#step2BookingType');
   if(step2BT) step2BT.addEventListener('change',()=>{ S.step2BookingType = step2BT.value.split(' — ')[0]; render(); });
   const spotsInput = root.querySelector('#spotsInput');
