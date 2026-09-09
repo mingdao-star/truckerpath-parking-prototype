@@ -1633,7 +1633,14 @@ function screenBatchImport(){
   if(S.importTab==='errors') rows = rows.filter(d=>d.status==='err');
   if(q) rows = rows.filter(d => (d.name+' '+d.id+' '+d.plate).toLowerCase().includes(q));
   const spotsReserved = S.spots || 0;
-  const overCapacity = validCount > spotsReserved;
+  // capacity must be checked per vehicle type — a fleet total that fits in aggregate can still
+  // leave a driver unassigned if e.g. 4 Truck + Trailer drivers are uploaded but only 3 Truck +
+  // Trailer spots were reserved (even if enough Trailer Only spots go unused to cover the total)
+  const validRows = activeRoster.filter(d=>d.status==='ok');
+  const vtypeCounts = {};
+  validRows.forEach(d=>{ vtypeCounts[d.vtype] = (vtypeCounts[d.vtype]||0)+1; });
+  const vtypeOverages = Object.keys(S.fleetSpots).filter(vt => (vtypeCounts[vt]||0) > (S.fleetSpots[vt]||0));
+  const overCapacity = vtypeOverages.length > 0;
   return `
   ${topNav('book')}
   <div class="page">
@@ -1651,7 +1658,11 @@ function screenBatchImport(){
       </div>
       ${overCapacity ? `
       <div style="background:var(--red-tint);border:1px solid #f3c6b4;border-radius:var(--r-md);padding:10px 14px;margin-bottom:12px;font-size:12.5px;color:var(--red)">
-        <b>⚠ ${validCount} valid drivers found, but only ${spotsReserved} spot${spotsReserved===1?'':'s'} reserved.</b> You can't continue to payment until this is fixed — go back and reserve more spots, or upload a file with ${spotsReserved} or fewer drivers.
+        <b>⚠ Not every driver can be assigned a spot.</b>
+        <ul style="margin:4px 0 0;padding-left:18px">
+          ${vtypeOverages.map(vt=>`<li>${vtypeCounts[vt]} ${vt} driver${vtypeCounts[vt]===1?'':'s'} found, but only ${S.fleetSpots[vt]||0} ${vt} spot${(S.fleetSpots[vt]||0)===1?'':'s'} reserved</li>`).join('')}
+        </ul>
+        You can't continue to payment until this is fixed — go back and reserve more spots for the vehicle type(s) above, or upload a file with fewer drivers of that type.
       </div>` : ''}
       <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px">Drivers are assigned to your locations in order: own yards first, then marketplace lots. All ${activeRoster.length} uploaded rows are shown below.</div>
       <div class="tabs-row">
