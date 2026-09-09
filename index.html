@@ -1613,7 +1613,8 @@ function importRowHtml(d){
   const isEditing = S.batch.editingRow === d.row;
   if(!isEditing){
     return `<tr class="${d.status==='err'?'warn':''}">
-      <td>${d.row}</td><td>${d.name||'—'}</td><td>${d.vtype||'—'}</td><td>${d.plate||'—'}</td><td>${d.state||'—'}</td>
+      <td>${d.row}</td><td>${d.name||'—'}</td><td>${d.id||'—'}</td><td>${d.plate||'—'}</td><td>${d.vtype||'—'}</td>
+      <td class="tabular">${d.gate||'—'}</td><td class="tabular">${d.pin||'—'}</td><td>${d.ci||'—'}</td><td>${d.co||'—'}</td>
       <td>${d.status==='err'
         ? `<div style="display:flex;align-items:center;gap:6px"><span class="pill-warn">${d.msg}</span><button class="btn-text" style="font-size:11.5px" data-editrow="${d.row}">Edit</button></div>`
         : '<span class="pill-ok">Valid</span>'}</td>
@@ -1622,15 +1623,13 @@ function importRowHtml(d){
   return `<tr class="warn">
     <td>${d.row}</td>
     <td><input class="control" style="height:30px;font-size:12.5px" id="editName_${d.row}" value="${d.name||''}" placeholder="Driver name"></td>
+    <td>${d.id||'—'}</td>
+    <td><input class="control" style="height:30px;font-size:12.5px" id="editPlate_${d.row}" value="${d.plate||''}" placeholder="Plate #"></td>
     <td><select class="control" style="height:30px;font-size:12.5px" id="editVtype_${d.row}">
       <option value="">Select…</option>
       ${VTYPES.filter(v=>v!=='Bobtail').map(v=>`<option ${d.vtype===v?'selected':''}>${v}</option>`).join('')}
     </select></td>
-    <td><input class="control" style="height:30px;font-size:12.5px" id="editPlate_${d.row}" value="${d.plate||''}" placeholder="Plate #"></td>
-    <td><select class="control" style="height:30px;font-size:12.5px" id="editState_${d.row}">
-      <option value="">--</option>
-      ${STATES.map(s=>`<option ${d.state===s?'selected':''}>${s}</option>`).join('')}
-    </select></td>
+    <td class="tabular">${d.gate||'—'}</td><td class="tabular">${d.pin||'—'}</td><td>${d.ci||'—'}</td><td>${d.co||'—'}</td>
     <td><div style="display:flex;gap:6px"><button class="btn btn-primary" style="height:30px;padding:0 10px;font-size:12px" data-saverow="${d.row}">Save</button><button class="btn btn-outline" style="height:30px;padding:0 10px;font-size:12px" data-cancelrow="${d.row}">Cancel</button></div></td>
   </tr>`;
 }
@@ -1681,8 +1680,8 @@ function screenBatchImport(){
       </div>
       <div class="search-box">${ic.search}<input id="importSearchInput" placeholder="Search driver name, ID, or plate" value="${S.importSearch}"></div>
       <div class="dtable-scroll"><table class="dtable">
-        <thead><tr><th>Row</th><th>Driver Name</th><th>Vehicle Type</th><th>Plate</th><th>State</th><th>Status</th></tr></thead>
-        <tbody>${rows.length ? rows.map(importRowHtml).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:16px">No rows match your search.</td></tr>'}</tbody>
+        <thead><tr><th>Row</th><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle Type</th><th>Gate Code</th><th>Access PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th></tr></thead>
+        <tbody>${rows.length ? rows.map(importRowHtml).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:16px">No rows match your search.</td></tr>'}</tbody>
       </table></div>
     </div></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
@@ -2100,10 +2099,18 @@ function wireScreen(root){
     const name = (root.querySelector(`#editName_${row}`).value||'').trim();
     const vtype = root.querySelector(`#editVtype_${row}`).value;
     const plate = (root.querySelector(`#editPlate_${row}`).value||'').trim();
-    const state = root.querySelector(`#editState_${row}`).value;
-    if(!name || !vtype || !plate || !state){ toast('Fill in every field before saving'); return; }
+    if(!name || !vtype || !plate){ toast('Fill in every field before saving'); return; }
     const entry = getImportRoster().find(d=>d.row===row);
-    if(entry){ entry.name=name; entry.vtype=vtype; entry.plate=plate; entry.state=state; entry.status='ok'; entry.msg=''; }
+    if(entry){
+      entry.name=name; entry.vtype=vtype; entry.plate=plate; entry.status='ok'; entry.msg='';
+      // a row created via the "missing information" error path never got its system-assigned
+      // fields (Driver ID, gate code, PIN, check-in/out) — backfill them now that it's fixed
+      if(!entry.id) entry.id = 'DRV-'+(1200+row);
+      if(!entry.gate) entry.gate = '1199#';
+      if(!entry.pin) entry.pin = String(300000+row*4113);
+      if(!entry.ci) entry.ci = 'Jul 14, '+(16+(row%6))+':00';
+      if(!entry.co) entry.co = 'Jul 17, 0'+(5+(row%3))+':30';
+    }
     S.batch.editingRow=null; render(); toast(`Row ${row} fixed and marked valid`);
   }));
   const reuploadBtn = root.querySelector('#reuploadBtn'); if(reuploadBtn) reuploadBtn.addEventListener('click',()=>go('batchDetails'));
