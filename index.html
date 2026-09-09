@@ -755,8 +755,7 @@ function buildRoster(count){
     let status = 'ok', msg = '';
     if(includeErrors && i===0){ vtype='Bobtail'; status='err'; msg='Vehicle not supported'; }
     if(includeErrors && i===1){ rows.push({row:i+1,name:'',id:'',vtype:'',plate:'',state:'',status:'err',msg:'Missing information'}); continue; }
-    const note = status==='ok' && i%10===0 ? 'Reefer — powered spot' : null;
-    rows.push({row:i+1, name, id, vtype, plate, state, status, msg, note, gate:'1199#', pin:String(300000+i*4113), ci:'Jul 14, '+(16+(i%6))+':00', co:'Jul 17, 0'+(5+(i%3))+':30'});
+    rows.push({row:i+1, name, id, vtype, plate, state, status, msg, gate:'1199#', pin:String(300000+i*4113), ci:'Jul 14, '+(16+(i%6))+':00', co:'Jul 17, 0'+(5+(i%3))+':30'});
   }
   return rows;
 }
@@ -1607,7 +1606,7 @@ function importRowHtml(d){
       <td>${d.row}</td><td>${d.name||'—'}</td><td>${d.vtype||'—'}</td><td>${d.plate||'—'}</td><td>${d.state||'—'}</td>
       <td>${d.status==='err'
         ? `<div style="display:flex;align-items:center;gap:6px"><span class="pill-warn">${d.msg}</span><button class="btn-text" style="font-size:11.5px" data-editrow="${d.row}">Edit</button></div>`
-        : d.note ? `<span class="pill-warn">${d.note}</span>` : '<span class="pill-ok">Valid</span>'}</td>
+        : '<span class="pill-ok">Valid</span>'}</td>
     </tr>`;
   }
   return `<tr class="warn">
