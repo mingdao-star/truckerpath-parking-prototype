@@ -215,6 +215,8 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .fleet-price-row:hover{background:var(--line)}
 .fleet-price-row.active{background:var(--brand-tint);border-color:var(--brand)}
 .fleet-price-row.active:hover{background:var(--brand-tint)}
+.fleet-price-row.readonly{cursor:default}
+.fleet-price-row.readonly:hover{background:var(--paper-dim)}
 .fleet-price-row .fp-type{flex:1;font-weight:600;color:var(--ink)}
 .fleet-price-row .fp-rate{font-weight:700;color:var(--ink)}
 .fleet-price-row .fp-avail{color:var(--ink-soft);min-width:88px;text-align:right}
@@ -288,9 +290,6 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 /* presenter-only demo control — deliberately styled to look out-of-band, not part of the product design */
 .card.presenter-tool{border:2px dashed #8b5cf6;background:#faf8ff}
 .presenter-tool-badge{background:#8b5cf6;color:#fff;font-size:10px;font-weight:800;letter-spacing:.04em;padding:3px 8px;border-radius:999px;text-transform:uppercase}
-.vtype-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--paper-dim);margin-bottom:8px}
-.vtype-row.disabled{opacity:.55}
-.vtype-price-pill{background:#fff;border:1px solid var(--line);padding:5px 12px;border-radius:999px;font-weight:700;font-size:13px;white-space:nowrap}
 .mode-toggle-row{display:flex;background:var(--paper-dim);border-radius:8px;padding:3px;gap:3px}
 .mode-toggle-btn{flex:1;padding:8px 10px;border-radius:6px;font-size:12.5px;font-weight:600;color:var(--ink-soft);background:transparent;white-space:nowrap;transition:background .12s,color .12s}
 .mode-toggle-btn.on{background:#fff;color:var(--ink);box-shadow:var(--shadow-sm)}
@@ -301,10 +300,6 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .card-icon-head b{font-size:15px}
 .step-num{width:20px;height:20px;border-radius:999px;background:var(--brand);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
 
-/* ---- batch details: location summary box ---- */
-.location-box{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--paper-dim)}
-.location-icon{width:42px;height:42px;border-radius:10px;background:var(--brand-tint);color:var(--brand);display:grid;place-items:center;flex:none}
-.location-spots-pill{background:var(--brand);color:#fff;font-weight:700;font-size:13px;padding:7px 16px;border-radius:999px;white-space:nowrap}
 .dropzone{border:2px dashed var(--border-input);border-radius:var(--r-lg);padding:30px;text-align:center;background:#fafaf9;cursor:pointer}
 .dropzone:hover{border-color:var(--brand);background:var(--brand-tint)}
 .progress-track{height:6px;border-radius:999px;background:var(--paper-dim);overflow:hidden;margin-top:10px}
@@ -1542,34 +1537,27 @@ function screenBatchDetails(){
   const l = LOTS[S.selectedLotId];
   const unit = batchRateUnit(S.batch.bookingType);
   const rowCount = S.presenterTool.rowCount;
-  const spotsRequested = S.spots || 0;
   return `
   ${topNav('book')}
   <div class="page">
     ${batchStepper(1)}
     <h1 class="batch-title">Batch Fleet Parking</h1>
     <div class="card"><div class="card-body">
-      <div class="card-icon-head"><div class="card-icon-badge">${ic.parkP}</div><b>Booking details</b></div>
-      <div class="location-box">
-        <div class="location-icon">${ic.parkP}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-weight:700;font-size:15px">${l.name.split(' at ').pop()}</div>
-          <div style="font-size:12px;color:var(--ink-soft);margin-top:2px">${l.city} · ${l.avail} space(s) available · ${S.search.checkIn} → ${S.search.checkOut}</div>
-        </div>
-        <span class="location-spots-pill">${spotsRequested} spot${spotsRequested===1?'':'s'} requested</span>
-      </div>
-      <div class="poi-head-divider" style="margin:14px 0"></div>
-      ${poiRatingLine(l)}
-      ${poiInfoBlock(l)}
-      <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Configure your booking and upload your driver list to reserve parking spots.</div>
-    </div></div>
-    <div class="card"><div class="card-body">
       <div class="card-icon-head"><div class="card-icon-badge">${ic.settings}</div><b>Booking configuration</b></div>
-      <div style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Supported Vehicle</div>
-      <div class="vtype-row"><span>Truck + Trailer</span><span class="vtype-price-pill">$${batchVehicleRate('Truck + Trailer', S.batch.bookingType).toFixed(2)} / ${unit}</span></div>
-      <div class="vtype-row"><span>Trailer Only</span><span class="vtype-price-pill">$${batchVehicleRate('Trailer Only', S.batch.bookingType).toFixed(2)} / ${unit}</span></div>
-      <div class="vtype-row disabled"><span>Bobtail</span><span class="pill-warn">This location does not support this type</span></div>
-      <div style="font-size:12.5px;color:var(--ink-soft);margin-top:6px">Drivers are billed at the rate above for their vehicle type, based on the booking type selected — billed ${S.batch.bookingType.toLowerCase()}.</div>
+      <div class="fleet-pricing-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
+          <div class="section-label" style="color:var(--ink);margin:0">Pricing &amp; Inventory by Vehicle Type</div>
+          <button class="btn-text" id="refreshAvailBtn" style="font-size:11.5px;white-space:nowrap">↻ Refresh</button>
+        </div>
+        ${Object.entries(l.vtypeAvail).map(([vt,n])=>`
+          <div class="fleet-price-row readonly">
+            <span class="fp-type">${vt}</span>
+            <span class="fp-rate tabular">$${batchVehicleRate(vt,S.batch.bookingType).toFixed(2)}/${unit}</span>
+            <span class="fp-avail tabular">${n} available</span>
+          </div>`).join('')}
+        <span class="refresh">Last refreshed ${timeAgo(S.availRefreshedAt)}</span>
+      </div>
+      <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Drivers are billed at the rate above for their vehicle type, based on the booking type selected — billed ${S.batch.bookingType.toLowerCase()}.</div>
     </div></div>
     <div class="card"><div class="card-body">
       <div class="card-icon-head"><div class="card-icon-badge">${ic.file}</div><b>Driver import</b></div>
