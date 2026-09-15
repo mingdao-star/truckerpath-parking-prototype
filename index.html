@@ -280,7 +280,6 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 /* ---- order detail (single) ---- */
 .orderdetail-banner{background:var(--paper-dim);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;display:flex;gap:14px;align-items:center;margin-bottom:16px}
 .orderdetail-ic{width:44px;height:44px;border-radius:999px;background:var(--brand);display:grid;place-items:center;flex:none}
-.yard-tag{display:inline-block;background:var(--brand-tint);color:var(--brand);font-size:11px;font-weight:700;text-transform:uppercase;padding:4px 8px;border-radius:6px;margin-top:4px}
 .od-single-grid{display:flex;gap:32px;flex-wrap:wrap}
 .od-single-grid>div:first-child{flex:1;min-width:280px}
 .checkin-box{width:220px;flex:none;text-align:center;padding:18px;background:var(--paper-dim);border-radius:var(--r-lg)}
@@ -482,7 +481,7 @@ const LOTS = {
     rating:4.1, address:'4501 W Sunland Gin Rd, Eloy, AZ 85131', highway:'I-10, Exit 226', phone:'1(520) 466-7710', staffedHours:null,
     reports:[{cls:'some',label:'SOME',time:'12m ago'},{cls:'many',label:'MANY',time:'25m ago'},{cls:'paid',label:'PAID ONLY',time:'2h ago'}],
     freeSpots:9, wifi:true, scales:false, atmCount:0, vtypeAvail:{'Truck + Trailer':6,'Trailer Only':3},
-    instructions:'Own yard — pull into any open spot marked with a green flag. No check-in required.'},
+    instructions:'Enter via the main gate on Sunland Gin Rd. Show your check-in code to the attendant or scan the QR code posted at the gate.'},
   maricopa:{name:'Maricopa, AZ Truck & Trailer Parking on N White Rd', city:'Maricopa, AZ', avail:12, totalSpots:15, day:18, week:85, month:320, lat:33.0581, lng:-112.0476,
     rating:4.4, address:'41215 N White Rd, Maricopa, AZ 85138', highway:'AZ-347, Exit 12', phone:'1(520) 568-4420', staffedHours:'6:00 AM – 10:00 PM',
     reports:[{cls:'some',label:'SOME',time:'6m ago'},{cls:'many',label:'MANY',time:'18m ago'},{cls:'paid',label:'PAID ONLY',time:'45m ago'}],
@@ -1490,7 +1489,7 @@ function singleOrderDetailBody(){
     <div class="chips-row">
       <div class="chip"><div class="k">Location</div><div class="v">Eloy, AZ</div></div>
       <div class="chip"><div class="k">Dates</div><div class="v">Jul 31 – Aug 7</div></div>
-      <div class="chip"><div class="k">Access</div><div class="v">24/7 gate — no code needed</div></div>
+      <div class="chip"><div class="k">Access</div><div class="v">24/7 — check-in code required</div></div>
       <div class="chip"><div class="k">Total Paid</div><div class="v">$${singleOrder.total.toFixed(2)}</div></div>
     </div>
     <div class="card"><div class="card-body">
@@ -1498,13 +1497,12 @@ function singleOrderDetailBody(){
         <div>
           <div class="section-label" style="color:var(--ink);margin:0 0 4px">Location</div>
           <div style="font-weight:700;font-size:16px">${shortName}</div>
-          <span class="yard-tag">Own Yard</span>
           <div class="poi-head-divider" style="margin:12px 0"></div>
           <div class="info-row"><span class="k">Address</span><span>3100 S Barrett Rd, Eloy, AZ 85131 <button class="copy-btn" data-copy="3100 S Barrett Rd, Eloy, AZ 85131">Copy</button></span></div>
           <div class="info-row"><span class="k">Coordinates</span><span>32.701693, -111.516104 <button class="copy-btn" data-copy="32.701693, -111.516104">Copy</button></span></div>
           <div class="info-row"><span class="k">Highway</span><span>${l.highway}</span></div>
           <div class="info-row"><span class="k">Total Spaces Available</span><span>${l.avail} space(s)</span></div>
-          <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — no code needed</span></div>
+          <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — check-in code required</span></div>
         </div>
         <div class="checkin-box">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
@@ -1704,7 +1702,7 @@ function screenBatchImport(){
         </ul>
         You can't continue to payment until this is fixed — go back and reserve more spots for the vehicle type(s) above, or upload a file with fewer drivers of that type.
       </div>` : ''}
-      <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px">Drivers are assigned to your locations in order: own yards first, then marketplace lots. All ${activeRoster.length} uploaded rows are shown below.</div>
+      <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px">Drivers are assigned to available spots at your reserved location. All ${activeRoster.length} uploaded rows are shown below.</div>
       <div class="tabs-row">
         <button class="tab-btn ${S.importTab==='all'?'on':''}" data-itab="all">All rows</button>
         <button class="tab-btn ${S.importTab==='errors'?'on':''}" data-itab="errors">Errors (${errCount})</button>
