@@ -172,7 +172,7 @@ select.control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg x
 .results-row{display:flex;gap:20px;align-items:flex-start;margin-top:16px;position:relative}
 /* full-bleed docked 3-pane layout for Book1 specifically (list | detail | map, flush, edge-to-edge) —
    breaks out of .page's max-width/padding using the standard left:50%/-50vw full-bleed trick */
-.b1-row{display:flex;align-items:stretch;gap:0;width:100vw;position:relative;left:50%;right:50%;margin:20px -50vw 0;height:720px;border-top:1px solid var(--line)}
+.b1-row{display:flex;align-items:stretch;gap:0;width:100vw;position:relative;left:50%;right:50%;margin:20px -50vw 0;padding:0 8px;height:720px;border-top:1px solid var(--line)}
 .results-list{flex:none;width:330px;display:flex;flex-direction:column;gap:0;overflow-y:auto;padding:8px 0;border-right:1px solid var(--line);background:#fff}
 .result-card{background:#fff;border:none;border-bottom:1px solid var(--line);border-radius:0;display:flex;cursor:pointer;transition:background .12s}
 .result-card:hover{background:var(--paper-dim)}
@@ -223,11 +223,6 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .stepper-inline.sm button{width:28px;height:30px;font-size:14px}
 .stepper-inline.sm input{width:40px;height:30px;font-size:12.5px}
 .fleet-spots-total{font-weight:700;font-size:13px;color:var(--ink);margin:4px 0 6px}
-.rate-cards{display:flex;gap:10px;margin-bottom:16px}
-.rate-card{flex:1;background:var(--paper-dim);border-radius:10px;padding:10px 12px}
-.rate-card .k{font-size:12px;color:var(--ink-soft);font-weight:600;margin-bottom:2px}
-.rate-card .v{font-size:18px;font-weight:700;color:var(--ink);display:flex;align-items:baseline;gap:2px}
-.rate-card .v span{font-size:12px;font-weight:400;color:var(--ink-soft)}
 .hours-banner{display:flex;align-items:center;gap:8px;background:var(--brand-tint);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px}
 .hours-banner b{color:var(--green-deep);flex:1;font-size:13.5px}
 .hours-banner span{color:var(--green-deep);font-size:12.5px}
@@ -519,11 +514,7 @@ function poiInfoBlock(l){
     { ic:ic.scale, label:'Scales', on:l.scales },
     { ic:ic.atm, label:'ATM', count:l.atmCount, on:l.atmCount>0 },
   ];
-  return `<div class="rate-cards">
-      <div class="rate-card"><div class="k">Daily Rate</div><div class="v"><b class="tabular">$${l.day}</b><span>/day</span></div></div>
-      <div class="rate-card"><div class="k">Monthly Rate</div><div class="v"><b class="tabular">$${l.month}</b><span>/month</span></div></div>
-    </div>
-    <div class="section-label" style="color:var(--ink)">Operating Hours</div>
+  return `<div class="section-label" style="color:var(--ink)">Operating Hours</div>
     <div class="hours-banner">
       <span class="hours-dot"></span>
       <b>Open now</b>
