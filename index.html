@@ -939,10 +939,19 @@ function computeStep2Total(){
 function selectLot(id){
   S.selectedLotId = id;
   const l = LOTS[id];
-  Object.keys(S.fleetSpots).forEach(vt=>{
-    const max = vtypeMaxAvail(l, vt);
-    if(S.fleetSpots[vt] > max) S.fleetSpots[vt] = max;
-  });
+  if(l.sharedPool){
+    // only one control is shown for a shared-pool lot — fold any split carried over from a
+    // previous (non-shared) lot into that single control instead of silently double-counting it
+    const combined = Object.values(S.fleetSpots).reduce((a,b)=>a+b,0);
+    const canonicalVt = Object.keys(l.vtypeAvail)[0];
+    Object.keys(S.fleetSpots).forEach(vt=>{ S.fleetSpots[vt] = 0; });
+    S.fleetSpots[canonicalVt] = Math.min(combined, l.poolSize);
+  } else {
+    Object.keys(S.fleetSpots).forEach(vt=>{
+      const max = vtypeMaxAvail(l, vt);
+      if(S.fleetSpots[vt] > max) S.fleetSpots[vt] = max;
+    });
+  }
   S.spots = Object.values(S.fleetSpots).reduce((a,b)=>a+b,0);
 }
 
@@ -1276,6 +1285,9 @@ function screenBookStep1(){
   const l = LOTS[S.selectedLotId];
   const total = computeStep2Total();
   const rateOptions = ['Daily','Weekly','Monthly'].filter(bt => bt==='Daily' ? l.day!=null : true);
+  // a shared-pool lot has no reason to ask for a per-type split up front — book N generic spots
+  // from the one pool, and the actual vehicle type per driver gets set later during CSV import
+  const sharedVt = l.sharedPool ? Object.keys(l.vtypeAvail)[0] : null;
   const detailPanel = S.detailPanelOpen ? `
       <div class="detail-panel card">
         <div class="card-body">
@@ -1295,15 +1307,33 @@ function screenBookStep1(){
               <div class="section-label" style="color:var(--ink);margin:0">Pricing &amp; Inventory by Vehicle Type</div>
               <button class="btn-text" id="refreshAvailBtn" style="font-size:11.5px;white-space:nowrap">↻ Refresh</button>
             </div>
-            <div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px">${l.sharedPool ? `Both vehicle types share the same ${l.poolSize} spots at the same rate — reserving one reduces what's left for the other.` : 'Set how many spots you need for each vehicle type'}</div>
-            ${Object.entries(l.vtypeAvail).map(([vt])=>{
+            <div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px">${l.sharedPool ? `One shared pool of ${l.poolSize} spots — book either vehicle type from the same pool at the same rate.` : 'Set how many spots you need for each vehicle type'}</div>
+            ${l.sharedPool ? (()=>{
+              const count = S.fleetSpots[sharedVt]||0;
+              const max = vtypeMaxAvail(l, sharedVt);
+              return `
+              <div class="fleet-price-row stepped">
+                <div class="fp-line">
+                  <span class="fp-type">Truck + Trailer / Trailer Only</span>
+                  <span class="fp-avail tabular">${max} available</span>
+                </div>
+                <div class="fp-line">
+                  <span class="fp-rate tabular">$${batchVehicleRate(sharedVt,S.step2BookingType,l).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</span>
+                  <div class="stepper-inline sm">
+                    <button type="button" data-fleetspotminus="${sharedVt}" ${count<=0?'disabled':''}>−</button>
+                    <input data-fleetspotinput="${sharedVt}" value="${count}" inputmode="numeric">
+                    <button type="button" data-fleetspotplus="${sharedVt}" ${count>=max?'disabled':''}>+</button>
+                  </div>
+                </div>
+              </div>`;
+            })() : Object.entries(l.vtypeAvail).map(([vt])=>{
               const count = S.fleetSpots[vt]||0;
               const max = vtypeMaxAvail(l, vt);
               return `
               <div class="fleet-price-row stepped">
                 <div class="fp-line">
                   <span class="fp-type">${vt}</span>
-                  <span class="fp-avail tabular">${max} available${l.sharedPool?' (shared)':''}</span>
+                  <span class="fp-avail tabular">${max} available</span>
                 </div>
                 <div class="fp-line">
                   <span class="fp-rate tabular">$${batchVehicleRate(vt,S.step2BookingType,l).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</span>
@@ -1576,12 +1606,18 @@ function screenBatchDetails(){
           <div class="section-label" style="color:var(--ink);margin:0">Pricing &amp; Inventory by Vehicle Type</div>
           <button class="btn-text" id="refreshAvailBtn" style="font-size:11.5px;white-space:nowrap">↻ Refresh</button>
         </div>
-        ${l.sharedPool ? `<div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px">Both vehicle types share the same ${l.poolSize} spots at the same rate.</div>` : ''}
-        ${Object.entries(l.vtypeAvail).map(([vt,n])=>`
+        ${l.sharedPool ? `
+        <div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px">One shared pool — book either vehicle type from the same pool at the same rate.</div>
+        <div class="fleet-price-row">
+          <span class="fp-type">Truck + Trailer / Trailer Only</span>
+          <span class="fp-rate tabular">$${batchVehicleRate(Object.keys(l.vtypeAvail)[0],S.batch.bookingType,l).toFixed(2)}/${unit}</span>
+          <span class="fp-avail tabular">${l.poolSize} available</span>
+        </div>
+        ` : Object.entries(l.vtypeAvail).map(([vt,n])=>`
           <div class="fleet-price-row">
             <span class="fp-type">${vt}</span>
             <span class="fp-rate tabular">$${batchVehicleRate(vt,S.batch.bookingType,l).toFixed(2)}/${unit}</span>
-            <span class="fp-avail tabular">${n} available${l.sharedPool?' (shared)':''}</span>
+            <span class="fp-avail tabular">${n} available</span>
           </div>`).join('')}
         <span class="refresh">Last refreshed ${timeAgo(S.availRefreshedAt)}</span>
       </div>
