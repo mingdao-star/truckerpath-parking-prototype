@@ -1864,6 +1864,7 @@ function screenOrderDetailBatch(){
   const q = S.confirmSearch.trim().toLowerCase();
   let rows = VALID_ROSTER;
   if(q) rows = rows.filter(d => (d.name+' '+d.id+' '+d.plate).toLowerCase().includes(q));
+  const batchOrder = computeBatchOrder();
   return `
   ${topNav('orders')}
   <div class="page">
@@ -1882,6 +1883,7 @@ function screenOrderDetailBatch(){
         <div style="display:flex;align-items:center;gap:14px">
           <span style="font-size:12.5px;color:var(--ink-soft)">Gate — Memphis: <b class="tabular" style="color:var(--ink)">1199#</b> <button class="copy-btn" data-copy="1199#" style="margin-left:2px">Copy</button></span>
           <div style="display:flex;gap:8px">
+            <button class="btn btn-outline" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
             <button class="btn btn-outline" data-toast="CSV exported">${ic.download}&nbsp;Export CSV</button>
             <button class="btn btn-primary" data-toast="Email queued to all drivers">${ic.mail}&nbsp;Send email to all drivers</button>
           </div>
@@ -1894,6 +1896,14 @@ function screenOrderDetailBatch(){
           <tbody>${rows.length ? rows.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td class="tabular">${d.gate}</td><td class="tabular">${d.pin}</td><td>${d.ci}</td><td>${d.co}</td><td><span class="pill-ok">Assigned</span></td><td><button class="icon-btn" data-pdfrow="${d.name}" title="Download this driver's PDF">${ic.download}</button></td></tr>`).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
         </table></div>
         <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${VALID_ROSTER.length} drivers assigned to this order.</div>
+        <div class="poi-head-divider" style="margin:16px 0"></div>
+        <div class="section-label" style="color:var(--ink);margin:0 0 8px">Charges</div>
+        ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} × ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
+        ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} × ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
+        <div class="info-row"><span class="k">Fleet discount (5%)</span><span>−$${batchOrder.discount.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+        <div class="info-row"><span class="k">Service fee (2%)</span><span>$${batchOrder.serviceFee.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+        <div class="info-row"><span class="k">Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+        <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</b></span></div>
       </div>
     </div>
     <button class="btn btn-outline" style="margin-top:16px" id="backToOrders2">← Back to Orders</button>
