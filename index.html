@@ -490,8 +490,11 @@ const LOTS = {
     instructions:'Enter via the north gate on 43rd Ave. Show your booking confirmation to the attendant.'},
   glendale2:{name:'Glendale, AZ Truck and Trailer Parking at PHX2 Logistics Plus', city:'Glendale, AZ', avail:50, totalSpots:65, day:16, week:74, month:270, lat:33.5722, lng:-112.1943,
     rating:4.3, address:'8747 N 91st Ave, Glendale, AZ 85305', highway:'I-17, Exit 208', phone:'1(623) 435-2280', staffedHours:null,
+    // this is the one lot in the demo with a shared inventory pool — Truck + Trailer and Trailer
+    // Only aren't separately capped, they draw from the same 50 spots at the same price
+    sharedPool:true, poolSize:50,
     reports:[{cls:'some',label:'SOME',time:'4m ago'},{cls:'many',label:'MANY',time:'10m ago'},{cls:'paid',label:'PAID ONLY',time:'1h ago'}],
-    freeSpots:15, wifi:true, scales:false, atmCount:0, vtypeAvail:{'Truck + Trailer':35,'Trailer Only':15},
+    freeSpots:15, wifi:true, scales:false, atmCount:0, vtypeAvail:{'Truck + Trailer':50,'Trailer Only':50},
     instructions:'Enter via the south gate on 91st Ave. A gate code is texted 1 hour before arrival.'},
 };
 
@@ -875,8 +878,23 @@ const BATCH_VEHICLE_RATES = {
   'Truck + Trailer': { Daily:45, Weekly:220, Monthly:800 },
   'Trailer Only': { Daily:35, Weekly:170, Monthly:620 },
 };
-function batchVehicleRate(vtype, bookingType){ return BATCH_VEHICLE_RATES[vtype][bookingType]; }
+// a lot with a shared inventory pool (see LOTS.glendale2) charges every vehicle type the same
+// rate — its own single lotRate() — instead of the fixed per-type BATCH_VEHICLE_RATES table
+function batchVehicleRate(vtype, bookingType, l){
+  if(l && l.sharedPool) return lotRate(l, bookingType);
+  return BATCH_VEHICLE_RATES[vtype][bookingType];
+}
 function batchRateUnit(bookingType){ return bookingType==='Weekly' ? 'week' : bookingType==='Monthly' ? 'month' : 'day'; }
+// how many more spots of this vehicle type can still be reserved at lot l — for a shared-pool lot
+// that's the pool size minus whatever's already reserved for the OTHER vehicle type(s), since they
+// draw from one combined pool rather than each having its own independent cap
+function vtypeMaxAvail(l, vt){
+  if(l.sharedPool){
+    const reservedElsewhere = Object.keys(l.vtypeAvail).filter(k=>k!==vt).reduce((sum,k)=>sum+(S.fleetSpots[k]||0),0);
+    return Math.max(0, l.poolSize - reservedElsewhere);
+  }
+  return l.vtypeAvail[vt]||0;
+}
 
 // flat AZ-style sales tax used across both the single-spot and batch order summaries
 const TAX_RATE = 0.081;
@@ -887,8 +905,9 @@ function computeBatchOrder(){
   const truckTrailerCount = validRows.filter(d=>d.vtype==='Truck + Trailer').length;
   const trailerOnlyCount = validRows.filter(d=>d.vtype==='Trailer Only').length;
   const unit = batchRateUnit(S.batch.bookingType);
-  const truckTrailerRate = batchVehicleRate('Truck + Trailer', S.batch.bookingType);
-  const trailerOnlyRate = batchVehicleRate('Trailer Only', S.batch.bookingType);
+  const bookingLot = LOTS[S.selectedLotId];
+  const truckTrailerRate = batchVehicleRate('Truck + Trailer', S.batch.bookingType, bookingLot);
+  const trailerOnlyRate = batchVehicleRate('Trailer Only', S.batch.bookingType, bookingLot);
   const truckTrailerPrice = truckTrailerRate * truckTrailerCount;
   const trailerOnlyPrice = trailerOnlyRate * trailerOnlyCount;
   const subtotal = truckTrailerPrice + trailerOnlyPrice;
@@ -913,7 +932,7 @@ function singleSpotOrder(){
 }
 function computeStep2Total(){
   const l = LOTS[S.selectedLotId];
-  return Object.entries(l.vtypeAvail).reduce((sum,[vt,n])=>sum + batchVehicleRate(vt, S.step2BookingType) * (S.fleetSpots[vt]||0), 0);
+  return Object.entries(l.vtypeAvail).reduce((sum,[vt,n])=>sum + batchVehicleRate(vt, S.step2BookingType, l) * (S.fleetSpots[vt]||0), 0);
 }
 
 // selecting a lot with fewer available spots (per vehicle type) than currently requested clamps the request down
@@ -921,7 +940,7 @@ function selectLot(id){
   S.selectedLotId = id;
   const l = LOTS[id];
   Object.keys(S.fleetSpots).forEach(vt=>{
-    const max = l.vtypeAvail[vt]||0;
+    const max = vtypeMaxAvail(l, vt);
     if(S.fleetSpots[vt] > max) S.fleetSpots[vt] = max;
   });
   S.spots = Object.values(S.fleetSpots).reduce((a,b)=>a+b,0);
@@ -1276,21 +1295,22 @@ function screenBookStep1(){
               <div class="section-label" style="color:var(--ink);margin:0">Pricing &amp; Inventory by Vehicle Type</div>
               <button class="btn-text" id="refreshAvailBtn" style="font-size:11.5px;white-space:nowrap">↻ Refresh</button>
             </div>
-            <div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px">Set how many spots you need for each vehicle type</div>
-            ${Object.entries(l.vtypeAvail).map(([vt,n])=>{
+            <div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px">${l.sharedPool ? `Both vehicle types share the same ${l.poolSize} spots at the same rate — reserving one reduces what's left for the other.` : 'Set how many spots you need for each vehicle type'}</div>
+            ${Object.entries(l.vtypeAvail).map(([vt])=>{
               const count = S.fleetSpots[vt]||0;
+              const max = vtypeMaxAvail(l, vt);
               return `
               <div class="fleet-price-row stepped">
                 <div class="fp-line">
                   <span class="fp-type">${vt}</span>
-                  <span class="fp-avail tabular">${n} available</span>
+                  <span class="fp-avail tabular">${max} available${l.sharedPool?' (shared)':''}</span>
                 </div>
                 <div class="fp-line">
-                  <span class="fp-rate tabular">$${batchVehicleRate(vt,S.step2BookingType).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</span>
+                  <span class="fp-rate tabular">$${batchVehicleRate(vt,S.step2BookingType,l).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</span>
                   <div class="stepper-inline sm">
                     <button type="button" data-fleetspotminus="${vt}" ${count<=0?'disabled':''}>−</button>
                     <input data-fleetspotinput="${vt}" value="${count}" inputmode="numeric">
-                    <button type="button" data-fleetspotplus="${vt}" ${count>=n?'disabled':''}>+</button>
+                    <button type="button" data-fleetspotplus="${vt}" ${count>=max?'disabled':''}>+</button>
                   </div>
                 </div>
               </div>`;
@@ -1556,11 +1576,12 @@ function screenBatchDetails(){
           <div class="section-label" style="color:var(--ink);margin:0">Pricing &amp; Inventory by Vehicle Type</div>
           <button class="btn-text" id="refreshAvailBtn" style="font-size:11.5px;white-space:nowrap">↻ Refresh</button>
         </div>
+        ${l.sharedPool ? `<div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px">Both vehicle types share the same ${l.poolSize} spots at the same rate.</div>` : ''}
         ${Object.entries(l.vtypeAvail).map(([vt,n])=>`
           <div class="fleet-price-row">
             <span class="fp-type">${vt}</span>
-            <span class="fp-rate tabular">$${batchVehicleRate(vt,S.batch.bookingType).toFixed(2)}/${unit}</span>
-            <span class="fp-avail tabular">${n} available</span>
+            <span class="fp-rate tabular">$${batchVehicleRate(vt,S.batch.bookingType,l).toFixed(2)}/${unit}</span>
+            <span class="fp-avail tabular">${n} available${l.sharedPool?' (shared)':''}</span>
           </div>`).join('')}
         <span class="refresh">Last refreshed ${timeAgo(S.availRefreshedAt)}</span>
       </div>
@@ -1651,14 +1672,17 @@ function screenBatchImport(){
   if(S.importTab==='errors') rows = rows.filter(d=>d.status==='err');
   if(q) rows = rows.filter(d => (d.name+' '+d.dot+' '+d.plate).toLowerCase().includes(q));
   const spotsReserved = S.spots || 0;
-  // capacity must be checked per vehicle type — a fleet total that fits in aggregate can still
-  // leave a driver unassigned if e.g. 4 Truck + Trailer drivers are uploaded but only 3 Truck +
-  // Trailer spots were reserved (even if enough Trailer Only spots go unused to cover the total)
+  const bookingLot = LOTS[S.selectedLotId];
   const validRows = activeRoster.filter(d=>d.status==='ok');
   const vtypeCounts = {};
   validRows.forEach(d=>{ vtypeCounts[d.vtype] = (vtypeCounts[d.vtype]||0)+1; });
-  const vtypeOverages = Object.keys(S.fleetSpots).filter(vt => (vtypeCounts[vt]||0) > (S.fleetSpots[vt]||0));
-  const overCapacity = vtypeOverages.length > 0;
+  // a shared-pool lot has no per-type cap to violate — only the combined total against the pool
+  // matters there. Everywhere else, capacity must be checked per vehicle type: a fleet total that
+  // fits in aggregate can still leave a driver unassigned if e.g. 4 Truck + Trailer drivers are
+  // uploaded but only 3 Truck + Trailer spots were reserved (even if enough Trailer Only spots go
+  // unused to cover the total)
+  const vtypeOverages = bookingLot.sharedPool ? [] : Object.keys(S.fleetSpots).filter(vt => (vtypeCounts[vt]||0) > (S.fleetSpots[vt]||0));
+  const overCapacity = bookingLot.sharedPool ? (validRows.length > spotsReserved) : vtypeOverages.length > 0;
   return `
   ${topNav('book')}
   <div class="page">
@@ -1679,9 +1703,13 @@ function screenBatchImport(){
         <div class="capacity-alert-ic">${ic.warn}</div>
         <div style="flex:1;min-width:0">
           <div class="capacity-alert-title">Not every driver can be assigned a spot</div>
+          ${bookingLot.sharedPool ? `
+          <div style="font-size:13px;margin-top:8px">${validRows.length} valid drivers found, but only ${spotsReserved} of the shared ${bookingLot.poolSize} spots were reserved.</div>
+          ` : `
           <ul style="margin:8px 0 0;padding-left:18px;font-size:13px;line-height:1.6">
             ${vtypeOverages.map(vt=>`<li>${vtypeCounts[vt]} ${vt} driver${vtypeCounts[vt]===1?'':'s'} found, but only ${S.fleetSpots[vt]||0} ${vt} spot${(S.fleetSpots[vt]||0)===1?'':'s'} reserved</li>`).join('')}
           </ul>
+          `}
           <div style="font-size:13px;margin-top:10px">You can't continue to payment until this is fixed — go back and reserve more spots for the vehicle type(s) above, or upload a file with fewer drivers of that type.</div>
         </div>
       </div>` : ''}
@@ -2065,7 +2093,7 @@ function wireScreen(root){
   const step2BT = root.querySelector('#step2BookingType');
   if(step2BT) step2BT.addEventListener('change',()=>{ S.step2BookingType = step2BT.value; render(); });
   function setFleetSpots(vt, n){
-    const max = LOTS[S.selectedLotId].vtypeAvail[vt]||0;
+    const max = vtypeMaxAvail(LOTS[S.selectedLotId], vt);
     S.fleetSpots[vt] = isNaN(n) ? 0 : Math.max(0, Math.min(n, max));
     S.spots = Object.values(S.fleetSpots).reduce((a,b)=>a+b,0);
   }
@@ -2077,7 +2105,7 @@ function wireScreen(root){
   }));
   root.querySelectorAll('[data-fleetspotinput]').forEach(inp=>inp.addEventListener('input',()=>{
     const vt = inp.dataset.fleetspotinput;
-    const max = LOTS[S.selectedLotId].vtypeAvail[vt]||0;
+    const max = vtypeMaxAvail(LOTS[S.selectedLotId], vt);
     const n = parseInt(inp.value.replace(/\D/g,''),10);
     if(!isNaN(n) && n > max) toast(`Only ${max} spot(s) available for ${vt}`);
     setFleetSpots(vt, n);
