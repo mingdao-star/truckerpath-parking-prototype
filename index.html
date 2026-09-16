@@ -1880,16 +1880,24 @@ function screenOrderDetailBatch(){
     </div>
     <div class="card">
       <div class="card-head"><h2 class="card-title">Booking Details</h2>
-        <div style="display:flex;align-items:center;gap:14px">
-          <span style="font-size:12.5px;color:var(--ink-soft)">Gate — Memphis: <b class="tabular" style="color:var(--ink)">1199#</b> <button class="copy-btn" data-copy="1199#" style="margin-left:2px">Copy</button></span>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-outline" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
-            <button class="btn btn-outline" data-toast="CSV exported">${ic.download}&nbsp;Export CSV</button>
-            <button class="btn btn-primary" data-toast="Email queued to all drivers">${ic.mail}&nbsp;Send email to all drivers</button>
-          </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
+          <button class="btn btn-outline" data-toast="CSV exported">${ic.download}&nbsp;Export CSV</button>
+          <button class="btn btn-primary" data-toast="Email queued to all drivers">${ic.mail}&nbsp;Send email to all drivers</button>
         </div>
       </div>
       <div class="card-body">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+          <div class="checkin-box">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
+              <div class="section-label" style="color:var(--ink);margin:0">Check-in Code</div>
+              <button class="btn-text" id="toggleCheckinCode" style="font-size:11.5px;display:flex;align-items:center;gap:4px">${S.checkinCodeRevealed?ic.eyeOff:ic.eye}${S.checkinCodeRevealed?'Hide':'Show'}</button>
+            </div>
+            <div class="checkin-code tabular">${S.checkinCodeRevealed?'1199#':'••••'}</div>
+            <div style="font-size:11px;color:var(--ink-soft);margin-top:8px">Valid during your reservation: ${order.dates}</div>
+            <div style="font-size:11px;color:var(--ink-soft);margin-top:2px">Same gate code for every driver on this order.</div>
+          </div>
+        </div>
         <div class="search-box">${ic.search}<input id="odSearchInput" placeholder="Search driver, ID, plate, or spot" value="${S.confirmSearch}"></div>
         <div class="dtable-scroll"><table class="dtable">
           <thead><tr><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle Type</th><th>Gate Code</th><th>Access PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th><th></th></tr></thead>
@@ -1905,6 +1913,11 @@ function screenOrderDetailBatch(){
         <div class="info-row"><span class="k">Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</b></span></div>
       </div>
+    </div>
+    <div class="help-bar">
+      <button class="help-bar-btn" data-toast="Opening support chat…">${ic.headset}Contact support</button>
+      <div class="help-bar-divider"></div>
+      <button class="help-bar-btn" data-toast="Calling ${order.loc}…">${ic.phone}Call</button>
     </div>
     <button class="btn btn-outline" style="margin-top:16px" id="backToOrders2">← Back to Orders</button>
   </div>`;
