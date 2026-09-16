@@ -202,15 +202,11 @@ select.control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg x
 .amenity.off{opacity:.4}
 .amenity-ic{position:relative;width:34px;height:34px;border:1px solid var(--line);border-radius:var(--r-md);display:grid;place-items:center;color:var(--ink-soft)}
 .amenity-count{position:absolute;top:-6px;right:-8px;background:var(--brand);color:#fff;font-size:9px;font-weight:700;padding:1px 4px;border-radius:999px;line-height:1.3}
-.beige-field{display:flex;align-items:center;gap:8px;background:var(--paper-dim);border-radius:8px;height:38px;padding:0 12px;font-size:13.5px;font-weight:500;color:var(--ink)}
 select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38px;border:none;border-radius:8px;background-color:var(--paper-dim);padding:0 32px 0 12px;font-size:13.5px;font-weight:500;color:var(--ink);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23676F67' stroke-width='1.7'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
 .stars-row{display:flex;gap:2px}
 .stars-row .star{width:16px;height:16px;border-radius:2px;background:var(--line);display:grid;place-items:center;color:#fff;font-size:10px;line-height:1}
 .stars-row .star.on{background:#C2410C}
 .poi-head-divider{height:1px;background:var(--line);margin:10px 0}
-.avail-note{background:var(--green-tint);border-radius:var(--r-md);padding:9px 12px;font-size:12.5px}
-.avail-note b{color:var(--green-deep)}
-.avail-note .refresh{color:var(--orange-deep);display:block;font-size:11px;margin-top:2px}
 .fleet-pricing-box{border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px}
 .fleet-pricing-box .refresh{color:var(--orange-deep);display:block;font-size:11px;margin-top:6px}
 .fleet-price-row{display:flex;align-items:center;gap:10px;background:var(--paper-dim);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:12.5px}
@@ -290,10 +286,6 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 /* presenter-only demo control — deliberately styled to look out-of-band, not part of the product design */
 .card.presenter-tool{border:2px dashed #8b5cf6;background:#faf8ff}
 .presenter-tool-badge{background:#8b5cf6;color:#fff;font-size:10px;font-weight:800;letter-spacing:.04em;padding:3px 8px;border-radius:999px;text-transform:uppercase}
-.mode-toggle-row{display:flex;background:var(--paper-dim);border-radius:8px;padding:3px;gap:3px}
-.mode-toggle-btn{flex:1;padding:8px 10px;border-radius:6px;font-size:12.5px;font-weight:600;color:var(--ink-soft);background:transparent;white-space:nowrap;transition:background .12s,color .12s}
-.mode-toggle-btn.on{background:#fff;color:var(--ink);box-shadow:var(--shadow-sm)}
-
 /* ---- shared section-header icon treatment ---- */
 .card-icon-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .card-icon-badge{width:32px;height:32px;border-radius:9px;background:var(--brand-tint);color:var(--brand);display:grid;place-items:center;flex:none}
@@ -302,6 +294,8 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 
 .dropzone{border:2px dashed var(--border-input);border-radius:var(--r-lg);padding:30px;text-align:center;background:#fafaf9;cursor:pointer}
 .dropzone:hover{border-color:var(--brand);background:var(--brand-tint)}
+.uploaded-file-row{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;background:#fff}
+.uploaded-file-ic{color:var(--ink-soft);flex:none}
 .progress-track{height:6px;border-radius:999px;background:var(--paper-dim);overflow:hidden;margin-top:10px}
 .progress-fill{height:100%;background:var(--brand);border-radius:999px;transition:width .2s}
 .stat-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
@@ -323,6 +317,9 @@ table.dtable tr.warn:hover td{background:#fdf1de}
 .dtable-scroll table.dtable th{position:sticky;top:0;background:#fff;z-index:1}
 .pill-ok{background:var(--green-tint);color:var(--green-deep);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
 .pill-warn{background:var(--orange-tint);color:var(--orange-deep);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.capacity-alert{display:flex;gap:14px;align-items:flex-start;background:var(--red-tint);border:1.5px solid #f3c6b4;border-radius:var(--r-lg);padding:18px 20px;margin-bottom:16px;color:var(--red)}
+.capacity-alert-ic{width:36px;height:36px;border-radius:999px;background:var(--red);display:grid;place-items:center;flex:none}
+.capacity-alert-title{font-weight:800;font-size:15.5px}
 .search-box{display:flex;align-items:center;gap:8px;border:1px solid var(--border-input);border-radius:var(--r-md);padding:0 12px;color:var(--ink-soft);margin-bottom:10px;max-width:320px;height:36px}
 .search-box input{border:none;flex:1;height:100%;background:transparent}
 .search-box input:focus{outline:none}
@@ -413,6 +410,7 @@ const ic = {
   eyeOff:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c5 0 9 4 10.5 7-.6 1.2-1.5 2.5-2.7 3.6M6.6 6.6C4.5 8 3 9.8 1.5 12c1.9 3.6 6 7 10.5 7 1.4 0 2.7-.3 3.9-.9"/><path d="M9.5 10a3.5 3.5 0 0 0 4.9 4.9"/></svg>',
   headset:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="2.5" y="13" width="4" height="6" rx="1.5"/><rect x="17.5" y="13" width="4" height="6" rx="1.5"/><path d="M19.5 19v.5a3 3 0 0 1-3 3H13"/></svg>',
   phone:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2.2 2A17 17 0 0 1 3 5.2 2 2 0 0 1 5 4Z"/></svg>',
+  warn:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 1 21h22L12 2Z"/><path d="M12 9v5"/><circle cx="12" cy="17.5" r="0.9" fill="#fff" stroke="none"/></svg>',
 };
 
 /* ============================================================
@@ -432,7 +430,6 @@ const S = {
   search: { location:'', bookingType:'Daily', checkIn:'2026-07-17', checkOut:'2026-07-19', vehicleType:'Truck + Trailer', priceRange:'Any Price' },
   resultsHeading: 'Brookville, PA',
 
-  bookingMode: 'single',
   selectedLotId: 'eloy',
   detailPanelOpen: false,
   step2VehicleType: 'Truck + Trailer',
@@ -445,7 +442,7 @@ const S = {
 
   payment: { context:'single', selectedCardId:'card_visa' },
 
-  batch: { bookingType:'Daily', uploading:false, uploadPct:0, editingRow:null },
+  batch: { bookingType:'Daily', uploading:false, uploadPct:0, uploaded:false, editingRow:null },
   // presenter-only demo control — not part of the product design, see screenBatchDetails
   presenterTool: { rowCount: null },
   directory: { state: null, search: '', listingPage: 1 },
@@ -912,10 +909,7 @@ function singleSpotOrder(){
 }
 function computeStep2Total(){
   const l = LOTS[S.selectedLotId];
-  if(S.bookingMode==='multiple'){
-    return Object.entries(l.vtypeAvail).reduce((sum,[vt,n])=>sum + batchVehicleRate(vt, S.step2BookingType) * (S.fleetSpots[vt]||0), 0);
-  }
-  return lotRate(l, S.step2BookingType);
+  return Object.entries(l.vtypeAvail).reduce((sum,[vt,n])=>sum + batchVehicleRate(vt, S.step2BookingType) * (S.fleetSpots[vt]||0), 0);
 }
 
 // selecting a lot with fewer available spots (per vehicle type) than currently requested clamps the request down
@@ -1270,67 +1264,38 @@ function screenBookStep1(){
             <button class="dp-close" id="dpClose">${ic.x}</button>
           </div>
           <div class="poi-head-divider"></div>
-          <div class="field" style="margin-top:0"><label>Booking Mode</label>
-            <div class="mode-toggle-row">
-              <button type="button" class="mode-toggle-btn ${S.bookingMode==='single'?'on':''}" data-bookingmode="single">Single spot</button>
-              <button type="button" class="mode-toggle-btn ${S.bookingMode==='multiple'?'on':''}" data-bookingmode="multiple">Multiple spots (fleet)</button>
+          <div class="field" style="margin-top:0"><label>Booking Type</label><select class="pill-select" id="step2BookingType">
+            ${rateOptions.map(v=>`<option ${S.step2BookingType===v?'selected':''}>${v}</option>`).join('')}
+          </select></div>
+          <div class="fleet-pricing-box" style="margin-top:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
+              <div class="section-label" style="color:var(--ink);margin:0">Pricing &amp; Inventory by Vehicle Type</div>
+              <button class="btn-text" id="refreshAvailBtn" style="font-size:11.5px;white-space:nowrap">↻ Refresh</button>
             </div>
+            <div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px">Set how many spots you need for each vehicle type</div>
+            ${Object.entries(l.vtypeAvail).map(([vt,n])=>{
+              const count = S.fleetSpots[vt]||0;
+              return `
+              <div class="fleet-price-row stepped">
+                <div class="fp-line">
+                  <span class="fp-type">${vt}</span>
+                  <span class="fp-avail tabular">${n} available</span>
+                </div>
+                <div class="fp-line">
+                  <span class="fp-rate tabular">$${batchVehicleRate(vt,S.step2BookingType).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</span>
+                  <div class="stepper-inline sm">
+                    <button type="button" data-fleetspotminus="${vt}" ${count<=0?'disabled':''}>−</button>
+                    <input data-fleetspotinput="${vt}" value="${count}" inputmode="numeric">
+                    <button type="button" data-fleetspotplus="${vt}" ${count>=n?'disabled':''}>+</button>
+                  </div>
+                </div>
+              </div>`;
+            }).join('')}
+            <div class="fleet-spots-total">${S.spots} spot${S.spots===1?'':'s'} selected</div>
+            <span class="refresh">Last refreshed ${timeAgo(S.availRefreshedAt)}</span>
           </div>
-          ${S.bookingMode==='multiple' ? `
-            <div class="field" style="margin-top:12px"><label>Booking Type</label><select class="pill-select" id="step2BookingType">
-              ${rateOptions.map(v=>`<option ${S.step2BookingType===v?'selected':''}>${v}</option>`).join('')}
-            </select></div>
-            <div class="fleet-pricing-box" style="margin-top:10px">
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
-                <div class="section-label" style="color:var(--ink);margin:0">Pricing &amp; Inventory by Vehicle Type</div>
-                <button class="btn-text" id="refreshAvailBtn" style="font-size:11.5px;white-space:nowrap">↻ Refresh</button>
-              </div>
-              <div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px">Set how many spots you need for each vehicle type</div>
-              ${Object.entries(l.vtypeAvail).map(([vt,n])=>{
-                const count = S.fleetSpots[vt]||0;
-                return `
-                <div class="fleet-price-row stepped">
-                  <div class="fp-line">
-                    <span class="fp-type">${vt}</span>
-                    <span class="fp-avail tabular">${n} available</span>
-                  </div>
-                  <div class="fp-line">
-                    <span class="fp-rate tabular">$${batchVehicleRate(vt,S.step2BookingType).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</span>
-                    <div class="stepper-inline sm">
-                      <button type="button" data-fleetspotminus="${vt}" ${count<=0?'disabled':''}>−</button>
-                      <input data-fleetspotinput="${vt}" value="${count}" inputmode="numeric">
-                      <button type="button" data-fleetspotplus="${vt}" ${count>=n?'disabled':''}>+</button>
-                    </div>
-                  </div>
-                </div>`;
-              }).join('')}
-              <div class="fleet-spots-total">${S.spots} spot${S.spots===1?'':'s'} selected</div>
-              <span class="refresh">Last refreshed ${timeAgo(S.availRefreshedAt)}</span>
-            </div>
-          ` : `
-            <div class="field" style="margin-top:12px"><label>Vehicle Type</label><select class="pill-select" id="step2VehicleType">
-              ${['Truck + Trailer','Trailer Only','Bobtail'].map(v=>`<option ${S.step2VehicleType===v?'selected':''}>${v}</option>`).join('')}
-            </select></div>
-            <div class="field" style="margin-top:10px"><label>Booking Type</label><select class="pill-select" id="step2BookingType">
-              ${rateOptions.map(v=>`<option ${S.step2BookingType===v?'selected':''}>${v} — $${lotRate(l,v).toFixed(2)}</option>`).join('')}
-            </select></div>
-            <div class="field" style="margin-top:10px"><label>Booking time</label>
-              <div class="beige-field">${ic.clock}<span>${S.search.checkIn} → ${S.search.checkOut}</span></div>
-            </div>
-            <div class="avail-note" style="margin-top:14px">
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-                <b><span class="tabular">${l.avail}</span> of ${l.totalSpots} spots available today</b>
-                <button class="btn-text" id="refreshAvailBtn" style="font-size:11.5px;white-space:nowrap">↻ Refresh</button>
-              </div>
-              <div class="progress-track" style="margin-top:8px"><div class="progress-fill" style="width:${Math.round(l.avail/l.totalSpots*100)}%"></div></div>
-              ${Object.keys(l.vtypeAvail).length>1 ? `<div style="display:flex;gap:16px;margin-top:8px;font-size:12px">
-                ${Object.entries(l.vtypeAvail).map(([vt,n])=>`<span>${vt}: <b class="tabular">${n}</b></span>`).join('')}
-              </div>` : ''}
-              <span class="refresh">Last refreshed ${timeAgo(S.availRefreshedAt)}</span>
-            </div>
-          `}
           <div class="total-row"><span>Total</span><b class="tabular">$${total.toFixed(2)}</b></div>
-          <button class="btn btn-primary btn-lg" style="width:100%;margin-top:14px" id="step2Continue">${S.bookingMode==='multiple' ? 'Continue to fleet details →' : 'Continue to vehicle info →'}</button>
+          <button class="btn btn-primary btn-lg" style="width:100%;margin-top:14px" id="step2Continue" ${S.spots<=0?'disabled':''}>Continue to booking →</button>
           <div class="poi-head-divider" style="margin:18px 0"></div>
           ${poiInfoBlock(l)}
         </div>
@@ -1373,7 +1338,10 @@ function screenBookStep3Vehicle(){
   return `
   ${topNav('book')}
   <div class="page">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><span class="step-pill">STEP 2 OF 3</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <button class="btn btn-outline" id="step3Back">← Back</button>
+      <span class="step-pill">STEP 2 OF 3</span>
+    </div>
     <div class="results-row" style="align-items:flex-start">
       <div class="card" style="flex:1">
         <div class="card-body">
@@ -1483,7 +1451,14 @@ function singleOrderDetailBody(){
       <div class="chip"><div class="k">Access</div><div class="v">24/7 — check-in code required</div></div>
       <div class="chip"><div class="k">Total Paid</div><div class="v">$${singleOrder.total.toFixed(2)}</div></div>
     </div>
-    <div class="card"><div class="card-body">
+    <div class="card">
+      <div class="card-head"><h2 class="card-title">Booking Details</h2>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" data-toast="Opening directions…">Get directions</button>
+          <button class="btn btn-primary" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
+        </div>
+      </div>
+      <div class="card-body">
       <div class="od-single-grid">
         <div>
           <div class="section-label" style="color:var(--ink);margin:0 0 4px">Location</div>
@@ -1511,14 +1486,14 @@ function singleOrderDetailBody(){
       <div class="info-row"><span class="k">Service fee</span><span>$${singleOrder.serviceFee.toFixed(2)}</span></div>
       <div class="info-row"><span class="k">Tax</span><span>$${singleOrder.tax.toFixed(2)}</span></div>
       <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${singleOrder.total.toFixed(2)}</b></span></div>
-    </div></div>
+      </div>
+    </div>
     <div class="help-bar">
       <button class="help-bar-btn" data-toast="Opening support chat…">${ic.headset}Contact support</button>
       <div class="help-bar-divider"></div>
       <a class="help-bar-btn" href="tel:${l.phone.replace(/\D/g,'')}">${ic.phone}Call</a>
     </div>
     <div style="display:flex;gap:10px;margin:16px 0">
-      <button class="btn btn-outline" data-toast="Opening directions…">Get directions</button>
       <div title="Add to Calendar" class="btn btn-outline addeventatc">
         Add to calendar
         <span class="start">07/31/2026 12:00 PM</span>
@@ -1528,7 +1503,6 @@ function singleOrderDetailBody(){
         <span class="description">TruckerPath Parking reservation. Check-in code: 1234.</span>
         <span class="location">3100 S Barrett Rd, Eloy, AZ 85131</span>
       </div>
-      <button class="btn btn-outline" data-toast="Receipt downloaded">Download receipt</button>
     </div>`;
 }
 function screenBookStep5Confirm(){
@@ -1601,6 +1575,14 @@ function screenBatchDetails(){
           ${ic.file}
           <div style="margin-top:8px;font-size:13.5px">Uploading fleet-drivers-jul14.xlsx…</div>
           <div class="progress-track" style="max-width:320px;margin:10px auto 0"><div class="progress-fill" style="width:${S.batch.uploadPct}%"></div></div>
+        </div>` : S.batch.uploaded ? `
+        <div class="uploaded-file-row">
+          <div class="uploaded-file-ic">${ic.file}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:600;font-size:13.5px">fleet-drivers-jul14.xlsx</div>
+            <div style="font-size:11.5px;color:var(--green-deep);display:flex;align-items:center;gap:4px">${ic.check} Uploaded</div>
+          </div>
+          <button class="icon-btn" id="removeUploadBtn" title="Remove file">${ic.x}</button>
         </div>` : `
         <div class="dropzone" id="uploadZone">
           ${ic.file}
@@ -1620,7 +1602,7 @@ function screenBatchDetails(){
     </div></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
       <button class="btn btn-outline" id="batchBack1">← Back</button>
-      <button class="btn btn-primary btn-lg" id="batchToImport" ${S.batch.uploading?'disabled':''}>Continue to import summary →</button>
+      <button class="btn btn-primary btn-lg" id="batchToImport" ${(S.batch.uploading||!S.batch.uploaded)?'disabled':''}>Continue to import summary →</button>
     </div>
   </div>`;
 }
@@ -1687,12 +1669,15 @@ function screenBatchImport(){
         <div class="stat-tile"><div class="n" style="color:var(--red)">${errCount}</div><div class="l">Errors — excluded</div></div>
       </div>
       ${overCapacity ? `
-      <div style="background:var(--red-tint);border:1px solid #f3c6b4;border-radius:var(--r-md);padding:10px 14px;margin-bottom:12px;font-size:12.5px;color:var(--red)">
-        <b>⚠ Not every driver can be assigned a spot.</b>
-        <ul style="margin:4px 0 0;padding-left:18px">
-          ${vtypeOverages.map(vt=>`<li>${vtypeCounts[vt]} ${vt} driver${vtypeCounts[vt]===1?'':'s'} found, but only ${S.fleetSpots[vt]||0} ${vt} spot${(S.fleetSpots[vt]||0)===1?'':'s'} reserved</li>`).join('')}
-        </ul>
-        You can't continue to payment until this is fixed — go back and reserve more spots for the vehicle type(s) above, or upload a file with fewer drivers of that type.
+      <div class="capacity-alert">
+        <div class="capacity-alert-ic">${ic.warn}</div>
+        <div style="flex:1;min-width:0">
+          <div class="capacity-alert-title">Not every driver can be assigned a spot</div>
+          <ul style="margin:8px 0 0;padding-left:18px;font-size:13px;line-height:1.6">
+            ${vtypeOverages.map(vt=>`<li>${vtypeCounts[vt]} ${vt} driver${vtypeCounts[vt]===1?'':'s'} found, but only ${S.fleetSpots[vt]||0} ${vt} spot${(S.fleetSpots[vt]||0)===1?'':'s'} reserved</li>`).join('')}
+          </ul>
+          <div style="font-size:13px;margin-top:10px">You can't continue to payment until this is fixed — go back and reserve more spots for the vehicle type(s) above, or upload a file with fewer drivers of that type.</div>
+        </div>
       </div>` : ''}
       <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px">Drivers are assigned to available spots at your reserved location. All ${activeRoster.length} uploaded rows are shown below.</div>
       <div class="tabs-row">
@@ -1870,7 +1855,7 @@ function screenOrderDetailSingle(){
       <h2 class="card-title" style="margin:0;font-size:18px">Order details — RP-88214-JX</h2>
     </div>
     ${singleOrderDetailBody()}
-    <button class="btn btn-outline" id="backToOrders">← Back to Orders</button>
+    <button class="btn btn-outline" style="margin-top:16px" id="backToOrders">← Back to Orders</button>
   </div>`;
 }
 
@@ -2031,12 +2016,10 @@ function wireScreen(root){
   bindText(root,'b1CheckOut', v=>S.search.checkOut=v);
   bindSelect(root,'b1BookingType', v=>S.search.bookingType=v);
   bindSelect(root,'b1VehicleType', v=>S.search.vehicleType=v);
-  root.querySelectorAll('[data-bookingmode]').forEach(b=>b.addEventListener('click',()=>{ S.bookingMode=b.dataset.bookingmode; render(); }));
   const refreshAvailBtn = root.querySelector('#refreshAvailBtn'); if(refreshAvailBtn) refreshAvailBtn.addEventListener('click',()=>{ S.availRefreshedAt=Date.now(); render(); toast('Availability refreshed'); });
   const dpClose = root.querySelector('#dpClose'); if(dpClose) dpClose.addEventListener('click',()=>{ S.detailPanelOpen=false; render(); });
-  bindSelect(root,'step2VehicleType', v=>S.step2VehicleType=v);
   const step2BT = root.querySelector('#step2BookingType');
-  if(step2BT) step2BT.addEventListener('change',()=>{ S.step2BookingType = step2BT.value.split(' — ')[0]; render(); });
+  if(step2BT) step2BT.addEventListener('change',()=>{ S.step2BookingType = step2BT.value; render(); });
   function setFleetSpots(vt, n){
     const max = LOTS[S.selectedLotId].vtypeAvail[vt]||0;
     S.fleetSpots[vt] = isNaN(n) ? 0 : Math.max(0, Math.min(n, max));
@@ -2057,9 +2040,19 @@ function wireScreen(root){
     rerenderKeepFocus();
   }));
   const step2Continue = root.querySelector('#step2Continue');
-  if(step2Continue) step2Continue.addEventListener('click',()=>{ go(S.bookingMode==='multiple' ? 'batchDetails' : 'book3'); });
+  if(step2Continue && !step2Continue.disabled) step2Continue.addEventListener('click',()=>{
+    if(S.spots<=1){
+      // exactly one spot selected — this is the single-location flow; remember which
+      // vehicle type it was for so book3's "Your reservation" summary shows it correctly
+      S.step2VehicleType = Object.keys(S.fleetSpots).find(vt=>S.fleetSpots[vt]>0) || S.step2VehicleType;
+      go('book3');
+    } else {
+      go('batchDetails');
+    }
+  });
 
   /* ---- book3 (vehicle/trailer form) ---- */
+  const step3Back = root.querySelector('#step3Back'); if(step3Back) step3Back.addEventListener('click',()=>go('book1'));
   root.querySelectorAll('[data-vf]').forEach(inp=>{
     inp.addEventListener('input',()=>{
       S.vehicleForm[inp.dataset.vf] = inp.value;
@@ -2102,14 +2095,15 @@ function wireScreen(root){
     const iv = setInterval(()=>{
       S.batch.uploadPct = Math.min(100, S.batch.uploadPct + 18 + Math.floor(Math.random()*12));
       if(S.batch.uploadPct >= 100){
-        clearInterval(iv); S.batch.uploading=false;
+        clearInterval(iv); S.batch.uploading=false; S.batch.uploaded=true;
         const foundCount = S.presenterTool.rowCount || 500;
         toast(`fleet-drivers-jul14.xlsx uploaded — ${foundCount} rows found`);
-        go('batchImport'); return;
+        render(); return;
       }
       render();
     }, 220);
   });
+  const removeUploadBtn = root.querySelector('#removeUploadBtn'); if(removeUploadBtn) removeUploadBtn.addEventListener('click',()=>{ S.batch.uploaded=false; render(); toast('File removed'); });
   const batchToImport = root.querySelector('#batchToImport'); if(batchToImport && !batchToImport.disabled) batchToImport.addEventListener('click',()=>go('batchImport'));
   root.querySelectorAll('[data-itab]').forEach(b=>b.addEventListener('click',()=>{ S.importTab=b.dataset.itab; render(); }));
   const importSearchInput = root.querySelector('#importSearchInput');
