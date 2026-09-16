@@ -198,6 +198,7 @@ select.control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg x
 .dp-close{width:26px;height:26px;border-radius:999px;display:grid;place-items:center;color:var(--ink-soft)}
 .dp-close:hover{background:var(--paper-dim)}
 .rating{color:var(--orange-deep);font-weight:700;font-size:13px;font-family:var(--font-display)}
+.trust-badge{display:inline-flex;align-items:center;gap:4px;background:var(--brand-tint);color:var(--brand);font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap}
 .info-row{display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #f0f0ee}
 .info-row:last-child{border-bottom:none}
 .info-row .k{color:var(--ink-soft)}
@@ -518,7 +519,12 @@ function poiInfoBlock(l){
     { ic:ic.scale, label:'Scales', on:l.scales },
     { ic:ic.atm, label:'ATM', count:l.atmCount, on:l.atmCount>0 },
   ];
-  return `<div class="section-label" style="color:var(--ink)">Operating Hours</div>
+  return `<div class="section-label" style="color:var(--ink)">Availability</div>
+    <div style="margin-bottom:16px">
+      <div><b class="tabular" style="color:var(--brand);font-size:20px">${l.avail}</b> <span style="font-size:14px;color:var(--ink)">of ${l.totalSpots} spots available today</span></div>
+      <div class="progress-track" style="margin-top:8px"><div class="progress-fill" style="width:${Math.round(l.avail/l.totalSpots*100)}%"></div></div>
+    </div>
+    <div class="section-label" style="color:var(--ink)">Operating Hours</div>
     <div class="hours-banner">
       <span class="hours-dot"></span>
       <b>Open now</b>
@@ -1295,6 +1301,10 @@ function screenBookStep1(){
             <div>
               <h2 class="card-title" style="font-size:20px">${l.name.split(' at ').pop()}</h2>
               ${poiRatingLine(l)}
+              <div style="display:flex;gap:6px;margin-top:8px">
+                <span class="trust-badge">${ic.check}Reserved Parking</span>
+                <span class="trust-badge">${ic.check}Guaranteed</span>
+              </div>
             </div>
             <button class="dp-close" id="dpClose">${ic.x}</button>
           </div>
