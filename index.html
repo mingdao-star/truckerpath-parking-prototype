@@ -9,8 +9,6 @@
 <!-- Real map: Leaflet + OpenStreetMap (free, no API key). Requires internet access when opened locally. -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<!-- Real "Add to Calendar" button — https://www.addevent.com/c/documentation/add-to-calendar-button -->
-<script type="text/javascript" src="https://cdn.addevent.com/libs/atc/1.6.1/atc.min.js" async defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Reddit+Sans:wght@700&display=swap" rel="stylesheet">
@@ -274,15 +272,8 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 /* ---- order detail (single) ---- */
 .orderdetail-banner{background:var(--paper-dim);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;display:flex;gap:14px;align-items:center;margin-bottom:16px}
 .orderdetail-ic{width:44px;height:44px;border-radius:999px;background:var(--brand);display:grid;place-items:center;flex:none}
-.od-single-grid{display:flex;gap:32px;flex-wrap:wrap}
-.od-single-grid>div:first-child{flex:1;min-width:280px}
-.checkin-box{width:220px;flex:none;text-align:center;padding:18px;background:var(--paper-dim);border-radius:var(--r-lg)}
-.checkin-code{font-size:30px;font-weight:800;letter-spacing:3px}
-.help-bar{display:flex;align-items:center;justify-content:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:12px 16px;margin-top:12px}
-.help-bar-btn{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink)}
-.help-bar-divider{width:1px;height:20px;background:var(--line)}
-.addeventatc{cursor:pointer;position:relative}
-.addeventatc span{display:none}
+.gatecode-pill{display:flex;align-items:center;gap:8px;background:var(--paper-dim);border-radius:999px;padding:7px 14px;flex:none;color:var(--ink-soft)}
+.gatecode-pill .code{font-weight:800;letter-spacing:2px;font-size:14px;color:var(--ink)}
 
 /* ---- batch flow specific ---- */
 .batch-title{font-size:19px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em}
@@ -1540,64 +1531,37 @@ function singleOrderDetailBody(){
   const shortName = l.name.split(' at ').pop();
   const singleOrder = singleSpotOrder();
   const revealed = S.checkinCodeRevealed;
+  const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
   return `
-    <div class="chips-row">
-      <div class="chip"><div class="k">Location</div><div class="v">Eloy, AZ</div></div>
-      <div class="chip"><div class="k">Dates</div><div class="v">Jul 31 – Aug 7</div></div>
-      <div class="chip"><div class="k">Access</div><div class="v">24/7 — check-in code required</div></div>
-      <div class="chip"><div class="k">Total Paid</div><div class="v">$${singleOrder.total.toFixed(2)}</div></div>
-    </div>
     <div class="card">
-      <div class="card-head"><h2 class="card-title">Booking Details</h2>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-outline" data-toast="Opening directions…">Get directions</button>
+      <div class="card-head">
+        <h2 class="card-title">Booking Details</h2>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="gatecode-pill" title="Gate Code — activates at check-in time">
+            ${ic.qr}<span class="code tabular">${revealed?'1234':'••••'}</span>
+            <button class="btn-text" id="toggleCheckinCode" style="display:flex;align-items:center;padding:0">${revealed?ic.eyeOff:ic.eye}</button>
+          </div>
           <button class="btn btn-primary" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
         </div>
       </div>
       <div class="card-body">
-      <div class="od-single-grid">
-        <div>
-          <div class="section-label" style="color:var(--ink);margin:0 0 4px">Location</div>
-          <div style="font-weight:700;font-size:16px">${shortName}</div>
-          <div class="poi-head-divider" style="margin:12px 0"></div>
-          <div class="info-row"><span class="k">Address</span><span>3100 S Barrett Rd, Eloy, AZ 85131 <button class="copy-btn" data-copy="3100 S Barrett Rd, Eloy, AZ 85131">Copy</button></span></div>
-          <div class="info-row"><span class="k">Coordinates</span><span>32.701693, -111.516104 <button class="copy-btn" data-copy="32.701693, -111.516104">Copy</button></span></div>
-          <div class="info-row"><span class="k">Highway</span><span>${l.highway}</span></div>
-          <div class="info-row"><span class="k">Total Spaces Available</span><span>${l.avail} space(s)</span></div>
-          <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — check-in code required</span></div>
-        </div>
-        <div class="checkin-box">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
-            <div class="section-label" style="color:var(--ink);margin:0">Check-in Code</div>
-            <button class="btn-text" id="toggleCheckinCode" style="font-size:11.5px;display:flex;align-items:center;gap:4px">${revealed?ic.eyeOff:ic.eye}${revealed?'Hide':'Show'}</button>
-          </div>
-          <div class="checkin-code tabular">${revealed?'1234':'••••'}</div>
-          <div style="font-size:11px;color:var(--ink-soft);margin-top:8px">Valid during your reservation: Jul 31, 12:00 PM – Aug 7, 12:00 PM</div>
-          <div style="font-size:11px;color:var(--ink-soft);margin-top:2px">Code activates at check-in time.</div>
-        </div>
-      </div>
-      <div class="poi-head-divider" style="margin:14px 0"></div>
-      <div class="section-label" style="color:var(--ink);margin:0 0 8px">Charges</div>
-      <div class="info-row"><span class="k">Weekly rate</span><span>$${singleOrder.weeklyRate.toFixed(2)}</span></div>
-      <div class="info-row"><span class="k">Service fee</span><span>$${singleOrder.serviceFee.toFixed(2)}</span></div>
-      <div class="info-row"><span class="k">Tax</span><span>$${singleOrder.tax.toFixed(2)}</span></div>
-      <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${singleOrder.total.toFixed(2)}</b></span></div>
-      </div>
-    </div>
-    <div class="help-bar">
-      <button class="help-bar-btn" data-toast="Opening support chat…">${ic.headset}Contact support</button>
-      <div class="help-bar-divider"></div>
-      <a class="help-bar-btn" href="tel:${l.phone.replace(/\D/g,'')}">${ic.phone}Call</a>
-    </div>
-    <div style="display:flex;gap:10px;margin:16px 0">
-      <div title="Add to Calendar" class="btn btn-outline addeventatc">
-        Add to calendar
-        <span class="start">07/31/2026 12:00 PM</span>
-        <span class="end">08/07/2026 12:00 PM</span>
-        <span class="timezone">America/Phoenix</span>
-        <span class="title">${shortName} — Parking Reservation</span>
-        <span class="description">TruckerPath Parking reservation. Check-in code: 1234.</span>
-        <span class="location">3100 S Barrett Rd, Eloy, AZ 85131</span>
+        <div class="section-label" style="color:var(--ink);margin:0 0 8px">Charges</div>
+        <div class="info-row"><span class="k">Weekly rate</span><span>$${singleOrder.weeklyRate.toFixed(2)}</span></div>
+        <div class="info-row"><span class="k">Service fee</span><span>$${singleOrder.serviceFee.toFixed(2)}</span></div>
+        <div class="info-row"><span class="k">Tax</span><span>$${singleOrder.tax.toFixed(2)}</span></div>
+        <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${singleOrder.total.toFixed(2)}</b></span></div>
+        <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
+        <div class="info-row"><span class="k">Paid on</span><span>Jul 24, 2026, 2:15 PM</span></div>
+        <div class="poi-head-divider" style="margin:16px 0"></div>
+        <div class="section-label" style="color:var(--ink);margin:0 0 4px">Location</div>
+        <div style="font-weight:700;font-size:16px">${shortName}</div>
+        <div class="poi-head-divider" style="margin:12px 0"></div>
+        <div class="info-row"><span class="k">Address</span><span>3100 S Barrett Rd, Eloy, AZ 85131 <button class="copy-btn" data-copy="3100 S Barrett Rd, Eloy, AZ 85131">Copy</button></span></div>
+        <div class="info-row"><span class="k">Coordinates</span><span>32.701693, -111.516104 <button class="copy-btn" data-copy="32.701693, -111.516104">Copy</button></span></div>
+        <div class="info-row"><span class="k">Highway</span><span>${l.highway}</span></div>
+        <div class="info-row"><span class="k">Total Spaces Available</span><span>${l.avail} space(s)</span></div>
+        <div class="info-row"><span class="k">Reservation Dates</span><span>Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM</span></div>
+        <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — check-in code required</span></div>
       </div>
     </div>`;
 }
@@ -1950,6 +1914,8 @@ function screenOrderDetailBatch(){
   // lot is currently selected (or Eloy) so the location detail below has real address/coordinates data
   const l = LOTS[S.selectedLotId] || LOTS.eloy;
   const shortName = l.name.split(' at ').pop();
+  const revealed = S.checkinCodeRevealed;
+  const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
   return `
   ${topNav('orders')}
   <div class="page">
@@ -1964,43 +1930,17 @@ function screenOrderDetailBatch(){
       <div class="chip"><div class="k">Total Paid</div><div class="v">${order.total}</div></div>
     </div>
     <div class="card">
-      <div class="card-head"><h2 class="card-title">Booking Details</h2>
-        <div style="display:flex;gap:8px">
+      <div class="card-head">
+        <h2 class="card-title">Booking Details</h2>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="gatecode-pill" title="Same gate code for every driver on this order">
+            ${ic.qr}<span class="code tabular">${revealed?'1199#':'••••'}</span>
+            <button class="btn-text" id="toggleCheckinCode" style="display:flex;align-items:center;padding:0">${revealed?ic.eyeOff:ic.eye}</button>
+          </div>
           <button class="btn btn-outline" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
-          <button class="btn btn-outline" data-toast="CSV exported">${ic.download}&nbsp;Export CSV</button>
-          <button class="btn btn-primary" data-toast="Email queued to all drivers">${ic.mail}&nbsp;Send email to all drivers</button>
         </div>
       </div>
       <div class="card-body">
-        <div class="od-single-grid" style="margin-bottom:16px">
-          <div>
-            <div class="section-label" style="color:var(--ink);margin:0 0 4px">Location</div>
-            <div style="font-weight:700;font-size:16px">${shortName}</div>
-            <div class="poi-head-divider" style="margin:12px 0"></div>
-            <div class="info-row"><span class="k">Address</span><span>${l.address} <button class="copy-btn" data-copy="${l.address}">Copy</button></span></div>
-            <div class="info-row"><span class="k">Coordinates</span><span>${l.lat.toFixed(6)}, ${l.lng.toFixed(6)} <button class="copy-btn" data-copy="${l.lat.toFixed(6)}, ${l.lng.toFixed(6)}">Copy</button></span></div>
-            <div class="info-row"><span class="k">Highway</span><span>${l.highway}</span></div>
-            <div class="info-row"><span class="k">Total Spaces Available</span><span>${l.avail} space(s)</span></div>
-            <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — check-in code required</span></div>
-          </div>
-          <div class="checkin-box">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
-              <div class="section-label" style="color:var(--ink);margin:0">Check-in Code</div>
-              <button class="btn-text" id="toggleCheckinCode" style="font-size:11.5px;display:flex;align-items:center;gap:4px">${S.checkinCodeRevealed?ic.eyeOff:ic.eye}${S.checkinCodeRevealed?'Hide':'Show'}</button>
-            </div>
-            <div class="checkin-code tabular">${S.checkinCodeRevealed?'1199#':'••••'}</div>
-            <div style="font-size:11px;color:var(--ink-soft);margin-top:8px">Valid during your reservation: ${order.dates}</div>
-            <div style="font-size:11px;color:var(--ink-soft);margin-top:2px">Same gate code for every driver on this order.</div>
-          </div>
-        </div>
-        <div class="poi-head-divider" style="margin:16px 0"></div>
-        <div class="search-box">${ic.search}<input id="odSearchInput" placeholder="Search driver, ID, plate, or spot" value="${S.confirmSearch}"></div>
-        <div class="dtable-scroll"><table class="dtable">
-          <thead><tr><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle Type</th><th>Gate Code</th><th>Access PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th><th></th></tr></thead>
-          <tbody>${rows.length ? rows.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td class="tabular">${d.gate}</td><td class="tabular">${d.pin}</td><td>${d.ci}</td><td>${d.co}</td><td><span class="pill-ok">Assigned</span></td><td><button class="icon-btn" data-pdfrow="${d.name}" title="Download this driver's PDF">${ic.download}</button></td></tr>`).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
-        </table></div>
-        <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${VALID_ROSTER.length} drivers assigned to this order.</div>
-        <div class="poi-head-divider" style="margin:16px 0"></div>
         <div class="section-label" style="color:var(--ink);margin:0 0 8px">Charges</div>
         ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} × ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
         ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} × ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
@@ -2008,12 +1948,35 @@ function screenOrderDetailBatch(){
         <div class="info-row"><span class="k">Service fee (2%)</span><span>$${batchOrder.serviceFee.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
         <div class="info-row"><span class="k">Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</b></span></div>
+        <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
+        <div class="info-row"><span class="k">Paid on</span><span>Jul 7, 2026, 9:03 AM</span></div>
+        <div class="poi-head-divider" style="margin:16px 0"></div>
+        <div class="section-label" style="color:var(--ink);margin:0 0 4px">Location</div>
+        <div style="font-weight:700;font-size:16px">${shortName}</div>
+        <div class="poi-head-divider" style="margin:12px 0"></div>
+        <div class="info-row"><span class="k">Address</span><span>${l.address} <button class="copy-btn" data-copy="${l.address}">Copy</button></span></div>
+        <div class="info-row"><span class="k">Coordinates</span><span>${l.lat.toFixed(6)}, ${l.lng.toFixed(6)} <button class="copy-btn" data-copy="${l.lat.toFixed(6)}, ${l.lng.toFixed(6)}">Copy</button></span></div>
+        <div class="info-row"><span class="k">Highway</span><span>${l.highway}</span></div>
+        <div class="info-row"><span class="k">Total Spaces Available</span><span>${l.avail} space(s)</span></div>
+        <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — check-in code required</span></div>
       </div>
     </div>
-    <div class="help-bar">
-      <button class="help-bar-btn" data-toast="Opening support chat…">${ic.headset}Contact support</button>
-      <div class="help-bar-divider"></div>
-      <button class="help-bar-btn" data-toast="Calling ${order.loc}…">${ic.phone}Call</button>
+    <div class="card" style="margin-top:16px">
+      <div class="card-head">
+        <h2 class="card-title">Drivers (${VALID_ROSTER.length})</h2>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" data-toast="CSV exported">${ic.download}&nbsp;Export CSV</button>
+          <button class="btn btn-primary" data-toast="Email queued to all drivers">${ic.mail}&nbsp;Send email to all drivers</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="search-box">${ic.search}<input id="odSearchInput" placeholder="Search driver, ID, plate, or spot" value="${S.confirmSearch}"></div>
+        <div class="dtable-scroll"><table class="dtable">
+          <thead><tr><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle Type</th><th>Gate Code</th><th>Access PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th><th></th></tr></thead>
+          <tbody>${rows.length ? rows.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td class="tabular">${d.gate}</td><td class="tabular">${d.pin}</td><td>${d.ci}</td><td>${d.co}</td><td><span class="pill-ok">Assigned</span></td><td><button class="icon-btn" data-pdfrow="${d.name}" title="Download this driver's PDF">${ic.download}</button></td></tr>`).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
+        </table></div>
+        <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${VALID_ROSTER.length} drivers assigned to this order.</div>
+      </div>
     </div>
     <button class="btn btn-outline" style="margin-top:16px" id="backToOrders2">← Back to Orders</button>
   </div>`;
@@ -2046,9 +2009,6 @@ function render(){
   wireScreen(app);
   syncLeafletMap();
   bindOutsideClickOnce();
-  // re-scan for the AddEvent "Add to Calendar" button — it's inserted dynamically by this SPA's
-  // own re-render, after atc.min.js already did its one-time page scan on load
-  if(window.addeventatc) addeventatc.refresh();
 }
 
 function bindText(root, id, setter, opts){
