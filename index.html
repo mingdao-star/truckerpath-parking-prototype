@@ -530,12 +530,7 @@ function poiInfoBlock(l){
     { ic:ic.scale, label:'Scales', on:l.scales },
     { ic:ic.atm, label:'ATM', count:l.atmCount, on:l.atmCount>0 },
   ];
-  return `<div class="section-label" style="color:var(--ink)">Availability</div>
-    <div style="margin-bottom:16px">
-      <div><b class="tabular" style="color:var(--brand);font-size:20px">${l.avail}</b> <span style="font-size:14px;color:var(--ink)">of ${l.totalSpots} spots available today</span></div>
-      <div class="progress-track" style="margin-top:8px"><div class="progress-fill" style="width:${Math.round(l.avail/l.totalSpots*100)}%"></div></div>
-    </div>
-    <div class="section-label" style="color:var(--ink)">General Info</div>
+  return `<div class="section-label" style="color:var(--ink)">General Info</div>
     <div class="info-row"><span class="k">Address</span><span>${l.address}</span></div>
     <div class="info-row"><span class="k">Highway</span><span>${l.highway}</span></div>
     <div class="info-row"><span class="k">Lat/Lng</span><span>${l.lat.toFixed(6)}, ${l.lng.toFixed(6)}</span></div>
