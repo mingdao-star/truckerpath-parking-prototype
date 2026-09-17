@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="google" content="notranslate">
 <title>TruckerPath Parking — Interactive Prototype</title>
-<meta name="description" content="Fully workable clickable prototype: Book Parking (quick single-spot) and Batch Fleet Parking flows, plus Orders, Wallet, and Login">
+<meta name="description" content="Fully workable clickable prototype: Book Parking (quick single-spot) and Batch Parking flows, plus Orders, Wallet, and Login">
 <!-- Real map: Leaflet + OpenStreetMap (free, no API key). Requires internet access when opened locally. -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -694,8 +694,8 @@ const PARTNER_LOCATIONS = [
   {partner:'Park it Plus',name:'Park it Plus',city:'Lebanon',state:'MO',active:false,avail:58,day:13,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
   {partner:'Space City Parking',name:'Space City Parking',city:'Brookshire',state:'TX',active:true,avail:40,day:17,vtypes:['Bobtail']},
   {partner:'Assure Parking',name:'Assure Parking Secured Drop Yard 24/7',city:'Memphis',state:'TN',active:true,avail:50,day:13,vtypes:['Trailer Only']},
-  {partner:'TSG Fleet Services LLC',name:'TSG Fleet Parking Services - Haslet',city:'Fort Worth',state:'TX',active:true,avail:60,day:29,vtypes:['Bobtail']},
-  {partner:'TSG Fleet Services LLC',name:'TSG Fleet Parking Services - Fontana',city:'Fontana',state:'CA',active:true,avail:46,day:29,vtypes:['Trailer Only']},
+  {partner:'TSG Parking Services LLC',name:'TSG Parking Services - Haslet',city:'Fort Worth',state:'TX',active:true,avail:60,day:29,vtypes:['Bobtail']},
+  {partner:'TSG Parking Services LLC',name:'TSG Parking Services - Fontana',city:'Fontana',state:'CA',active:true,avail:46,day:29,vtypes:['Trailer Only']},
   {partner:'AAA Parking',name:'AAA Trailer Services & Parking - Granite City',city:'Granite City',state:'IL',active:true,avail:28,day:45,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
   {partner:'AAA Parking',name:'AAA Trailer Services & Parking - Bridgeton',city:'Bridgeton',state:'MO',active:true,avail:20,day:13,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
   {partner:'AAA Parking',name:'AAA Trailer Services & Parking - Sikeston',city:'Sikeston',state:'MO',active:false,avail:58,day:18,vtypes:['Truck + Trailer','Trailer Only']},
@@ -764,7 +764,7 @@ function buildRoster(count){
     let vtype = VTYPES[i % 3 === 0 ? 0 : i % 3 === 1 ? 1 : 0];
     let status = 'ok', msg = '';
     // email/phone are optional driver-provided contact info — left blank on some rows on purpose
-    const email = i % 2 === 0 ? '' : `${name.toLowerCase().replace(' ','.')}@fleetmail.com`;
+    const email = i % 2 === 0 ? '' : `${name.toLowerCase().replace(' ','.')}@drivermail.com`;
     const phone = i % 3 === 0 ? '' : `(555) ${String(200+i).padStart(3,'0')}-${String(1000+(i*37)%9000).padStart(4,'0')}`;
     if(includeErrors && i===0){ vtype='Bobtail'; status='err'; msg='Vehicle not supported'; }
     if(includeErrors && i===1){ rows.push({row:i+1,name:'',id:'',dot:'',vtype:'',plate:'',state:'',email:'',phone:'',status:'err',msg:'Missing information'}); continue; }
@@ -1249,7 +1249,7 @@ function screenLogin(){
         ${S.loginErr ? `<div class="field-err">${S.loginErr}</div>` : ''}
         <div style="text-align:right;margin:8px 0 16px"><a href="#" class="btn-text" id="forgotPw" style="font-size:12.5px">Forgot password?</a></div>
         <button class="btn btn-primary btn-lg" style="width:100%" id="loginSubmit">Log in</button>
-        <div style="text-align:center;margin-top:14px;font-size:12.5px;color:var(--ink-soft)">New to TruckerPath fleet? <a href="#" class="btn-text" id="toCreateTab">Create an account</a></div>
+        <div style="text-align:center;margin-top:14px;font-size:12.5px;color:var(--ink-soft)">New to TruckerPath? <a href="#" class="btn-text" id="toCreateTab">Create an account</a></div>
       ` : `
         <h2 style="font-size:17px;margin:0 0 14px">Create your account</h2>
         <div class="field" style="margin-bottom:12px"><label>Company name</label><input class="control" id="signupCompany" placeholder="ABC Logistics"></div>
@@ -1463,7 +1463,7 @@ function screenPayment(context){
     <div style="font-size:12.5px;margin-bottom:10px">${batchOrder.spotsReserved} spot(s) reserved for ${batchOrder.validCount} driver(s)<br><span style="color:var(--ink-soft)">${batchOrder.trailerOnlyCount} Trailer Only + ${batchOrder.truckTrailerCount} Truck + Trailer</span></div>
     ${batchOrder.trailerOnlyCount>0 ? `<div class="orderline"><span>Trailer Only parking</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div><div class="orderline-detail">${batchOrder.trailerOnlyCount} driver(s) × billed ${batchOrder.unit}</div>` : ''}
     ${batchOrder.truckTrailerCount>0 ? `<div class="orderline"><span>Truck + Trailer parking</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div><div class="orderline-detail">${batchOrder.truckTrailerCount} driver(s) × billed ${batchOrder.unit}</div>` : ''}
-    <div class="orderline"><span>Fleet discount (5%)</span><span class="green">−$${batchOrder.discount.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+    <div class="orderline"><span>Volume discount (5%)</span><span class="green">−$${batchOrder.discount.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
     <div class="orderline"><span>Service fee (2%)</span><span>$${batchOrder.serviceFee.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
     <div class="orderline"><span>Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
     <div class="orderline total"><span>Total</span><span>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
@@ -1472,7 +1472,7 @@ function screenPayment(context){
   return `
   ${topNav('book')}
   <div class="page">
-    ${context==='batch' ? '<h1 class="batch-title">Batch Fleet Parking</h1>' : ''}
+    ${context==='batch' ? '<h1 class="batch-title">Batch Parking</h1>' : ''}
     <div class="results-row" style="align-items:flex-start">
       <div class="card" style="flex:1">
         <div class="card-head"><h2 class="card-title">Payment</h2>${headBadge}</div>
@@ -1582,7 +1582,7 @@ function screenBookStep5Confirm(){
 }
 
 /* ============================================================
-   Batch Fleet flow
+   Batch flow
 ============================================================ */
 function batchStepper(active){
   const steps=['Find Parking','Booking Details','Import Drivers','Payment','Confirmation'];
@@ -1599,7 +1599,7 @@ function screenBatchDetails(){
   ${topNav('book')}
   <div class="page">
     ${batchStepper(1)}
-    <h1 class="batch-title">Batch Fleet Parking</h1>
+    <h1 class="batch-title">Batch Parking</h1>
     <div class="card"><div class="card-body">
       <div class="card-icon-head"><div class="card-icon-badge">${ic.file}</div><b>Driver import</b></div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="step-num">1</span><span style="font-weight:600;font-size:13px">Download the template</span></div>
@@ -1613,13 +1613,13 @@ function screenBatchDetails(){
         ${S.batch.uploading ? `
         <div class="dropzone" style="cursor:default">
           ${ic.file}
-          <div style="margin-top:8px;font-size:13.5px">Uploading fleet-drivers-jul14.xlsx…</div>
+          <div style="margin-top:8px;font-size:13.5px">Uploading drivers-jul14.xlsx…</div>
           <div class="progress-track" style="max-width:320px;margin:10px auto 0"><div class="progress-fill" style="width:${S.batch.uploadPct}%"></div></div>
         </div>` : S.batch.uploaded ? `
         <div class="uploaded-file-row">
           <div class="uploaded-file-ic">${ic.file}</div>
           <div style="flex:1;min-width:0">
-            <div style="font-weight:600;font-size:13.5px">fleet-drivers-jul14.xlsx</div>
+            <div style="font-weight:600;font-size:13.5px">drivers-jul14.xlsx</div>
             <div style="font-size:11.5px;color:var(--green-deep);display:flex;align-items:center;gap:4px">${ic.check} Uploaded</div>
           </div>
           <button class="icon-btn" id="removeUploadBtn" title="Remove file">${ic.x}</button>
@@ -1700,10 +1700,10 @@ function screenBatchImport(){
   ${topNav('book')}
   <div class="page">
     ${batchStepper(2)}
-    <h1 class="batch-title">Batch Fleet Parking</h1>
+    <h1 class="batch-title">Batch Parking</h1>
     <div class="card"><div class="card-body">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div style="font-weight:700">Import summary — fleet-drivers-jul14.xlsx</div>
+        <div style="font-weight:700">Import summary — drivers-jul14.xlsx</div>
         <button class="btn-text" id="reuploadBtn">Re-upload file</button>
       </div>
       <div class="stat-tiles">
@@ -1764,7 +1764,7 @@ function screenBatchConfirm(){
     ${batchStepper(4)}
     <div class="confirm-banner">
       <div class="confirm-ic">${ic.checkW}</div>
-      <div><div style="font-weight:700;font-size:16px">Booking confirmed — FP-20260708-4417</div><div style="color:var(--green-deep);font-size:13px">Parking instructions generated for ${batchOrder.validCount} driver${batchOrder.validCount===1?'':'s'}. A receipt was sent to dispatch@navprofleet.com.</div></div>
+      <div><div style="font-weight:700;font-size:16px">Booking confirmed — FP-20260708-4417</div><div style="color:var(--green-deep);font-size:13px">Parking instructions generated for ${batchOrder.validCount} driver${batchOrder.validCount===1?'':'s'}. A receipt was sent to dispatch@navprodispatch.com.</div></div>
     </div>
     <div class="chips-row">
       <div class="chip"><div class="k">Spots</div><div class="v">${batchOrder.spotsReserved} reserved · ${batchOrder.validCount} assigned</div></div>
@@ -1970,7 +1970,7 @@ function screenOrderDetailBatch(){
         <div class="section-label" style="color:var(--ink);margin:0 0 8px">Charges</div>
         ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} × ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
         ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} × ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
-        <div class="info-row"><span class="k">Fleet discount (5%)</span><span>−$${batchOrder.discount.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+        <div class="info-row"><span class="k">Volume discount (5%)</span><span>−$${batchOrder.discount.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
         <div class="info-row"><span class="k">Service fee (2%)</span><span>$${batchOrder.serviceFee.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
         <div class="info-row"><span class="k">Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</b></span></div>
@@ -2089,7 +2089,7 @@ function wireScreen(root){
     } else {
       const dest = S.postLoginGoto || 'book1';
       S.postLoginGoto = null;
-      S.loggedIn=true; toast('Account created — welcome to TruckerPath fleet'); go(dest);
+      S.loggedIn=true; toast('Account created — welcome to TruckerPath'); go(dest);
     }
   });
 
@@ -2184,7 +2184,7 @@ function wireScreen(root){
       if(S.batch.uploadPct >= 100){
         clearInterval(iv); S.batch.uploading=false; S.batch.uploaded=true;
         const foundCount = S.presenterTool.rowCount || 500;
-        toast(`fleet-drivers-jul14.xlsx uploaded — ${foundCount} rows found`);
+        toast(`drivers-jul14.xlsx uploaded — ${foundCount} rows found`);
         render(); return;
       }
       render();
