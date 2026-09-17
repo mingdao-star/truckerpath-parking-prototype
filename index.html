@@ -1922,12 +1922,6 @@ function screenOrderDetailBatch(){
       <div class="orderdetail-ic">${ic.checkW}</div>
       <h2 class="card-title" style="margin:0;font-size:18px">Order details — ${order.id}</h2>
     </div>
-    <div class="chips-row">
-      <div class="chip"><div class="k">Location</div><div class="v">${order.loc}</div></div>
-      <div class="chip"><div class="k">Dates</div><div class="v">${order.dates}</div></div>
-      <div class="chip"><div class="k">Spots reserved</div><div class="v">${order.spots}</div></div>
-      <div class="chip"><div class="k">Total Paid</div><div class="v">${order.total}</div></div>
-    </div>
     <div class="card">
       <div class="card-head">
         <h2 class="card-title">Booking Details</h2>
@@ -1956,6 +1950,8 @@ function screenOrderDetailBatch(){
         <div class="info-row"><span class="k">Address</span><span>${l.address} <button class="copy-btn" data-copy="${l.address}">Copy</button></span></div>
         <div class="info-row"><span class="k">Coordinates</span><span>${l.lat.toFixed(6)}, ${l.lng.toFixed(6)} <button class="copy-btn" data-copy="${l.lat.toFixed(6)}, ${l.lng.toFixed(6)}">Copy</button></span></div>
         <div class="info-row"><span class="k">Highway</span><span>${l.highway}</span></div>
+        <div class="info-row"><span class="k">Reservation Dates</span><span>${order.dates}</span></div>
+        <div class="info-row"><span class="k">Spots Reserved</span><span>${order.spots}</span></div>
         <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — check-in code required</span></div>
       </div>
     </div>
