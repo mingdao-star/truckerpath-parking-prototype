@@ -483,12 +483,15 @@ const S = {
   walletNewCard: { name:'', number:'', exp:'', cvc:'', zip:'' },
   wallet: { selectedCardId:null, showAddModal:false },
 
+  // spots/total below are derived from the same fixed VALID_ROSTER (22 drivers) and each
+  // order's own lotId — kept in sync with computeOrderCharges() so the Orders list and the
+  // Order Detail screen never disagree about how many drivers/dollars a given order represents
   ordersHistory: [
-    {id:'FP-20260708-4417', loc:'TA Travel Center, SecurSpace Yard', dates:'Jul 14 – Jul 17, 2026', spots:500, total:'$27,732.78', status:'Paid', type:'batch'},
-    {id:'FP-20260622-3108', loc:"Pilot Flying J — Fort Worth", dates:'Jun 22 – Jun 25, 2026', spots:180, total:'$8,370.00', status:'Paid', type:'batch'},
-    {id:'FP-20260530-2984', loc:"Love's Truck Stop — Mesquite", dates:'May 30 – Jun 2, 2026', spots:60, total:'$2,520.00', status:'Refunded', type:'batch'},
-    {id:'RP-88214-JX', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', dates:'Jul 31 – Aug 7, 2026', spots:1, total:'$166.65', status:'Paid', type:'single'},
-    {id:'FP-20260801-4602', loc:'TA Travel Center — Dallas South', dates:'Aug 10 – Aug 13, 2026', spots:320, total:'$17,280.00', status:'Draft', type:'batch'},
+    {id:'FP-20260708-4417', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 14 – Jul 17, 2026', spots:22, total:'$963.19', paidOn:'Jul 7, 2026, 9:03 AM', status:'Paid', type:'batch'},
+    {id:'FP-20260622-3108', loc:'Maricopa, AZ — N White Rd Truck & Trailer Yard', lotId:'maricopa', dates:'Jun 22 – Jun 25, 2026', spots:22, total:'$963.19', paidOn:'Jun 15, 2026, 11:20 AM', status:'Paid', type:'batch'},
+    {id:'FP-20260530-2984', loc:'Glendale, AZ — PHX1 Logistics Plus', lotId:'glendale1', dates:'May 30 – Jun 2, 2026', spots:22, total:'$963.19', paidOn:'May 24, 2026, 3:47 PM', status:'Refunded', type:'batch'},
+    {id:'RP-88214-JX', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 31 – Aug 7, 2026', spots:1, total:'$166.65', paidOn:'Jul 24, 2026, 2:15 PM', status:'Paid', type:'single'},
+    {id:'FP-20260801-4602', loc:'Glendale, AZ — PHX2 Logistics Plus', lotId:'glendale2', dates:'Aug 10 – Aug 13, 2026', spots:22, total:'$368.53', paidOn:'Aug 3, 2026, 10:15 AM', status:'Draft', type:'batch'},
   ],
 };
 
@@ -968,6 +971,36 @@ function computeBatchOrder(){
     truckTrailerPrice, trailerOnlyPrice, subtotal, discount, serviceFee, tax, total,
     spotsReserved: S.spots || 0,
   };
+}
+// past-order view (Orders -> View) must NOT depend on live booking-flow state (S.selectedLotId,
+// S.batch.bookingType, S.presenterTool's simulated roster) — that state has nothing to do with
+// an order placed earlier, and using it caused the order detail screen to show whatever lot/
+// roster the user happened to be browsing elsewhere. This always prices the fixed 22-driver
+// VALID_ROSTER against the order's own lot at the standard Daily rate.
+function computeOrderCharges(l){
+  const truckTrailerCount = VALID_ROSTER.filter(d=>d.vtype==='Truck + Trailer').length;
+  const trailerOnlyCount = VALID_ROSTER.filter(d=>d.vtype==='Trailer Only').length;
+  const unit = batchRateUnit('Daily');
+  const truckTrailerRate = batchVehicleRate('Truck + Trailer', 'Daily', l);
+  const trailerOnlyRate = batchVehicleRate('Trailer Only', 'Daily', l);
+  const truckTrailerPrice = truckTrailerRate * truckTrailerCount;
+  const trailerOnlyPrice = trailerOnlyRate * trailerOnlyCount;
+  const subtotal = truckTrailerPrice + trailerOnlyPrice;
+  const discount = subtotal * 0.05;
+  const serviceFee = subtotal * 0.02;
+  const tax = (subtotal - discount) * TAX_RATE;
+  const total = subtotal - discount + serviceFee + tax;
+  return {
+    validCount: VALID_ROSTER.length, truckTrailerCount, trailerOnlyCount, unit,
+    truckTrailerPrice, trailerOnlyPrice, subtotal, discount, serviceFee, tax, total,
+  };
+}
+// order.dates is always "MMM D – MMM D, YYYY" — split it so the driver table's check-in/out
+// columns can show the actual dates for whichever order is being viewed, instead of a date
+// baked into the demo roster that only matched one specific order
+function orderDateBounds(order){
+  const [start, endRaw] = order.dates.split(' – ');
+  return { start, end: endRaw.replace(/,\s*\d{4}$/, '') };
 }
 // single-spot flow uses one fixed demo scenario (weekly rate at Eloy) — computed once so the tax
 // line stays consistent everywhere this total is shown (payment, confirmation, order detail, orders list)
@@ -1575,6 +1608,7 @@ function singleOrderDetailBody(){
   const shortName = l.name.split(' at ').pop();
   const singleOrder = singleSpotOrder();
   const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
+  const orderRecord = S.ordersHistory.find(o=>o.id==='RP-88214-JX');
   return `
     <div class="card">
       <div class="card-head">
@@ -1588,7 +1622,7 @@ function singleOrderDetailBody(){
         <div class="info-row"><span class="k">Tax</span><span>$${singleOrder.tax.toFixed(2)}</span></div>
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${singleOrder.total.toFixed(2)}</b></span></div>
         <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
-        <div class="info-row"><span class="k">Paid on</span><span>Jul 24, 2026, 2:15 PM</span></div>
+        <div class="info-row"><span class="k">Paid on</span><span>${orderRecord.paidOn}</span></div>
         <div class="poi-head-divider" style="margin:16px 0"></div>
         <div class="section-label" style="color:var(--ink);margin:0 0 4px">Location</div>
         <div style="font-weight:700;font-size:16px">${shortName}</div>
@@ -1951,10 +1985,11 @@ function screenOrderDetailBatch(){
   const q = S.confirmSearch.trim().toLowerCase();
   let rows = VALID_ROSTER;
   if(q) rows = rows.filter(d => (d.name+' '+d.id+' '+d.plate).toLowerCase().includes(q));
-  const batchOrder = computeBatchOrder();
-  // this order's loc is a demo string, not tied to one of our 4 real lots — fall back to whichever
-  // lot is currently selected (or Eloy) so the location detail below has real address/coordinates data
-  const l = LOTS[S.selectedLotId] || LOTS.eloy;
+  // tied to this specific order's own lot and its own dates — never to live booking-flow state —
+  // so the numbers on screen stay correct no matter what the user was doing elsewhere in the app
+  const l = LOTS[order.lotId] || LOTS.eloy;
+  const batchOrder = computeOrderCharges(l);
+  const { start: ciDate, end: coDate } = orderDateBounds(order);
   const shortName = l.name.split(' at ').pop();
   const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
   return `
@@ -1981,7 +2016,7 @@ function screenOrderDetailBatch(){
         <div class="info-row"><span class="k">Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</b></span></div>
         <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
-        <div class="info-row"><span class="k">Paid on</span><span>Jul 7, 2026, 9:03 AM</span></div>
+        <div class="info-row"><span class="k">Paid on</span><span>${order.paidOn}</span></div>
         <div class="poi-head-divider" style="margin:16px 0"></div>
         <div class="section-label" style="color:var(--ink);margin:0 0 4px">Location</div>
         <div style="font-weight:700;font-size:16px">${shortName}</div>
@@ -1990,7 +2025,7 @@ function screenOrderDetailBatch(){
         <div class="info-row"><span class="k">Coordinates</span><span>${l.lat.toFixed(6)}, ${l.lng.toFixed(6)} <button class="copy-btn" data-copy="${l.lat.toFixed(6)}, ${l.lng.toFixed(6)}">Copy</button></span></div>
         <div class="info-row"><span class="k">Highway</span><span>${l.highway}</span></div>
         <div class="info-row"><span class="k">Reservation Dates</span><span>${order.dates}</span></div>
-        <div class="info-row"><span class="k">Spots Reserved</span><span>${order.spots}</span></div>
+        <div class="info-row"><span class="k">Spots Reserved</span><span>${batchOrder.validCount}</span></div>
         <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — check-in code required</span></div>
       </div>
     </div>
@@ -2009,7 +2044,7 @@ function screenOrderDetailBatch(){
         <div class="search-box">${ic.search}<input id="odSearchInput" placeholder="Search driver, ID, plate, or spot" value="${S.confirmSearch}"></div>
         <div class="dtable-scroll"><table class="dtable">
           <thead><tr><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle Type</th><th>Gate Code</th><th>Access PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th><th></th></tr></thead>
-          <tbody>${rows.length ? rows.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td class="tabular">${d.gate}</td><td class="tabular">${d.pin}</td><td>${d.ci}</td><td>${d.co}</td><td><span class="pill-ok">Assigned</span></td><td><button class="icon-btn" data-pdfrow="${d.name}" title="Download this driver's PDF">${ic.download}</button></td></tr>`).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
+          <tbody>${rows.length ? rows.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td class="tabular">${d.gate}</td><td class="tabular">${d.pin}</td><td>${ciDate}, ${16+((d.row-1)%6)}:00</td><td>${coDate}, 0${5+((d.row-1)%3)}:30</td><td><span class="pill-ok">Assigned</span></td><td><button class="icon-btn" data-pdfrow="${d.name}" title="Download this driver's PDF">${ic.download}</button></td></tr>`).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
         </table></div>
         <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${VALID_ROSTER.length} drivers assigned to this order.</div>
       </div>` : ''}
