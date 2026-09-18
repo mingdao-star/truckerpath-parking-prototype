@@ -283,6 +283,9 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .qrcard-visual svg{width:36px;height:36px}
 .qrcard-code{font-size:30px;font-weight:800;letter-spacing:4px;color:var(--ink)}
 .qrcard-caption{font-size:11.5px;color:var(--ink-soft);margin-top:12px}
+.orderdetail-top-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.orderdetail-top-row>.confirm-banner,.orderdetail-top-row>.orderdetail-banner{flex:2 1 320px;margin-bottom:0}
+.orderdetail-top-row>.qrcard{flex:1 1 260px;margin-bottom:0}
 
 /* ---- batch flow specific ---- */
 .batch-title{font-size:19px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em}
@@ -1564,7 +1567,6 @@ function singleOrderDetailBody(){
   const singleOrder = singleSpotOrder();
   const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
   return `
-    ${gateCodeCard('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.')}
     <div class="card">
       <div class="card-head">
         <h2 class="card-title">Booking Details</h2>
@@ -1595,9 +1597,12 @@ function screenBookStep5Confirm(){
   return `
   ${topNav('book')}
   <div class="page">
-    <div class="confirm-banner">
-      <div class="confirm-ic">${ic.checkW}</div>
-      <div><div style="font-weight:700;font-size:16px">You're booked — RP-88214-JX</div><div style="color:var(--green-deep);font-size:13px">Confirmation sent to ${phone ? phone : 'your phone'}. Show your check-in code at the gate.</div></div>
+    <div class="orderdetail-top-row">
+      <div class="confirm-banner">
+        <div class="confirm-ic">${ic.checkW}</div>
+        <div><div style="font-weight:700;font-size:16px">You're booked — RP-88214-JX</div><div style="color:var(--green-deep);font-size:13px">Confirmation sent to ${phone ? phone : 'your phone'}. Show your check-in code at the gate.</div></div>
+      </div>
+      ${gateCodeCard('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.')}
     </div>
     ${singleOrderDetailBody()}
     <button class="btn btn-primary" id="backHomeBtn">Back to Book Parking</button>
@@ -1920,9 +1925,12 @@ function screenOrderDetailSingle(){
   return `
   ${topNav('orders')}
   <div class="page">
-    <div class="orderdetail-banner">
-      <div class="orderdetail-ic">${ic.checkW}</div>
-      <h2 class="card-title" style="margin:0;font-size:18px">Order details — RP-88214-JX</h2>
+    <div class="orderdetail-top-row">
+      <div class="orderdetail-banner">
+        <div class="orderdetail-ic">${ic.checkW}</div>
+        <h2 class="card-title" style="margin:0;font-size:18px">Order details — RP-88214-JX</h2>
+      </div>
+      ${gateCodeCard('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.')}
     </div>
     ${singleOrderDetailBody()}
     <button class="btn btn-outline" style="margin-top:16px" id="backToOrders">← Back to Orders</button>
@@ -1943,11 +1951,13 @@ function screenOrderDetailBatch(){
   return `
   ${topNav('orders')}
   <div class="page">
-    <div class="orderdetail-banner">
-      <div class="orderdetail-ic">${ic.checkW}</div>
-      <h2 class="card-title" style="margin:0;font-size:18px">Order details — ${order.id}</h2>
+    <div class="orderdetail-top-row">
+      <div class="orderdetail-banner">
+        <div class="orderdetail-ic">${ic.checkW}</div>
+        <h2 class="card-title" style="margin:0;font-size:18px">Order details — ${order.id}</h2>
+      </div>
+      ${gateCodeCard('1199#', 'Same gate code for every driver on this order.')}
     </div>
-    ${gateCodeCard('1199#', 'Same gate code for every driver on this order.')}
     <div class="card">
       <div class="card-head">
         <h2 class="card-title">Booking Details</h2>
