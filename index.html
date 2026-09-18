@@ -332,6 +332,9 @@ table.dtable tr.warn:hover td{background:#fdf1de}
 .capacity-alert{display:flex;gap:14px;align-items:flex-start;background:var(--red-tint);border:1.5px solid #f3c6b4;border-radius:var(--r-lg);padding:18px 20px;margin-bottom:16px;color:var(--red)}
 .capacity-alert-ic{width:36px;height:36px;border-radius:999px;background:var(--red);display:grid;place-items:center;flex:none}
 .capacity-alert-title{font-weight:800;font-size:15.5px}
+.capacity-check-loading{text-align:center;padding:48px 20px}
+.spinner{width:32px;height:32px;border:3px solid var(--line);border-top-color:var(--brand);border-radius:999px;animation:spin .8s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
 .search-box{display:flex;align-items:center;gap:8px;border:1px solid var(--border-input);border-radius:var(--r-md);padding:0 12px;color:var(--ink-soft);margin-bottom:10px;max-width:320px;height:36px}
 .search-box input{border:none;flex:1;height:100%;background:transparent}
 .search-box input:focus{outline:none}
@@ -466,7 +469,7 @@ const S = {
 
   payment: { context:'single', selectedCardId:'card_visa' },
 
-  batch: { bookingType:'Daily', uploading:false, uploadPct:0, uploaded:false, editingRow:null },
+  batch: { bookingType:'Daily', uploading:false, uploadPct:0, uploaded:false, editingRow:null, checkingCapacity:false },
   // presenter-only demo control — not part of the product design, see screenBatchDetails
   presenterTool: { rowCount: null },
   directory: { state: null, search: '', listingPage: 1 },
@@ -1719,16 +1722,21 @@ function screenBatchDetails(){
 }
 
 // error rows can be fixed inline (instead of forcing a full re-upload) — edit mode swaps the row's
-// cells for inputs; Save validates and flips status to 'ok' in place on the same roster array object
-function importRowHtml(d){
+// cells for inputs; Save validates and flips status to 'ok' in place on the same roster array object.
+// isOverage flags an otherwise-valid row whose vehicle type has more drivers uploaded than spots
+// reserved — it's not a data error, just contextually unassignable right now, so it's highlighted
+// the same way but keeps its own "No spot reserved" pill instead of overwriting d.status.
+function importRowHtml(d, isOverage){
   const isEditing = S.batch.editingRow === d.row;
   if(!isEditing){
-    return `<tr class="${d.status==='err'?'warn':''}">
+    const flagged = d.status==='err' || isOverage;
+    return `<tr class="${flagged?'warn':''}">
       <td>${d.row}</td><td>${d.name||'—'}</td><td class="tabular">${d.dot||'—'}</td><td>${d.plate||'—'}</td><td>${d.vtype||'—'}</td>
       <td>${d.email||'—'}</td><td>${d.phone||'—'}</td><td>${d.ci||'—'}</td><td>${d.co||'—'}</td>
       <td><div style="display:flex;align-items:center;gap:6px">
-        ${d.status==='err' ? `<span class="pill-warn">${d.msg}</span>` : '<span class="pill-ok">Valid</span>'}
+        ${d.status==='err' ? `<span class="pill-warn">${d.msg}</span>` : isOverage ? `<span class="pill-warn">No spot reserved</span>` : '<span class="pill-ok">Valid</span>'}
         <button class="btn-text" style="font-size:11.5px" data-editrow="${d.row}">Edit</button>
+        ${flagged ? `<button class="btn-text" style="font-size:11.5px;color:var(--red)" data-deleterow="${d.row}">Delete</button>` : ''}
       </div></td>
     </tr>`;
   }
@@ -1748,6 +1756,23 @@ function importRowHtml(d){
   </tr>`;
 }
 function screenBatchImport(){
+  // simulates a brief server-side pass matching uploaded vehicle types against reserved spots,
+  // distinct from the instant client-side field checks (missing info / unsupported vehicle)
+  if(S.batch.checkingCapacity){
+    return `
+    ${topNav('book')}
+    <div class="page">
+      ${batchStepper(2)}
+      <h1 class="batch-title">Batch Parking</h1>
+      <div class="card"><div class="card-body">
+        <div class="capacity-check-loading">
+          <div class="spinner"></div>
+          <div style="margin-top:14px;font-weight:600;font-size:14px">Checking driver capacity against reserved spots…</div>
+          <div style="font-size:12.5px;color:var(--ink-soft);margin-top:4px">Matching each uploaded vehicle type to what you reserved in step 1.</div>
+        </div>
+      </div></div>
+    </div>`;
+  }
   const q = S.importSearch.trim().toLowerCase();
   const activeRoster = getImportRoster();
   const validCount = activeRoster.filter(d=>d.status==='ok').length;
@@ -1794,7 +1819,7 @@ function screenBatchImport(){
             ${vtypeOverages.map(vt=>`<li>${vtypeCounts[vt]} ${vt} driver${vtypeCounts[vt]===1?'':'s'} found, but only ${S.fleetSpots[vt]||0} ${vt} spot${(S.fleetSpots[vt]||0)===1?'':'s'} reserved</li>`).join('')}
           </ul>
           `}
-          <div style="font-size:13px;margin-top:10px">You can't continue to payment until this is fixed — go back and reserve more spots for the vehicle type(s) above, or upload a file with fewer drivers of that type.</div>
+          <div style="font-size:13px;margin-top:10px">You can't continue to payment until this is fixed — go back and reserve more spots for the vehicle type(s) above, or fix it directly below: the affected rows are highlighted so you can change their vehicle type or delete them.</div>
         </div>
       </div>` : ''}
       <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px">Drivers are assigned to available spots at your reserved location. All ${activeRoster.length} uploaded rows are shown below.</div>
@@ -1805,7 +1830,7 @@ function screenBatchImport(){
       <div class="search-box">${ic.search}<input id="importSearchInput" placeholder="Search driver name, DOT #, or plate" value="${S.importSearch}"></div>
       <div class="dtable-scroll"><table class="dtable">
         <thead><tr><th>Row</th><th>Driver</th><th>DOT Number</th><th>Plate</th><th>Vehicle Type</th><th>Email (optional)</th><th>Phone Number (optional)</th><th>Check-in</th><th>Check-out</th><th>Status</th></tr></thead>
-        <tbody>${rows.length ? rows.map(importRowHtml).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:16px">No rows match your search.</td></tr>'}</tbody>
+        <tbody>${rows.length ? rows.map(d=>importRowHtml(d, !bookingLot.sharedPool && d.status==='ok' && vtypeOverages.includes(d.vtype))).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:16px">No rows match your search.</td></tr>'}</tbody>
       </table></div>
     </div></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
@@ -2258,12 +2283,23 @@ function wireScreen(root){
     }, 220);
   });
   const removeUploadBtn = root.querySelector('#removeUploadBtn'); if(removeUploadBtn) removeUploadBtn.addEventListener('click',()=>{ S.batch.uploaded=false; render(); toast('File removed'); });
-  const batchToImport = root.querySelector('#batchToImport'); if(batchToImport && !batchToImport.disabled) batchToImport.addEventListener('click',()=>go('batchImport'));
+  const batchToImport = root.querySelector('#batchToImport'); if(batchToImport && !batchToImport.disabled) batchToImport.addEventListener('click',()=>{
+    S.batch.checkingCapacity = true; go('batchImport');
+    setTimeout(()=>{ S.batch.checkingCapacity = false; render(); }, 900);
+  });
   root.querySelectorAll('[data-itab]').forEach(b=>b.addEventListener('click',()=>{ S.importTab=b.dataset.itab; render(); }));
   const importSearchInput = root.querySelector('#importSearchInput');
   if(importSearchInput) importSearchInput.addEventListener('input',()=>{ S.importSearch=importSearchInput.value; rerenderKeepFocus(); });
   root.querySelectorAll('[data-editrow]').forEach(b=>b.addEventListener('click',()=>{ S.batch.editingRow=parseInt(b.dataset.editrow,10); render(); }));
   root.querySelectorAll('[data-cancelrow]').forEach(b=>b.addEventListener('click',()=>{ S.batch.editingRow=null; render(); }));
+  root.querySelectorAll('[data-deleterow]').forEach(b=>b.addEventListener('click',()=>{
+    const row = parseInt(b.dataset.deleterow,10);
+    const roster = getImportRoster();
+    const idx = roster.findIndex(d=>d.row===row);
+    if(idx>-1) roster.splice(idx,1);
+    if(S.batch.editingRow===row) S.batch.editingRow=null;
+    render(); toast(`Row ${row} removed`);
+  }));
   root.querySelectorAll('[data-saverow]').forEach(b=>b.addEventListener('click',()=>{
     const row = parseInt(b.dataset.saverow,10);
     const name = (root.querySelector(`#editName_${row}`).value||'').trim();
