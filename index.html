@@ -280,10 +280,10 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .qrcard-toggle{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--brand);flex:none;background:none;border:none;cursor:pointer}
 /* floats over whatever is below instead of pushing the page down when revealed */
 .qrcard-expand{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:0 14px 32px rgba(20,20,10,.16);padding:16px 18px;z-index:20}
-.qrcard-expand-row{display:flex;align-items:center;gap:20px}
+.qrcard-expand-row{display:flex;align-items:center;justify-content:center;gap:20px}
 .qrcard-visual{width:72px;height:72px;border-radius:var(--r-md);background:var(--paper-dim);display:grid;place-items:center;color:var(--ink);flex:none}
 .qrcard-visual svg{width:36px;height:36px}
-.qrcard-code{font-size:30px;font-weight:800;letter-spacing:4px;color:var(--ink)}
+.qrcard-code{font-size:30px;font-weight:800;letter-spacing:4px;color:var(--ink);text-align:center}
 .qrcard-caption{font-size:11.5px;color:var(--ink-soft);margin-top:12px}
 .orderdetail-top-row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:16px}
 .orderdetail-top-row>.confirm-banner,.orderdetail-top-row>.orderdetail-banner{flex:2 1 320px;margin-bottom:0}
@@ -1554,10 +1554,7 @@ function gateCodeCard(code, caption){
     ${revealed ? `<div class="qrcard-expand">
       <div class="qrcard-expand-row">
         <div class="qrcard-visual">${ic.qr}</div>
-        <div>
-          <div class="qrcard-code tabular">${code}</div>
-          <button class="copy-btn" data-copy="${code}">Copy code</button>
-        </div>
+        <div class="qrcard-code tabular">${code}</div>
       </div>
       <div class="qrcard-caption">${caption}</div>
     </div>` : ''}
