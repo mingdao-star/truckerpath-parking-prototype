@@ -266,10 +266,6 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 /* ---- confirmation ---- */
 .confirm-banner{background:var(--green-tint);border:1px solid #bfe0cc;border-radius:var(--r-lg);padding:16px 18px;display:flex;gap:14px;align-items:center;margin-bottom:16px}
 .confirm-ic{width:36px;height:36px;border-radius:999px;background:var(--green);display:grid;place-items:center;flex:none}
-.chips-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
-.chip{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:8px 12px;box-shadow:var(--shadow-sm)}
-.chip .k{font-size:10px;text-transform:uppercase;color:var(--ink-soft);font-weight:700;letter-spacing:.03em}
-.chip .v{font-size:13.5px;font-weight:700}
 /* ---- order detail (single) ---- */
 .orderdetail-banner{background:var(--paper-dim);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;display:flex;gap:14px;align-items:center;margin-bottom:16px}
 .orderdetail-ic{width:44px;height:44px;border-radius:999px;background:var(--brand);display:grid;place-items:center;flex:none}
@@ -476,7 +472,6 @@ const S = {
   importTab: 'all',
   importSearch: '',
   confirmSearch: '',
-  confirmPage: 1,
   selectedOrderId: null,
 
   walletCards: [
@@ -1843,53 +1838,76 @@ function screenBatchImport(){
   </div>`;
 }
 
+// mirrors the Order Detail layout (order-detail-top-row with gate code, Booking Details card
+// with Charges + Location, collapsible Drivers card) so a just-completed booking looks exactly
+// like viewing that same order later would — this screen uses LIVE booking-flow state, which is
+// correct here (unlike the historical Order Detail view, this IS that state, right now)
 function screenBatchConfirm(){
   const batchOrder = computeBatchOrder();
   const validRoster = batchOrder.roster.filter(d=>d.status==='ok');
   const q = S.confirmSearch.trim().toLowerCase();
   let rows = validRoster;
   if(q) rows = rows.filter(d => (d.name+' '+d.id+' '+d.plate).toLowerCase().includes(q));
-  const per = 8, pages = Math.max(1, Math.ceil(rows.length/per));
-  const page = Math.min(S.confirmPage, pages);
-  const slice = rows.slice((page-1)*per, page*per);
-  let pageBtns = '';
-  for(let i=1;i<=pages;i++) pageBtns += `<button class="page-btn ${i===page?'on':''}" data-pg="${i}">${i}</button>`;
+  const l = LOTS[S.selectedLotId];
+  const shortName = l.name.split(' at ').pop();
+  const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
   return `
-  ${topNav('book')}
+  ${topNav('orders')}
   <div class="page">
     ${batchStepper(4)}
-    <div class="confirm-banner">
-      <div class="confirm-ic">${ic.checkW}</div>
-      <div><div style="font-weight:700;font-size:16px">Booking confirmed — FP-20260708-4417</div><div style="color:var(--green-deep);font-size:13px">Parking instructions generated for ${batchOrder.validCount} driver${batchOrder.validCount===1?'':'s'}. A receipt was sent to dispatch@navprodispatch.com.</div></div>
-    </div>
-    <div class="chips-row">
-      <div class="chip"><div class="k">Spots</div><div class="v">${batchOrder.spotsReserved} reserved · ${batchOrder.validCount} assigned</div></div>
-      <div class="chip"><div class="k">Gate — Memphis</div><div class="v">1199# <button class="copy-btn" data-copy="1199#" style="margin-left:4px">Copy</button></div></div>
+    <div class="orderdetail-top-row">
+      <div class="confirm-banner">
+        <div class="confirm-ic">${ic.checkW}</div>
+        <div><div style="font-weight:700;font-size:16px">Booking confirmed — FP-20260708-4417</div><div style="color:var(--green-deep);font-size:13px">Parking instructions generated for ${batchOrder.validCount} driver${batchOrder.validCount===1?'':'s'}. A receipt was sent to dispatch@navprodispatch.com.</div></div>
+      </div>
+      ${gateCodeCard('1199#', 'Same gate code for every driver on this order.')}
     </div>
     <div class="card">
-      <div class="card-head"><h2 class="card-title">Booking Details</h2>
+      <div class="card-head">
+        <h2 class="card-title">Booking Details</h2>
+        <button class="btn btn-outline" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
+      </div>
+      <div class="card-body">
+        <div class="section-label" style="color:var(--ink);margin:0 0 8px">Charges</div>
+        ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} × ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
+        ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} × ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
+        <div class="info-row"><span class="k">Volume discount (5%)</span><span>−$${batchOrder.discount.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+        <div class="info-row"><span class="k">Service fee (2%)</span><span>$${batchOrder.serviceFee.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+        <div class="info-row"><span class="k">Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+        <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</b></span></div>
+        <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
+        <div class="poi-head-divider" style="margin:16px 0"></div>
+        <div class="section-label" style="color:var(--ink);margin:0 0 4px">Location</div>
+        <div style="font-weight:700;font-size:16px">${shortName}</div>
+        <div class="poi-head-divider" style="margin:12px 0"></div>
+        <div class="info-row"><span class="k">Address</span><span>${l.address} <button class="copy-btn" data-copy="${l.address}">Copy</button></span></div>
+        <div class="info-row"><span class="k">Coordinates</span><span>${l.lat.toFixed(6)}, ${l.lng.toFixed(6)} <button class="copy-btn" data-copy="${l.lat.toFixed(6)}, ${l.lng.toFixed(6)}">Copy</button></span></div>
+        <div class="info-row"><span class="k">Highway</span><span>${l.highway}</span></div>
+        <div class="info-row"><span class="k">Spots Reserved</span><span>${batchOrder.validCount}</span></div>
+        <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — check-in code required</span></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-head">
+        <button class="drivers-toggle" id="toggleDriversSection">
+          ${S.driversSectionExpanded?ic.chevDown:ic.chevRight}
+          <h2 class="card-title" style="margin:0">Drivers (${batchOrder.validCount})</h2>
+        </button>
         <div style="display:flex;gap:8px">
           <button class="btn btn-outline" data-toast="CSV exported (${batchOrder.validCount} rows)">${ic.download}&nbsp;Export CSV</button>
           <button class="btn btn-primary" data-toast="Email queued to ${batchOrder.validCount} drivers">${ic.mail}&nbsp;Send email to all drivers</button>
         </div>
       </div>
-      <div class="card-body">
+      ${S.driversSectionExpanded ? `<div class="card-body">
         <div class="search-box">${ic.search}<input id="confirmSearchInput" placeholder="Search driver, ID, plate, or spot" value="${S.confirmSearch}"></div>
         <div class="dtable-scroll"><table class="dtable">
           <thead><tr><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle Type</th><th>Gate Code</th><th>Access PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th><th></th></tr></thead>
-          <tbody>${slice.length ? slice.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td class="tabular">${d.gate}</td><td class="tabular">${d.pin}</td><td>${d.ci}</td><td>${d.co}</td><td><span class="pill-ok">Assigned</span></td><td><button class="icon-btn" data-pdfrow="${d.name}" title="Download this driver's PDF">${ic.download}</button></td></tr>`).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
+          <tbody>${rows.length ? rows.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td class="tabular">${d.gate}</td><td class="tabular">${d.pin}</td><td>${d.ci}</td><td>${d.co}</td><td><span class="pill-ok">Assigned</span></td><td><button class="icon-btn" data-pdfrow="${d.name}" title="Download this driver's PDF">${ic.download}</button></td></tr>`).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
         </table></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
-          <span style="font-size:12.5px;color:var(--ink-soft)">${rows.length ? (page-1)*per+1 : 0}–${Math.min(page*per,rows.length)} of ${rows.length} (${batchOrder.validCount} total in this order)</span>
-          <div class="pager">
-            <button class="page-btn" data-pg="${page-1}" ${page<=1?'disabled':''}>‹</button>
-            ${pageBtns}
-            <button class="page-btn" data-pg="${page+1}" ${page>=pages?'disabled':''}>›</button>
-          </div>
-        </div>
-      </div>
+        <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${batchOrder.validCount} drivers assigned to this order.</div>
+      </div>` : ''}
     </div>
-    <button class="btn btn-primary" style="margin-top:16px" id="backHomeBtn2">Back to Book Parking</button>
+    <button class="btn btn-primary" style="margin-top:16px" id="backToOrdersConfirm">Back to My Orders</button>
   </div>`;
 }
 
@@ -2258,7 +2276,7 @@ function wireScreen(root){
   const amenitiesToggle = root.querySelector('#amenitiesToggle'); if(amenitiesToggle) amenitiesToggle.addEventListener('click',()=>{ S.amenitiesExpanded=!S.amenitiesExpanded; render(); });
   const toggleDriversSection = root.querySelector('#toggleDriversSection'); if(toggleDriversSection) toggleDriversSection.addEventListener('click',()=>{ S.driversSectionExpanded=!S.driversSectionExpanded; render(); });
   const backHome = root.querySelector('#backHomeBtn'); if(backHome) backHome.addEventListener('click',()=>go('homepage'));
-  const backHome2 = root.querySelector('#backHomeBtn2'); if(backHome2) backHome2.addEventListener('click',()=>go('homepage'));
+  const backToOrdersConfirm = root.querySelector('#backToOrdersConfirm'); if(backToOrdersConfirm) backToOrdersConfirm.addEventListener('click',()=>go('orders'));
   root.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>copyText(b.dataset.copy)));
   root.querySelectorAll('[data-toast]').forEach(b=>b.addEventListener('click',()=>toast(b.dataset.toast)));
 
@@ -2330,10 +2348,9 @@ function wireScreen(root){
   });
 
   const confirmSearchInput = root.querySelector('#confirmSearchInput');
-  if(confirmSearchInput) confirmSearchInput.addEventListener('input',()=>{ S.confirmSearch=confirmSearchInput.value; S.confirmPage=1; rerenderKeepFocus(); });
+  if(confirmSearchInput) confirmSearchInput.addEventListener('input',()=>{ S.confirmSearch=confirmSearchInput.value; rerenderKeepFocus(); });
   const odSearchInput = root.querySelector('#odSearchInput');
   if(odSearchInput) odSearchInput.addEventListener('input',()=>{ S.confirmSearch=odSearchInput.value; rerenderKeepFocus(); });
-  root.querySelectorAll('[data-pg]').forEach(b=>b.addEventListener('click',()=>{ const n=parseInt(b.dataset.pg,10); if(n>=1){ S.confirmPage=n; render(); } }));
   root.querySelectorAll('[data-pdfrow]').forEach(b=>b.addEventListener('click',()=>toast(`Downloading PDF for ${b.dataset.pdfrow}`)));
 
   /* ---- orders ---- */
