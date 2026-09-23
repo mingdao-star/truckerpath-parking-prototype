@@ -1641,7 +1641,7 @@ function singleOrderDetailBody(){
 function screenBookStep5Confirm(){
   const phone = S.vehicleForm.driverPhone;
   return `
-  ${topNav('book')}
+  ${topNav('orders')}
   <div class="page">
     <div class="orderdetail-top-row">
       <div class="confirm-banner">
@@ -1651,7 +1651,7 @@ function screenBookStep5Confirm(){
       ${gateCodeCard('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.')}
     </div>
     ${singleOrderDetailBody()}
-    <button class="btn btn-primary" id="backHomeBtn">Back to Book Parking</button>
+    <button class="btn btn-primary" id="backHomeBtn">Back to My Orders</button>
   </div>`;
 }
 
@@ -2280,7 +2280,7 @@ function wireScreen(root){
   const toggleCheckinCode = root.querySelector('#toggleCheckinCode'); if(toggleCheckinCode) toggleCheckinCode.addEventListener('click',()=>{ S.checkinCodeRevealed=!S.checkinCodeRevealed; render(); });
   const amenitiesToggle = root.querySelector('#amenitiesToggle'); if(amenitiesToggle) amenitiesToggle.addEventListener('click',()=>{ S.amenitiesExpanded=!S.amenitiesExpanded; render(); });
   const toggleDriversSection = root.querySelector('#toggleDriversSection'); if(toggleDriversSection) toggleDriversSection.addEventListener('click',()=>{ S.driversSectionExpanded=!S.driversSectionExpanded; render(); });
-  const backHome = root.querySelector('#backHomeBtn'); if(backHome) backHome.addEventListener('click',()=>go('homepage'));
+  const backHome = root.querySelector('#backHomeBtn'); if(backHome) backHome.addEventListener('click',()=>go('orders'));
   const backToOrdersConfirm = root.querySelector('#backToOrdersConfirm'); if(backToOrdersConfirm) backToOrdersConfirm.addEventListener('click',()=>go('orders'));
   root.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>copyText(b.dataset.copy)));
   root.querySelectorAll('[data-toast]').forEach(b=>b.addEventListener('click',()=>toast(b.dataset.toast)));
