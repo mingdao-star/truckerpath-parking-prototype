@@ -211,6 +211,7 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .stars-row .star{width:16px;height:16px;border-radius:2px;background:var(--line);display:grid;place-items:center;color:#fff;font-size:10px;line-height:1}
 .stars-row .star.on{background:#C2410C}
 .poi-head-divider{height:1px;background:var(--line);margin:10px 0}
+.book1-cta-sticky{position:sticky;bottom:0;background:#fff;padding:14px 0 4px;box-shadow:0 -10px 14px -10px rgba(0,0,0,.12)}
 .fleet-pricing-box{border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px}
 .fleet-pricing-box .refresh{color:var(--orange-deep);display:block;font-size:11px;margin-top:6px}
 .fleet-price-row{display:flex;align-items:center;gap:10px;background:var(--paper-dim);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:12.5px}
@@ -1386,6 +1387,7 @@ function screenBookStep1(){
           <div class="field" style="margin-top:0"><label>Booking Type</label><select class="pill-select" id="step2BookingType">
             ${rateOptions.map(v=>`<option ${S.step2BookingType===v?'selected':''}>${v}</option>`).join('')}
           </select></div>
+          <div class="book1-cta-section">
           <div class="fleet-pricing-box" style="margin-top:10px">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
               <div class="section-label" style="color:var(--ink);margin:0">Pricing &amp; Inventory by Vehicle Type</div>
@@ -1434,7 +1436,10 @@ function screenBookStep1(){
           </div>
           <div class="total-row"><span>Total</span><b class="tabular">$${total.toFixed(2)}</b></div>
           <div style="font-size:11px;color:var(--ink-soft);text-align:right;margin-top:2px">Price shown does not include tax</div>
-          <button class="btn btn-primary btn-lg" style="width:100%;margin-top:14px" id="step2Continue" ${S.spots<=0?'disabled':''}>Continue to booking →</button>
+          <div class="book1-cta-sticky">
+            <button class="btn btn-primary btn-lg" style="width:100%" id="step2Continue" ${S.spots<=0?'disabled':''}>Continue to booking →</button>
+          </div>
+          </div>
           <div class="poi-head-divider" style="margin:18px 0"></div>
           ${poiInfoBlock(l)}
         </div>
