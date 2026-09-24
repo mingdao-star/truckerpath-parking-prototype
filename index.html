@@ -523,6 +523,9 @@ const LOTS = {
     reports:[{cls:'some',label:'SOME',time:'4m ago'},{cls:'many',label:'MANY',time:'10m ago'},{cls:'paid',label:'PAID ONLY',time:'1h ago'}],
     freeSpots:15, wifi:true, scales:false, atmCount:0, vtypeAvail:{'Truck + Trailer':50,'Trailer Only':50},
     amenities:{wideLanes:true, access247:true, gated:true, cctv:true, lighting:true, electronicAccess:true, showers:true, wifi:true, restroom:true, fenced:true, pavedSurface:true},
+    // this partner hasn't uploaded an entrance photo yet — Access & Check-in should fall back to
+    // just the QR icon + text instructions, with no image section
+    hasCheckinPhoto:false,
     instructions:'Enter via the south gate on 91st Ave. A gate code is texted 1 hour before arrival.'},
 };
 
@@ -581,7 +584,7 @@ function poiInfoBlock(l){
     <div class="info-row"><span class="k">Call</span><span><a href="tel:${l.phone.replace(/\D/g,'')}" style="color:var(--brand)">${l.phone}</a></span></div>
     <div class="info-row"><span class="k">Weather</span><span><a href="#" style="color:var(--brand)" data-toast="Opening weather details…">View Details</a></span></div>
     <div class="section-label" style="color:var(--ink);margin-top:12px">Access &amp; Check-in</div>
-    <div class="instruction-photo" style="background-image:url('${lotPhotoUrl(S.selectedLotId)}');background-position:${lotPhotoPos(S.selectedLotId)}"><span class="instruction-photo-cap">Entrance at this location</span></div>
+    ${l.hasCheckinPhoto===false ? '' : `<div class="instruction-photo" style="background-image:url('${lotPhotoUrl(S.selectedLotId)}');background-position:${lotPhotoPos(S.selectedLotId)}"><span class="instruction-photo-cap">Entrance at this location</span></div>`}
     <div style="display:flex;gap:10px;align-items:flex-start">
       <div class="card-icon-badge" style="flex:none">${ic.qr}</div>
       <div><div style="font-weight:600;font-size:13px;margin-bottom:2px">Scan QR to enter</div>
