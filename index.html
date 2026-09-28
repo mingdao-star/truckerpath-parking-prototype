@@ -428,7 +428,7 @@ const S = {
   locationDetailsExpanded: false,
 
   // All Listings must land blank (no pre-filtered state) — see screenAllListings
-  search: { location:'', bookingType:'Daily', checkIn:'2026-07-17', checkOut:'2026-07-19', vehicleType:'Truck + Trailer', priceRange:'Any Price' },
+  search: { location:'', bookingType:'Daily', checkIn:'2026-07-17', checkInTime:'09:00', checkOut:'2026-07-19', checkOutTime:'12:00', vehicleType:'Truck + Trailer', priceRange:'Any Price' },
   resultsHeading: 'Brookville, PA',
 
   selectedLotId: 'eloy',
@@ -437,7 +437,6 @@ const S = {
   step2BookingType: 'Daily',
   spots: 5,
   availRefreshedAt: Date.now(),
-  checkInTime: '09:00',
 
   // one plain vehicle/trailer form per spot — resized to match S.spots when entering the
   // Vehicle & Trailer Details page (see go())
@@ -885,6 +884,11 @@ function timeAgo(ts){
   if(m < 60) return `${m}m ago`;
   const h = Math.floor(m/60);
   return `${h}h ago`;
+}
+// 'YYYY-MM-DD' date input value -> 'Mon D' for the reservation summary
+function formatDateShort(dateStr){
+  if(!dateStr) return '';
+  return new Date(dateStr+'T00:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric' });
 }
 function lotRate(l, bookingType){
   if(bookingType==='Weekly') return l.week;
@@ -1355,6 +1359,14 @@ function screenBookStep1(){
           <div class="field" style="margin-top:0"><label>Booking Type</label><select class="pill-select" id="step2BookingType">
             ${rateOptions.map(v=>`<option ${S.step2BookingType===v?'selected':''}>${v}</option>`).join('')}
           </select></div>
+          <div class="grid-2" style="margin-top:10px">
+            <div class="field" style="margin-top:0"><label>Check-in date</label><input type="date" class="control" id="step2CheckIn" value="${S.search.checkIn}"></div>
+            <div class="field" style="margin-top:0"><label>Check-in time</label><input type="time" class="control" id="step2CheckInTime" value="${S.search.checkInTime}"></div>
+          </div>
+          <div class="grid-2" style="margin-top:10px">
+            <div class="field" style="margin-top:0"><label>Check-out date</label><input type="date" class="control" id="step2CheckOut" value="${S.search.checkOut}"></div>
+            <div class="field" style="margin-top:0"><label>Check-out time</label><input type="time" class="control" id="step2CheckOutTime" value="${S.search.checkOutTime}"></div>
+          </div>
           <div class="book1-cta-section">
           <div class="fleet-pricing-box" style="margin-top:10px">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
@@ -1474,9 +1486,6 @@ function screenBookStep3Vehicle(){
           </div>
           <button class="btn btn-outline" id="openVehicleUploadModal">${ic.file}&nbsp;Batch upload file</button>
         </div>
-        <div class="card" style="margin-bottom:16px"><div class="card-body">
-          <div class="field" style="margin-top:0;max-width:220px"><label>Check-in time</label><input type="time" class="control" id="vfCheckInTime" value="${S.checkInTime}"></div>
-        </div></div>
         ${S.vehicleForms.map((vf,i)=>`
         <div class="card" style="margin-bottom:16px"><div class="card-body">
           <h3 class="card-title" style="margin:0 0 16px;font-size:15px">Vehicle ${i+1}</h3>
@@ -1493,7 +1502,7 @@ function screenBookStep3Vehicle(){
         <div class="card-body">
           <h3 class="card-title" style="font-size:14px;margin-bottom:12px">Your reservation</h3>
           <div class="rail-lot"><div class="rail-thumb"></div><div><div class="rail-name">${l.name.split(' at ').pop()}</div><div class="rail-addr">${l.city}</div></div></div>
-          <div class="rail-row"><span class="k">Dates</span><span>Jul 31 – Aug 7</span></div>
+          <div class="rail-row"><span class="k">Dates</span><span>${formatDateShort(S.search.checkIn)}, ${S.search.checkInTime} – ${formatDateShort(S.search.checkOut)}, ${S.search.checkOutTime}</span></div>
           <div class="rail-row"><span class="k">Booking type</span><span>${S.step2BookingType}</span></div>
           <div class="rail-row"><span class="k">Vehicle</span><span>${S.step2VehicleType}</span></div>
           <div class="rail-row"><span class="k">Spots</span><span>${S.spots}</span></div>
@@ -2014,6 +2023,10 @@ function wireScreen(root){
   const dpClose = root.querySelector('#dpClose'); if(dpClose) dpClose.addEventListener('click',()=>{ S.detailPanelOpen=false; render(); });
   const step2BT = root.querySelector('#step2BookingType');
   if(step2BT) step2BT.addEventListener('change',()=>{ S.step2BookingType = step2BT.value; render(); });
+  bindText(root,'step2CheckIn', v=>S.search.checkIn=v);
+  bindText(root,'step2CheckInTime', v=>S.search.checkInTime=v);
+  bindText(root,'step2CheckOut', v=>S.search.checkOut=v);
+  bindText(root,'step2CheckOutTime', v=>S.search.checkOutTime=v);
   const step2VT = root.querySelector('#step2VehicleType');
   if(step2VT) step2VT.addEventListener('change',()=>{
     S.step2VehicleType = step2VT.value;
@@ -2044,7 +2057,6 @@ function wireScreen(root){
 
   /* ---- book3 (vehicle/trailer details — shared by single-spot and fleet bookings) ---- */
   const step3Back = root.querySelector('#step3Back'); if(step3Back) step3Back.addEventListener('click',()=>go('book1'));
-  bindText(root,'vfCheckInTime', v=>S.checkInTime=v);
   root.querySelectorAll('[data-vf]').forEach(inp=>{
     inp.addEventListener('input',()=>{
       S.vehicleForms[parseInt(inp.dataset.vfrow,10)][inp.dataset.vf] = inp.value;
