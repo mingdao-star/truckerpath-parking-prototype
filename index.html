@@ -585,7 +585,7 @@ function poiInfoBlock(l){
     <div class="info-row"><span class="k">Lat/Lng</span><span>${l.lat.toFixed(6)}, ${l.lng.toFixed(6)}</span></div>
     <div class="info-row"><span class="k">Call</span><span><a href="tel:${l.phone.replace(/\D/g,'')}" style="color:var(--brand)">${l.phone}</a></span></div>
     <div class="info-row"><span class="k">Weather</span><span><a href="#" style="color:var(--brand)" data-toast="Opening weather details…">View Details</a></span></div>
-    <div class="section-label" style="color:var(--ink);margin-top:12px">Access &amp; Check-in</div>
+    <div class="section-label" style="color:var(--ink);margin-top:12px;text-align:center">Access &amp; Check-in</div>
     ${l.hasCheckinPhoto===false ? '' : `<div class="instruction-photo" style="background-image:url('${lotPhotoUrl(S.selectedLotId)}');background-position:${lotPhotoPos(S.selectedLotId)}"><span class="instruction-photo-cap">Entrance at this location</span></div>`}
     <div style="display:flex;gap:10px;align-items:flex-start">
       <div class="card-icon-badge" style="flex:none">${ic.qr}</div>
