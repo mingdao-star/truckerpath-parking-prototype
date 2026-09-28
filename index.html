@@ -466,9 +466,9 @@ const S = {
   // order's own lotId — kept in sync with computeOrderCharges() so the Orders list and the
   // Order Detail screen never disagree about how many drivers/dollars a given order represents
   ordersHistory: [
-    {id:'FP-20260708-4417', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 14 – Jul 17, 2026', spots:22, total:'$963.19', paidOn:'Jul 7, 2026, 9:03 AM', status:'Paid', type:'batch'},
-    {id:'FP-20260622-3108', loc:'Maricopa, AZ — N White Rd Truck & Trailer Yard', lotId:'maricopa', dates:'Jun 22 – Jun 25, 2026', spots:22, total:'$963.19', paidOn:'Jun 15, 2026, 11:20 AM', status:'Paid', type:'batch'},
-    {id:'FP-20260530-2984', loc:'Glendale, AZ — PHX1 Logistics Plus', lotId:'glendale1', dates:'May 30 – Jun 2, 2026', spots:22, total:'$963.19', paidOn:'May 24, 2026, 3:47 PM', status:'Refunded', type:'batch'},
+    {id:'FP-20260708-4417', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 14 – Jul 17, 2026', spots:22, total:'$1,036.48', paidOn:'Jul 7, 2026, 9:03 AM', status:'Paid', type:'batch'},
+    {id:'FP-20260622-3108', loc:'Maricopa, AZ — N White Rd Truck & Trailer Yard', lotId:'maricopa', dates:'Jun 22 – Jun 25, 2026', spots:22, total:'$1,036.48', paidOn:'Jun 15, 2026, 11:20 AM', status:'Paid', type:'batch'},
+    {id:'FP-20260530-2984', loc:'Glendale, AZ — PHX1 Logistics Plus', lotId:'glendale1', dates:'May 30 – Jun 2, 2026', spots:22, total:'$1,036.48', paidOn:'May 24, 2026, 3:47 PM', status:'Refunded', type:'batch'},
     {id:'RP-88214-JX', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 31 – Aug 7, 2026', spots:1, total:'$166.65', paidOn:'Jul 24, 2026, 2:15 PM', status:'Paid', type:'single'},
     {id:'FP-20260801-4602', loc:'Glendale, AZ — PHX2 Logistics Plus', lotId:'glendale2', dates:'Aug 10 – Aug 13, 2026', spots:22, total:'$368.53', paidOn:'Aug 3, 2026, 10:15 AM', status:'Draft', type:'batch'},
   ],
@@ -792,33 +792,29 @@ const PARTNER_LOCATIONS = [
 /* deterministic driver roster, generated once */
 const FIRST = ['Holly','Iris','Monica','Louis','Amy','Hank','Derek','Paul','Dana','David','Maria','Jill','Robert','Wendy','Grace','Tony','Nina','Carla','Omar','Faith','Ray','Sofia','Wade','Priya'];
 const LAST = ['Bishop','Larson','Nguyen','Hayes','Diaz','Ruiz','Ross','Carter','Grant','Larson','Duke','Khan','Ali','Vargas','Doyle','Chen','Mercer','Silva','Boyd','Cruz','Webb','Reyes','Frost','Vega'];
-const VTYPES = ['Truck + Trailer','Trailer Only','Bobtail'];
 const STATES = ['TX','MO','NM','AR','OK'];
 function buildRoster(count){
   const rows = [];
-  const includeErrors = count >= 4; // avoid an all-errors demo when simulating a tiny file
   for(let i=0;i<count;i++){
     const name = FIRST[i%FIRST.length]+' '+LAST[i%LAST.length];
     const id = 'DRV-'+(1201+i);
     const dot = String(1500000+i*271);
     const plate = String.fromCharCode(65+((i*7)%26))+String.fromCharCode(65+((i*11)%26))+String.fromCharCode(65+((i*13)%26))+'-'+(1000+i*37)%9000;
     const state = STATES[i % STATES.length];
-    let vtype = VTYPES[i % 3 === 0 ? 0 : i % 3 === 1 ? 1 : 0];
-    let status = 'ok', msg = '';
+    // every historical demo order books a single vehicle type, matching the live booking flow
+    const vtype = 'Truck + Trailer';
     // email/phone are optional driver-provided contact info — left blank on some rows on purpose
     const email = i % 2 === 0 ? '' : `${name.toLowerCase().replace(' ','.')}@drivermail.com`;
     const phone = i % 3 === 0 ? '' : `(555) ${String(200+i).padStart(3,'0')}-${String(1000+(i*37)%9000).padStart(4,'0')}`;
-    if(includeErrors && i===0){ vtype='Bobtail'; status='err'; msg='Vehicle not supported'; }
-    if(includeErrors && i===1){ rows.push({row:i+1,name:'',id:'',dot:'',vtype:'',plate:'',state:'',email:'',phone:'',status:'err',msg:'Missing information'}); continue; }
-    rows.push({row:i+1, name, id, dot, vtype, plate, state, email, phone, status, msg, gate:'1199#', pin:String(300000+i*4113), ci:'Jul 14, '+(16+(i%6))+':00', co:'Jul 17, 0'+(5+(i%3))+':30'});
+    rows.push({row:i+1, name, id, dot, vtype, plate, state, email, phone, status:'ok', msg:'', gate:'1199#', pin:String(300000+i*4113), ci:'Jul 14, '+(16+(i%6))+':00', co:'Jul 17, 0'+(5+(i%3))+':30'});
   }
   return rows;
 }
 // fixed 22-driver demo roster used only by the historical Order Detail screens (Orders -> View)
 // — unrelated to the live booking flow, which now collects vehicle/trailer info directly (see
 // S.vehicleForms) instead of an uploaded driver roster
-const ROSTER = buildRoster(24);
-const VALID_ROSTER = ROSTER.filter(d=>d.status==='ok');
+const ROSTER = buildRoster(22);
+const VALID_ROSTER = ROSTER;
 
 /* ============================================================
    Helpers
