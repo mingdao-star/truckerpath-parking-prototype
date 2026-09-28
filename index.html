@@ -211,17 +211,18 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .stars-row .star.on{background:#C2410C}
 .poi-head-divider{height:1px;background:var(--line);margin:10px 0}
 .book1-cta-sticky{position:sticky;bottom:0;background:#fff;padding:14px 0 4px;box-shadow:0 -10px 14px -10px rgba(0,0,0,.12)}
-.fleet-pricing-box{border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px}
-.fleet-pricing-box .refresh{color:var(--ink-muted);display:block;font-size:11px;margin-top:8px}
-.rate-card{display:flex;align-items:center;gap:12px;background:var(--paper-dim);border-radius:var(--r-md);padding:12px;margin-top:10px}
-.rate-card-icon{width:38px;height:38px;border-radius:var(--r-md);background:#fff;display:grid;place-items:center;color:var(--brand);flex:none;box-shadow:var(--shadow-sm)}
-.rate-card-info{flex:1;min-width:0}
-.rate-card-price{font-family:var(--font-display);font-size:18px;color:var(--ink)}
-.rate-card-price span{font-family:'Inter',-apple-system,sans-serif;font-size:12px;font-weight:500;color:var(--ink-soft);margin-left:2px}
-.avail-pill{display:inline-block;margin-top:3px;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--green-tint);color:var(--green-deep)}
-.avail-pill.low{background:var(--orange-tint);color:var(--orange-deep)}
-.stepper-inline.sm button{width:28px;height:30px;font-size:14px}
-.stepper-inline.sm input{width:40px;height:30px;font-size:12.5px}
+.fleet-pricing-box{border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px}
+.icon-btn-outline{width:36px;height:36px;border:1px solid var(--border-input);border-radius:var(--r-md);display:grid;place-items:center;color:var(--brand);flex:none}
+.icon-btn-outline:hover{background:var(--paper-dim)}
+.pricing-col-label{font-size:11.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em}
+.pricing-col-label:last-child{text-align:right}
+.rate-select-row{position:relative;flex:1;min-width:0;min-height:44px;display:flex;align-items:center;gap:6px;background:var(--paper-dim);border-radius:var(--r-md);padding:0 10px}
+.rate-select-name{font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rate-select-price{flex:1;text-align:right;font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rate-select-chevron{color:var(--ink-soft);flex:none;display:flex}
+.rate-select-native{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;appearance:none;-webkit-appearance:none;border:none}
+.stepper-inline.sm button{width:28px;height:44px;font-size:14px}
+.stepper-inline.sm input{width:38px;height:44px;font-size:13.5px}
 .hours-banner{display:flex;align-items:center;gap:8px;background:var(--brand-tint);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px}
 .hours-banner b{color:var(--green-deep);flex:1;font-size:13.5px}
 .hours-banner span{color:var(--green-deep);font-size:12.5px}
@@ -367,6 +368,7 @@ table.orders tbody tr:hover td{background:var(--paper-dim)}
    Icons
 ============================================================ */
 const ic = {
+  refresh:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>',
   check:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-11"/></svg>',
   checkW:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-11"/></svg>',
   chevDown:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
@@ -1357,18 +1359,25 @@ function screenBookStep1(){
           `}
           <div class="book1-cta-section">
           <div class="fleet-pricing-box" style="margin-top:10px">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
-              <div class="section-label" style="color:var(--ink);margin:0">Pricing &amp; Inventory</div>
-              <button class="btn-text" id="refreshAvailBtn" style="font-size:11.5px;white-space:nowrap">↻ Refresh</button>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px">
+              <h3 class="card-title" style="margin:0">Pricing &amp; Inventory</h3>
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:12.5px;color:var(--ink-soft);white-space:nowrap">Updated ${timeAgo(S.availRefreshedAt)}</span>
+                <button class="icon-btn-outline" id="refreshAvailBtn" title="Refresh availability">${ic.refresh}</button>
+              </div>
             </div>
-            <div class="field" style="margin-top:0"><label>Vehicle Type</label><select class="pill-select" id="step2VehicleType">
-              ${Object.keys(l.vtypeAvail).map(vt=>`<option ${S.step2VehicleType===vt?'selected':''}>${vt}</option>`).join('')}
-            </select></div>
-            <div class="rate-card">
-              <div class="rate-card-icon">${ic.parkP}</div>
-              <div class="rate-card-info">
-                <div class="rate-card-price"><b class="tabular">$${batchVehicleRate(S.step2VehicleType,S.step2BookingType,l).toFixed(2)}</b><span>/${batchRateUnit(S.step2BookingType)}</span></div>
-                <span class="avail-pill ${vtypeMax<=3?'low':''}">${vtypeMax} available</span>
+            <div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:8px">
+              <label class="pricing-col-label">Vehicle Type</label>
+              <label class="pricing-col-label">Spaces</label>
+            </div>
+            <div style="display:flex;align-items:stretch;gap:8px">
+              <div class="rate-select-row">
+                <span class="rate-select-name">${S.step2VehicleType}</span>
+                <span class="rate-select-price tabular">$${batchVehicleRate(S.step2VehicleType,S.step2BookingType,l).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</span>
+                <span class="rate-select-chevron">${ic.chevDown}</span>
+                <select id="step2VehicleType" class="rate-select-native">
+                  ${Object.keys(l.vtypeAvail).map(vt=>`<option ${S.step2VehicleType===vt?'selected':''}>${vt}</option>`).join('')}
+                </select>
               </div>
               <div class="stepper-inline sm">
                 <button type="button" id="spotsMinus" ${S.spots<=0?'disabled':''}>−</button>
@@ -1376,7 +1385,7 @@ function screenBookStep1(){
                 <button type="button" id="spotsPlus" ${S.spots>=vtypeMax?'disabled':''}>+</button>
               </div>
             </div>
-            <span class="refresh">Last refreshed ${timeAgo(S.availRefreshedAt)}</span>
+            <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">${vtypeMax} available · ${S.spots>=vtypeMax ? 'all selected' : `${S.spots} selected`}</div>
           </div>
           <div class="total-row"><span>Total</span><b class="tabular">$${total.toFixed(2)}</b></div>
           <div style="font-size:11px;color:var(--ink-soft);text-align:right;margin-top:2px">Price shown does not include tax</div>
