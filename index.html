@@ -1710,10 +1710,14 @@ function locationSummaryCard(l, opts){
 }
 // shared body for the single-spot "just booked" screen and its My Orders detail view —
 // they show the same booking, just under a different banner and back-button destination
+// fixed vehicle record for this historical order — a pure function of a fixed index, never
+// live S.vehicleForms, so this screen (Orders -> View) shows the same driver info no matter
+// what the user is doing elsewhere in the live booking flow
 function singleOrderDetailBody(){
   const singleOrder = singleSpotOrder();
   const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
   const orderRecord = S.ordersHistory.find(o=>o.id==='RP-88214-JX');
+  const vf = buildVehicleFormRow(4);
   return `
     <div class="card">
       <div class="card-head">
@@ -1728,6 +1732,25 @@ function singleOrderDetailBody(){
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${singleOrder.total.toFixed(2)}</b></span></div>
         <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
         <div class="info-row"><span class="k">Paid on</span><span>${orderRecord.paidOn}</span></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-head">
+        <h2 class="card-title">Driver & Vehicle</h2>
+      </div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="info-row"><span class="k">Truck company</span><span>${vf.truckCompany}</span></div>
+          <div class="info-row"><span class="k">Truck #</span><span>${vf.truckNum}</span></div>
+          <div class="info-row"><span class="k">Truck make</span><span>${vf.truckMake}</span></div>
+          <div class="info-row"><span class="k">Truck plate #</span><span>${vf.truckPlate}</span></div>
+          <div class="info-row"><span class="k">Truck DOT #</span><span>${vf.truckDot}</span></div>
+          <div class="info-row"><span class="k">Driver phone</span><span>${vf.driverPhone}</span></div>
+          <div class="info-row"><span class="k">Trailer type</span><span>${vf.trailerType}</span></div>
+          <div class="info-row"><span class="k">Trailer #</span><span>${vf.trailerNum}</span></div>
+          <div class="info-row"><span class="k">Trailer company</span><span>${vf.trailerCompany}</span></div>
+          <div class="info-row"><span class="k">Trailer plate #</span><span>${vf.trailerPlate}</span></div>
+        </div>
       </div>
     </div>`;
 }
