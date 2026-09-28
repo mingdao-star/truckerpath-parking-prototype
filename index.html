@@ -1502,12 +1502,9 @@ function screenPayment(context){
     <div class="orderline"><span>Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${singleOrder.tax.toFixed(2)}</span></div>
     <div class="orderline total"><span>Total due today</span><span>$${singleOrder.total.toFixed(2)}</span></div>
   ` : `
-    <div style="font-size:11px;color:var(--green-deep);font-weight:700;margin-bottom:2px">✓ VEHICLES</div>
     <div style="font-size:12.5px;margin-bottom:10px">${batchOrder.spotsReserved} spot(s) reserved · ${S.step2VehicleType}</div>
     ${batchOrder.trailerOnlyCount>0 ? `<div class="orderline"><span>Trailer Only parking</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div><div class="orderline-detail">${batchOrder.trailerOnlyCount} vehicle(s) × billed ${batchOrder.unit}</div>` : ''}
     ${batchOrder.truckTrailerCount>0 ? `<div class="orderline"><span>Truck + Trailer parking</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div><div class="orderline-detail">${batchOrder.truckTrailerCount} vehicle(s) × billed ${batchOrder.unit}</div>` : ''}
-    <div class="orderline"><span>Volume discount (5%)</span><span class="green">−$${batchOrder.discount.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
-    <div class="orderline"><span>Service fee (2%)</span><span>$${batchOrder.serviceFee.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
     <div class="orderline"><span>Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
     <div class="orderline total"><span>Total</span><span>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
   `;
@@ -1526,11 +1523,13 @@ function screenPayment(context){
           ${paymentCardsList()}
         </div>
       </div>
-      <div class="rail card payment-rail"><div class="card-body">
-        <div style="font-weight:700;margin-bottom:10px">${context==='single'?'Order summary':'Order summary'}</div>
-        ${summary}
-        <button class="btn btn-primary btn-lg" style="width:100%;margin-top:12px" id="payBtn">${ic.lock}&nbsp;Pay $${total.toLocaleString('en-US',{minimumFractionDigits:2})}</button>
-      </div></div>
+      <div class="rail card payment-rail">
+        <div class="card-head"><h2 class="card-title">Order summary</h2></div>
+        <div class="card-body">
+          ${summary}
+          <button class="btn btn-primary btn-lg" style="width:100%;margin-top:12px" id="payBtn">${ic.lock}&nbsp;Pay $${total.toLocaleString('en-US',{minimumFractionDigits:2})}</button>
+        </div>
+      </div>
     </div>
     ${addCardModalHtml()}
   </div>`;
