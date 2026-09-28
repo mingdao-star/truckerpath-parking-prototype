@@ -580,24 +580,14 @@ function poiInfoBlock(l){
 }
 // the extra location facts an Order Detail screen hides behind "View location details" — kept
 // out of the always-visible summary (name/address/dates/booking type) so the Location card stays
-// short; shared by the single- and batch-order detail/confirm screens
+// short; shared by the single- and batch-order detail/confirm screens. Operating hours and
+// amenities live in the booking-flow POI panel (poiInfoBlock) instead — not repeated here.
 function locationDetailsHtml(l){
-  const amenities = AMENITY_DEFS.map(d=>({ ic:ic[d.ic], label:d.label, on: !!(l.amenities && l.amenities[d.key]) }));
   return `
     <div class="info-row"><span class="k">Coordinates</span><span>${l.lat.toFixed(6)}, ${l.lng.toFixed(6)} <button class="copy-btn" data-copy="${l.lat.toFixed(6)}, ${l.lng.toFixed(6)}">Copy</button></span></div>
     <div class="info-row"><span class="k">Highway</span><span>${l.highway}</span></div>
     <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — check-in code required</span></div>
-    <div class="info-row"><span class="k">Call</span><span><a href="tel:${l.phone.replace(/\D/g,'')}" style="color:var(--brand)">${l.phone}</a></span></div>
-    <div class="poi-head-divider" style="margin:12px 0"></div>
-    ${operatingHoursBanner(l)}
-    <div class="poi-head-divider" style="margin:12px 0"></div>
-    <div class="section-label" style="color:var(--ink)">Amenities</div>
-    <div class="amenities-grid">
-      ${amenities.map(a=>`<div class="amenity ${a.on?'':'off'}">
-        <div class="amenity-ic">${a.ic}</div>
-        <span>${a.label}</span>
-      </div>`).join('')}
-    </div>`;
+    <div class="info-row"><span class="k">Call</span><span><a href="tel:${l.phone.replace(/\D/g,'')}" style="color:var(--brand)">${l.phone}</a></span></div>`;
 }
 
 const US_STATES = [
