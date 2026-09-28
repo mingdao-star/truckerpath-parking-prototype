@@ -1359,6 +1359,9 @@ function screenBookStep1(){
           <div class="field" style="margin-top:0"><label>Booking Type</label><select class="pill-select" id="step2BookingType">
             ${rateOptions.map(v=>`<option ${S.step2BookingType===v?'selected':''}>${v}</option>`).join('')}
           </select></div>
+          ${S.step2BookingType==='Monthly' ? `
+          <div class="field" style="margin-top:10px"><label>Start date</label><input type="date" class="control" id="step2CheckIn" value="${S.search.checkIn}"></div>
+          ` : `
           <div class="grid-2" style="margin-top:10px">
             <div class="field" style="margin-top:0"><label>Check-in date</label><input type="date" class="control" id="step2CheckIn" value="${S.search.checkIn}"></div>
             <div class="field" style="margin-top:0"><label>Check-in time</label><input type="time" class="control" id="step2CheckInTime" value="${S.search.checkInTime}"></div>
@@ -1367,6 +1370,7 @@ function screenBookStep1(){
             <div class="field" style="margin-top:0"><label>Check-out date</label><input type="date" class="control" id="step2CheckOut" value="${S.search.checkOut}"></div>
             <div class="field" style="margin-top:0"><label>Check-out time</label><input type="time" class="control" id="step2CheckOutTime" value="${S.search.checkOutTime}"></div>
           </div>
+          `}
           <div class="book1-cta-section">
           <div class="fleet-pricing-box" style="margin-top:10px">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
@@ -1502,7 +1506,7 @@ function screenBookStep3Vehicle(){
         <div class="card-body">
           <h3 class="card-title" style="font-size:14px;margin-bottom:12px">Your reservation</h3>
           <div class="rail-lot"><div class="rail-thumb"></div><div><div class="rail-name">${l.name.split(' at ').pop()}</div><div class="rail-addr">${l.city}</div></div></div>
-          <div class="rail-row"><span class="k">Dates</span><span>${formatDateShort(S.search.checkIn)}, ${S.search.checkInTime} – ${formatDateShort(S.search.checkOut)}, ${S.search.checkOutTime}</span></div>
+          <div class="rail-row"><span class="k">${S.step2BookingType==='Monthly'?'Start date':'Dates'}</span><span>${S.step2BookingType==='Monthly' ? formatDateShort(S.search.checkIn) : `${formatDateShort(S.search.checkIn)}, ${S.search.checkInTime} – ${formatDateShort(S.search.checkOut)}, ${S.search.checkOutTime}`}</span></div>
           <div class="rail-row"><span class="k">Booking type</span><span>${S.step2BookingType}</span></div>
           <div class="rail-row"><span class="k">Vehicle</span><span>${S.step2VehicleType}</span></div>
           <div class="rail-row"><span class="k">Spots</span><span>${S.spots}</span></div>
