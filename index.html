@@ -20,6 +20,7 @@
   --green:#1FA971; --green-tint:#E9FAF3; --green-deep:#178F5D;
   --orange:#f97316; --orange-tint:#fff1e6; --orange-deep:#b45309;
   --red:#bb3000; --red-tint:#fdece5;
+  --info:#3457D5; --info-tint:#EAF0FE;
   --r-sm:6px; --r-md:9px; --r-lg:14px; --r-xl:20px;
   --shadow-sm:0 1px 2px rgba(14,19,47,.05), 0 1px 1px rgba(14,19,47,.04);
   --shadow-md:0 6px 16px rgba(14,19,47,.10), 0 2px 6px rgba(14,19,47,.05);
@@ -325,6 +326,9 @@ table.dtable tbody tr:hover td{background:var(--paper-dim)}
 .orderline.total{border-top:1px solid var(--line);margin-top:6px;padding-top:10px;font-weight:700;font-size:15px}
 .orderline .green{color:var(--green-deep)}
 .orderline-detail{font-size:11px;color:var(--ink-soft);margin:-5px 0 8px}
+.booking-type-badge{background:var(--info-tint);color:var(--info);font-size:12.5px;font-weight:700;padding:4px 14px;border-radius:999px;flex:none}
+.stay-summary-box{background:var(--paper-dim);border-radius:var(--r-md);padding:10px 14px;margin-bottom:14px}
+.stay-summary-box .info-row{border-bottom:none;padding:5px 0}
 .payment-rail{width:380px}
 
 /* ---- orders list ---- */
@@ -917,25 +921,83 @@ function vtypeMaxAvail(l, vt){
 // flat AZ-style sales tax used across both the single-spot and batch order summaries
 const TAX_RATE = 0.081;
 
-// one vehicle type per booking now (chosen in Step 1) — every reserved spot is that same type,
-// so this just prices S.spots at that type's rate rather than mixing counts from an uploaded roster
+// 'YYYY-MM-DD' date input value -> 'Fri, Jul 17' for the Order Summary's stay box
+function formatDateWeekday(dateStr){
+  if(!dateStr) return '';
+  return new Date(dateStr+'T00:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+}
+// real check-in/checkout-based pricing for the Payment screen's Order Summary (single- and
+// fleet-spot bookings alike, now that Step 1 collects real dates for every booking regardless of
+// spot count). Weekly bookings bill in whole weeks, then any leftover (<7) days at the daily
+// rate; Monthly bookings bill in whole calendar months, rounding any partial month up — never
+// less than 1 of whichever unit is being billed.
+function computeStayBreakdown(){
+  const l = LOTS[S.selectedLotId];
+  const bookingType = S.step2BookingType;
+  const vtype = S.step2VehicleType;
+  const spots = S.spots;
+  const rate = batchVehicleRate(vtype, bookingType, l);
+  const ciDT = new Date(`${S.search.checkIn}T${S.search.checkInTime}`);
+  const coDT = new Date(`${S.search.checkOut}T${S.search.checkOutTime}`);
+  const totalDays = Math.max(1, Math.ceil(Math.max(1, coDT-ciDT) / 3600000 / 24));
+  const plural = (n,w) => `${n} ${w}${n===1?'':'s'}`;
+
+  let billedLabel, lineItemPrice, lineItemDetail;
+  if(bookingType==='Weekly'){
+    const weeks = Math.floor(totalDays/7);
+    const extraDays = totalDays % 7;
+    const dailyRate = batchVehicleRate(vtype, 'Daily', l);
+    if(weeks===0){
+      lineItemPrice = dailyRate * spots * extraDays;
+      billedLabel = plural(extraDays,'day');
+      lineItemDetail = `$${dailyRate.toFixed(2)}/day × ${plural(spots,'spot')} × ${plural(extraDays,'day')}`;
+    } else if(extraDays===0){
+      lineItemPrice = rate * spots * weeks;
+      billedLabel = plural(weeks,'week');
+      lineItemDetail = `$${rate.toFixed(2)}/week × ${plural(spots,'spot')} × ${plural(weeks,'week')}`;
+    } else {
+      lineItemPrice = rate*spots*weeks + dailyRate*spots*extraDays;
+      billedLabel = `${plural(weeks,'week')} ${plural(extraDays,'day')}`;
+      lineItemDetail = `$${rate.toFixed(2)}/week × ${plural(spots,'spot')} × ${plural(weeks,'week')} + $${dailyRate.toFixed(2)}/day × ${plural(spots,'spot')} × ${plural(extraDays,'day')}`;
+    }
+  } else if(bookingType==='Monthly'){
+    let months = (coDT.getFullYear()-ciDT.getFullYear())*12 + (coDT.getMonth()-ciDT.getMonth());
+    const coMinutes = coDT.getHours()*60+coDT.getMinutes();
+    const ciMinutes = ciDT.getHours()*60+ciDT.getMinutes();
+    if(coDT.getDate()>ciDT.getDate() || (coDT.getDate()===ciDT.getDate() && coMinutes>ciMinutes)) months += 1;
+    months = Math.max(1, months);
+    lineItemPrice = rate * spots * months;
+    billedLabel = plural(months,'month');
+    lineItemDetail = `$${rate.toFixed(2)}/month × ${plural(spots,'spot')} × ${plural(months,'month')}`;
+  } else {
+    lineItemPrice = rate * spots * totalDays;
+    billedLabel = plural(totalDays,'day');
+    lineItemDetail = `$${rate.toFixed(2)}/day × ${plural(spots,'spot')} × ${plural(totalDays,'day')}`;
+  }
+
+  const tax = lineItemPrice * TAX_RATE;
+  const total = lineItemPrice + tax;
+  return {
+    bookingType, vtype, spots,
+    checkInDate: S.search.checkIn, checkInTime: S.search.checkInTime,
+    checkOutDate: S.search.checkOut, checkOutTime: S.search.checkOutTime,
+    billedLabel, lineItemPrice, lineItemDetail, tax, total,
+  };
+}
+
+// one vehicle type per booking now (chosen in Step 1) — every reserved spot is that same type.
+// Reuses the real check-in/checkout-based pricing from computeStayBreakdown() so the just-booked
+// Confirm screen's total always agrees with what was actually charged on the Payment screen,
+// repackaged into the shape screenBatchConfirm's Charges breakdown already expects.
 function computeBatchOrder(){
-  const unit = batchRateUnit(S.batch.bookingType);
-  const bookingLot = LOTS[S.selectedLotId];
+  const order = computeStayBreakdown();
   const truckTrailerCount = S.step2VehicleType==='Truck + Trailer' ? S.spots : 0;
   const trailerOnlyCount = S.step2VehicleType==='Trailer Only' ? S.spots : 0;
-  const truckTrailerRate = batchVehicleRate('Truck + Trailer', S.batch.bookingType, bookingLot);
-  const trailerOnlyRate = batchVehicleRate('Trailer Only', S.batch.bookingType, bookingLot);
-  const truckTrailerPrice = truckTrailerRate * truckTrailerCount;
-  const trailerOnlyPrice = trailerOnlyRate * trailerOnlyCount;
-  const subtotal = truckTrailerPrice + trailerOnlyPrice;
-  const discount = subtotal * 0.05;
-  const serviceFee = subtotal * 0.02;
-  const tax = (subtotal - discount) * TAX_RATE;
-  const total = subtotal - discount + serviceFee + tax;
   return {
-    validCount: S.spots, truckTrailerCount, trailerOnlyCount, unit,
-    truckTrailerPrice, trailerOnlyPrice, subtotal, discount, serviceFee, tax, total,
+    validCount: S.spots, truckTrailerCount, trailerOnlyCount, unit: order.billedLabel,
+    truckTrailerPrice: truckTrailerCount>0 ? order.lineItemPrice : 0,
+    trailerOnlyPrice: trailerOnlyCount>0 ? order.lineItemPrice : 0,
+    tax: order.tax, total: order.total,
     spotsReserved: S.spots || 0,
   };
 }
@@ -1532,21 +1594,7 @@ function paymentCardsList(){
 }
 function screenPayment(context){
   S.payment.context = context;
-  const batchOrder = context==='batch' ? computeBatchOrder() : null;
-  const singleOrder = context==='single' ? singleSpotOrder() : null;
-  const total = context==='single' ? singleOrder.total : batchOrder.total;
-  const summary = context==='single' ? `
-    <div class="orderline"><span>Weekly rate (1 week)</span><span>$${singleOrder.weeklyRate.toFixed(2)}</span></div>
-    <div class="orderline"><span>Service fee</span><span>$${singleOrder.serviceFee.toFixed(2)}</span></div>
-    <div class="orderline"><span>Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${singleOrder.tax.toFixed(2)}</span></div>
-    <div class="orderline total"><span>Total due today</span><span>$${singleOrder.total.toFixed(2)}</span></div>
-  ` : `
-    <div style="font-size:12.5px;margin-bottom:10px">${batchOrder.spotsReserved} spot(s) reserved · ${S.step2VehicleType}</div>
-    ${batchOrder.trailerOnlyCount>0 ? `<div class="orderline"><span>Trailer Only parking</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div><div class="orderline-detail">${batchOrder.trailerOnlyCount} vehicle(s) × billed ${batchOrder.unit}</div>` : ''}
-    ${batchOrder.truckTrailerCount>0 ? `<div class="orderline"><span>Truck + Trailer parking</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div><div class="orderline-detail">${batchOrder.truckTrailerCount} vehicle(s) × billed ${batchOrder.unit}</div>` : ''}
-    <div class="orderline"><span>Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
-    <div class="orderline total"><span>Total</span><span>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
-  `;
+  const order = computeStayBreakdown();
   return `
   ${topNav('book')}
   <div class="page">
@@ -1563,10 +1611,21 @@ function screenPayment(context){
         </div>
       </div>
       <div class="rail card payment-rail">
-        <div class="card-head"><h2 class="card-title">Order summary</h2></div>
+        <div class="card-head">
+          <h2 class="card-title">Order summary</h2>
+          <span class="booking-type-badge">${order.bookingType}</span>
+        </div>
         <div class="card-body">
-          ${summary}
-          <button class="btn btn-primary btn-lg" style="width:100%;margin-top:12px" id="payBtn">${ic.lock}&nbsp;Pay $${total.toLocaleString('en-US',{minimumFractionDigits:2})}</button>
+          <div class="stay-summary-box">
+            <div class="info-row"><span class="k">Check-in</span><span>${formatDateWeekday(order.checkInDate)} · ${order.checkInTime}</span></div>
+            <div class="info-row"><span class="k">Check-out</span><span>${formatDateWeekday(order.checkOutDate)} · ${order.checkOutTime}</span></div>
+            <div class="info-row"><span class="k">Billed</span><span>${order.billedLabel}</span></div>
+          </div>
+          <div class="orderline"><span><b>${order.vtype} parking</b></span><span><b class="tabular">$${order.lineItemPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</b></span></div>
+          <div class="orderline-detail">${order.lineItemDetail}</div>
+          <div class="orderline"><span>Tax</span><span class="tabular">$${order.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+          <div class="orderline total"><span>Total</span><span class="tabular">$${order.total.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+          <button class="btn btn-primary btn-lg" style="width:100%;margin-top:12px" id="payBtn">${ic.lock}&nbsp;Pay $${order.total.toLocaleString('en-US',{minimumFractionDigits:2})}</button>
         </div>
       </div>
     </div>
@@ -1709,11 +1768,9 @@ function screenBatchConfirm(){
       </div>
       <div class="card-body">
         <div class="section-label" style="color:var(--ink);margin:0 0 8px">Charges</div>
-        ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} × ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
-        ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} × ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
-        <div class="info-row"><span class="k">Volume discount (5%)</span><span>−$${batchOrder.discount.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
-        <div class="info-row"><span class="k">Service fee (2%)</span><span>$${batchOrder.serviceFee.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
-        <div class="info-row"><span class="k">Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+        ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} × billed ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
+        ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} × billed ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
+        <div class="info-row"><span class="k">Tax</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</b></span></div>
         <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
       </div>
@@ -1886,9 +1943,7 @@ function screenOrderDetailBatch(){
         <div class="section-label" style="color:var(--ink);margin:0 0 8px">Charges</div>
         ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} × ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
         ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} × ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
-        <div class="info-row"><span class="k">Volume discount (5%)</span><span>−$${batchOrder.discount.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
-        <div class="info-row"><span class="k">Service fee (2%)</span><span>$${batchOrder.serviceFee.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
-        <div class="info-row"><span class="k">Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+        <div class="info-row"><span class="k">Tax</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</b></span></div>
         <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
         <div class="info-row"><span class="k">Paid on</span><span>${order.paidOn}</span></div>
@@ -2108,7 +2163,7 @@ function wireScreen(root){
   const payBtn = root.querySelector('#payBtn');
   if(payBtn) payBtn.addEventListener('click',()=>{
     const isBatch = S.payment.context==='batch';
-    const total = '$' + (isBatch ? computeBatchOrder().total : singleSpotOrder().total).toLocaleString('en-US',{minimumFractionDigits:2});
+    const total = '$' + computeStayBreakdown().total.toLocaleString('en-US',{minimumFractionDigits:2});
     payBtn.textContent='Processing…'; payBtn.disabled=true;
     setTimeout(()=>{ toast('Payment confirmed — '+total); go(isBatch?'batchConfirm':'book5'); },800);
   });
