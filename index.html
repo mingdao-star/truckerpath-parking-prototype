@@ -262,7 +262,7 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 
 /* ---- confirmation ---- */
 .confirm-banner{background:var(--green-tint);border:1px solid #bfe0cc;border-radius:var(--r-lg);padding:16px 18px;display:flex;gap:14px;align-items:center;margin-bottom:16px}
-.confirm-ic{width:36px;height:36px;border-radius:999px;background:var(--green);display:grid;place-items:center;flex:none}
+.confirm-ic{width:40px;height:40px;border-radius:999px;background:var(--green);display:grid;place-items:center;flex:none}
 /* ---- order detail (single) ---- */
 .orderdetail-banner{background:var(--paper-dim);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;display:flex;gap:14px;align-items:center;margin-bottom:16px}
 .orderdetail-ic{width:44px;height:44px;border-radius:999px;background:var(--brand);display:grid;place-items:center;flex:none}
@@ -1773,7 +1773,7 @@ function screenBatchConfirm(){
     <div class="orderdetail-top-row">
       <div class="confirm-banner">
         <div class="confirm-ic">${ic.checkW}</div>
-        <div><div style="font-weight:700;font-size:16px">Booking confirmed — FP-20260708-4417</div><div style="color:var(--green-deep);font-size:13px">Parking instructions generated for ${batchOrder.validCount} driver${batchOrder.validCount===1?'':'s'}. A receipt was sent to dispatch@navprodispatch.com.</div></div>
+        <div style="font-weight:700;font-size:16px">Booking confirmed — FP-20260708-4417</div>
       </div>
       ${locationSummaryCard(l, { address: l.address, bookingType: S.batch.bookingType, spots: batchOrder.validCount })}
       ${gateCodeCard('1199#', 'Same gate code for every driver on this order.')}
