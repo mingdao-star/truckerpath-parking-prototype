@@ -90,7 +90,6 @@ svg{display:block;flex:none}
 .drivers-toggle{display:flex;align-items:center;gap:8px;background:none;border:none;padding:0;cursor:pointer;color:var(--ink)}
 .card-title{font-size:16px;font-weight:700;margin:0}
 .card-body{padding:20px 22px}
-.step-pill{background:var(--brand);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;letter-spacing:.02em}
 
 /* fields */
 .field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em}
@@ -223,7 +222,6 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .fleet-price-row.stepped .fp-avail{min-width:0}
 .stepper-inline.sm button{width:28px;height:30px;font-size:14px}
 .stepper-inline.sm input{width:40px;height:30px;font-size:12.5px}
-.fleet-spots-total{font-weight:700;font-size:13px;color:var(--ink);margin:4px 0 6px}
 .hours-banner{display:flex;align-items:center;gap:8px;background:var(--brand-tint);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px}
 .hours-banner b{color:var(--green-deep);flex:1;font-size:13.5px}
 .hours-banner span{color:var(--green-deep);font-size:12.5px}
@@ -294,46 +292,22 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 
 /* ---- batch flow specific ---- */
 .batch-title{font-size:19px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em}
-/* presenter-only demo control — deliberately styled to look out-of-band, not part of the product design */
-.card.presenter-tool{border:2px dashed #8b5cf6;background:#faf8ff}
-.presenter-tool-badge{background:#8b5cf6;color:#fff;font-size:10px;font-weight:800;letter-spacing:.04em;padding:3px 8px;border-radius:999px;text-transform:uppercase}
 /* ---- shared section-header icon treatment ---- */
 .card-icon-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .card-icon-badge{width:32px;height:32px;border-radius:9px;background:var(--brand-tint);color:var(--brand);display:grid;place-items:center;flex:none}
 .card-icon-head b{font-size:15px}
-.step-num{width:20px;height:20px;border-radius:999px;background:var(--brand);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
 
 .dropzone{border:2px dashed var(--border-input);border-radius:var(--r-lg);padding:30px;text-align:center;background:#fafaf9;cursor:pointer}
 .dropzone:hover{border-color:var(--brand);background:var(--brand-tint)}
-.uploaded-file-row{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;background:#fff}
-.uploaded-file-ic{color:var(--ink-soft);flex:none}
-.progress-track{height:6px;border-radius:999px;background:var(--paper-dim);overflow:hidden;margin-top:10px}
-.progress-fill{height:100%;background:var(--brand);border-radius:999px;transition:width .2s}
-.stat-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
-.stat-tile{border:1px solid var(--line);border-radius:var(--r-md);padding:10px 14px}
-.stat-tile .n{font-size:22px;font-weight:700;font-family:var(--font-display)}
-.stat-tile .l{font-size:11.5px;color:var(--ink-soft)}
-.tabs-row{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:10px}
-.tab-btn{padding:9px 4px;margin-right:16px;font-size:13px;font-weight:500;color:var(--ink-soft);border-bottom:2px solid transparent}
-.tab-btn.on{color:var(--brand);border-bottom-color:var(--brand);font-weight:700}
 table.dtable{width:100%;border-collapse:collapse;font-size:12.5px}
 table.dtable th{text-align:left;font-size:10.5px;text-transform:uppercase;color:var(--ink-soft);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
 table.dtable td{padding:8px 10px;border-bottom:1px solid #f0f0ee;white-space:nowrap;font-variant-numeric:tabular-nums}
 table.dtable tbody tr{transition:background .1s}
 table.dtable tbody tr.dir-row{cursor:pointer}
 table.dtable tbody tr:hover td{background:var(--paper-dim)}
-table.dtable tr.warn td{background:#fff8ef}
-table.dtable tr.warn:hover td{background:#fdf1de}
 .dtable-scroll{max-height:420px;overflow-y:auto;overflow-x:auto;border:1px solid var(--line);border-radius:8px}
 .dtable-scroll table.dtable th{position:sticky;top:0;background:#fff;z-index:1}
 .pill-ok{background:var(--green-tint);color:var(--green-deep);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
-.pill-warn{background:var(--orange-tint);color:var(--orange-deep);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
-.capacity-alert{display:flex;gap:14px;align-items:flex-start;background:var(--red-tint);border:1.5px solid #f3c6b4;border-radius:var(--r-lg);padding:18px 20px;margin-bottom:16px;color:var(--red)}
-.capacity-alert-ic{width:36px;height:36px;border-radius:999px;background:var(--red);display:grid;place-items:center;flex:none}
-.capacity-alert-title{font-weight:800;font-size:15.5px}
-.capacity-check-loading{text-align:center;padding:48px 20px}
-.spinner{width:32px;height:32px;border:3px solid var(--line);border-top-color:var(--brand);border-radius:999px;animation:spin .8s linear infinite;margin:0 auto}
-@keyframes spin{to{transform:rotate(360deg)}}
 .search-box{display:flex;align-items:center;gap:8px;border:1px solid var(--border-input);border-radius:var(--r-md);padding:0 12px;color:var(--ink-soft);margin-bottom:10px;max-width:320px;height:36px}
 .search-box input{border:none;flex:1;height:100%;background:transparent}
 .search-box input:focus{outline:none}
@@ -461,20 +435,19 @@ const S = {
   detailPanelOpen: false,
   step2VehicleType: 'Truck + Trailer',
   step2BookingType: 'Daily',
-  fleetSpots: { 'Truck + Trailer': 3, 'Trailer Only': 2 },
   spots: 5,
   availRefreshedAt: Date.now(),
+  checkInTime: '09:00',
 
-  vehicleForm: { truckCompany:'', truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' },
+  // one plain vehicle/trailer form per spot — resized to match S.spots when entering the
+  // Vehicle & Trailer Details page (see go())
+  vehicleForms: [{ truckCompany:'', truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' }],
+  vehicleUploadModalOpen: false,
 
   payment: { context:'single', selectedCardId:'card_visa' },
 
-  batch: { bookingType:'Daily', uploading:false, uploadPct:0, uploaded:false, editingRow:null, checkingCapacity:false },
-  // presenter-only demo control — not part of the product design, see screenBatchDetails
-  presenterTool: { rowCount: null },
+  batch: { bookingType:'Daily' },
   directory: { state: null, search: '', listingPage: 1 },
-  importTab: 'all',
-  importSearch: '',
   confirmSearch: '',
   selectedOrderId: null,
 
@@ -499,19 +472,19 @@ const S = {
 
 const LOTS = {
   eloy:{name:'Eloy, AZ Truck & Trailer Parking at PICACHO RV & TRUCK PARK', city:'Eloy, AZ', avail:9, totalSpots:12, day:15, week:150, month:300, lat:32.7519, lng:-111.5468,
-    rating:4.1, address:'4501 W Sunland Gin Rd, Eloy, AZ 85131', highway:'I-10, Exit 226', phone:'1(520) 466-7710', staffedHours:null,
+    rating:4.1, address:'4501 W Sunland Gin Rd, Eloy, AZ 85131', highway:'I-10, Exit 226', phone:'1(520) 466-7710',
     reports:[{cls:'some',label:'SOME',time:'12m ago'},{cls:'many',label:'MANY',time:'25m ago'},{cls:'paid',label:'PAID ONLY',time:'2h ago'}],
     freeSpots:9, wifi:true, scales:false, atmCount:0, vtypeAvail:{'Truck + Trailer':6,'Trailer Only':3},
     amenities:{access247:true, gated:true, electronicAccess:true, wifi:true, restroom:true},
     instructions:'Enter via the main gate on Sunland Gin Rd. Show your check-in code to the attendant or scan the QR code posted at the gate.'},
   maricopa:{name:'Maricopa, AZ Truck & Trailer Parking on N White Rd', city:'Maricopa, AZ', avail:12, totalSpots:15, day:18, week:85, month:320, lat:33.0581, lng:-112.0476,
-    rating:4.4, address:'41215 N White Rd, Maricopa, AZ 85138', highway:'AZ-347, Exit 12', phone:'1(520) 568-4420', staffedHours:'6:00 AM – 10:00 PM',
+    rating:4.4, address:'41215 N White Rd, Maricopa, AZ 85138', highway:'AZ-347, Exit 12', phone:'1(520) 568-4420',
     reports:[{cls:'some',label:'SOME',time:'6m ago'},{cls:'many',label:'MANY',time:'18m ago'},{cls:'paid',label:'PAID ONLY',time:'45m ago'}],
     freeSpots:4, wifi:true, scales:true, atmCount:1, vtypeAvail:{'Truck + Trailer':7,'Trailer Only':5},
     amenities:{assignedParking:true, access247:true, gated:true, cctv:true, onSiteStaff:true, lighting:true, showers:true, wifi:true, publicScale:true, restroom:true, fenced:true, pavedSurface:true},
     instructions:'Check in at the site office before 9pm. After hours, use the drop-box for your paperwork.'},
   glendale1:{name:'Glendale-Litchfield Park, AZ at PHX1 Logistics Plus', city:'Glendale, AZ', avail:50, totalSpots:60, day:14, week:65, month:250, lat:33.5387, lng:-112.3576,
-    rating:4.6, address:'6900 N 43rd Ave, Glendale, AZ 85301', highway:'I-17, Exit 205', phone:'1(623) 847-1190', staffedHours:'6:00 AM – 10:00 PM',
+    rating:4.6, address:'6900 N 43rd Ave, Glendale, AZ 85301', highway:'I-17, Exit 205', phone:'1(623) 847-1190',
     reports:[{cls:'some',label:'SOME',time:'3m ago'},{cls:'many',label:'MANY',time:'15m ago'},{cls:'paid',label:'PAID ONLY',time:'1h ago'}],
     freeSpots:20, wifi:false, scales:true, atmCount:1, vtypeAvail:{'Truck + Trailer':30,'Trailer Only':20},
     amenities:{assignedParking:true, wideLanes:true, access247:true, gated:true, cctv:true, onSiteStaff:true, lighting:true, showers:true, publicScale:true, fuel:true, restroom:true, food:true, fenced:true, pavedSurface:true, truckRepair:true},
@@ -519,7 +492,7 @@ const LOTS = {
     // instructions either, just the bare QR icon + title
     hasCheckinPhoto:false, instructions:''},
   glendale2:{name:'Glendale, AZ Truck and Trailer Parking at PHX2 Logistics Plus', city:'Glendale, AZ', avail:50, totalSpots:65, day:16, week:74, month:270, lat:33.5722, lng:-112.1943,
-    rating:4.3, address:'8747 N 91st Ave, Glendale, AZ 85305', highway:'I-17, Exit 208', phone:'1(623) 435-2280', staffedHours:null,
+    rating:4.3, address:'8747 N 91st Ave, Glendale, AZ 85305', highway:'I-17, Exit 208', phone:'1(623) 435-2280',
     // this is the one lot in the demo with a shared inventory pool — Truck + Trailer and Trailer
     // Only aren't separately capped, they draw from the same 50 spots at the same price
     sharedPool:true, poolSize:50,
@@ -552,7 +525,6 @@ function operatingHoursBanner(l){
       <b>Open now</b>
       <span>Gate access: 24 hours</span>
     </div>
-    <div class="info-row"><span class="k">Staffed Security</span><span>${l.staffedHours ? l.staffedHours : 'Unstaffed — QR gate entry only'}</span></div>
     <div style="font-size:11.5px;color:var(--ink-soft);margin:2px 0 0">Mon–Sun · same hours every day</div>`;
 }
 // the canonical amenity vocabulary — first 12 always show, the rest sit behind "Show More"
@@ -852,34 +824,11 @@ function buildRoster(count){
   }
   return rows;
 }
+// fixed 22-driver demo roster used only by the historical Order Detail screens (Orders -> View)
+// — unrelated to the live booking flow, which now collects vehicle/trailer info directly (see
+// S.vehicleForms) instead of an uploaded driver roster
 const ROSTER = buildRoster(24);
 const VALID_ROSTER = ROSTER.filter(d=>d.status==='ok');
-
-function shuffleArray(arr){
-  const a = arr.slice();
-  for(let i=a.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]] = [a[j],a[i]];
-  }
-  return a;
-}
-// shuffled once at load so error rows are scattered like a real import, not always at the top —
-// the "row" number on each entry still reflects its original position in the uploaded file
-const IMPORT_DISPLAY_ROSTER = shuffleArray(ROSTER);
-
-// presenter tool — not part of the product design, see screenBatchDetails: simulates a custom
-// uploaded-file size (row count) for the Import Summary screen, instead of the fixed sample above.
-// Cached per row-count so the simulated order stays stable across unrelated re-renders and only
-// reshuffles when the presenter actually changes the number.
-let _simulatedImportCache = { count:null, roster:null };
-function getImportRoster(){
-  const n = S.presenterTool.rowCount;
-  if(n === null || n === undefined || n <= 0) return IMPORT_DISPLAY_ROSTER;
-  if(_simulatedImportCache.count !== n){
-    _simulatedImportCache = { count:n, roster: shuffleArray(buildRoster(n)) };
-  }
-  return _simulatedImportCache.roster;
-}
 
 /* ============================================================
    Helpers
@@ -973,23 +922,22 @@ function batchRateUnit(bookingType){ return bookingType==='Weekly' ? 'week' : bo
 // that's the pool size minus whatever's already reserved for the OTHER vehicle type(s), since they
 // draw from one combined pool rather than each having its own independent cap
 function vtypeMaxAvail(l, vt){
-  if(l.sharedPool){
-    const reservedElsewhere = Object.keys(l.vtypeAvail).filter(k=>k!==vt).reduce((sum,k)=>sum+(S.fleetSpots[k]||0),0);
-    return Math.max(0, l.poolSize - reservedElsewhere);
-  }
+  // only one vehicle type is ever being reserved at a time now, so a shared-pool lot's whole
+  // pool is available to whichever single type is currently selected
+  if(l.sharedPool) return l.poolSize;
   return l.vtypeAvail[vt]||0;
 }
 
 // flat AZ-style sales tax used across both the single-spot and batch order summaries
 const TAX_RATE = 0.081;
 
+// one vehicle type per booking now (chosen in Step 1) — every reserved spot is that same type,
+// so this just prices S.spots at that type's rate rather than mixing counts from an uploaded roster
 function computeBatchOrder(){
-  const roster = getImportRoster();
-  const validRows = roster.filter(d=>d.status==='ok');
-  const truckTrailerCount = validRows.filter(d=>d.vtype==='Truck + Trailer').length;
-  const trailerOnlyCount = validRows.filter(d=>d.vtype==='Trailer Only').length;
   const unit = batchRateUnit(S.batch.bookingType);
   const bookingLot = LOTS[S.selectedLotId];
+  const truckTrailerCount = S.step2VehicleType==='Truck + Trailer' ? S.spots : 0;
+  const trailerOnlyCount = S.step2VehicleType==='Trailer Only' ? S.spots : 0;
   const truckTrailerRate = batchVehicleRate('Truck + Trailer', S.batch.bookingType, bookingLot);
   const trailerOnlyRate = batchVehicleRate('Trailer Only', S.batch.bookingType, bookingLot);
   const truckTrailerPrice = truckTrailerRate * truckTrailerCount;
@@ -1000,7 +948,7 @@ function computeBatchOrder(){
   const tax = (subtotal - discount) * TAX_RATE;
   const total = subtotal - discount + serviceFee + tax;
   return {
-    roster, validCount: validRows.length, truckTrailerCount, trailerOnlyCount, unit,
+    validCount: S.spots, truckTrailerCount, trailerOnlyCount, unit,
     truckTrailerPrice, trailerOnlyPrice, subtotal, discount, serviceFee, tax, total,
     spotsReserved: S.spots || 0,
   };
@@ -1046,27 +994,18 @@ function singleSpotOrder(){
 }
 function computeStep2Total(){
   const l = LOTS[S.selectedLotId];
-  return Object.entries(l.vtypeAvail).reduce((sum,[vt,n])=>sum + batchVehicleRate(vt, S.step2BookingType, l) * (S.fleetSpots[vt]||0), 0);
+  return batchVehicleRate(S.step2VehicleType, S.step2BookingType, l) * S.spots;
 }
 
-// selecting a lot with fewer available spots (per vehicle type) than currently requested clamps the request down
+// selecting a lot with fewer available spots (for the currently chosen vehicle type) than
+// currently requested clamps the request down; if the new lot doesn't offer the currently
+// selected vehicle type at all, fall back to whichever type it does offer
 function selectLot(id){
   S.selectedLotId = id;
   const l = LOTS[id];
-  if(l.sharedPool){
-    // only one control is shown for a shared-pool lot — fold any split carried over from a
-    // previous (non-shared) lot into that single control instead of silently double-counting it
-    const combined = Object.values(S.fleetSpots).reduce((a,b)=>a+b,0);
-    const canonicalVt = Object.keys(l.vtypeAvail)[0];
-    Object.keys(S.fleetSpots).forEach(vt=>{ S.fleetSpots[vt] = 0; });
-    S.fleetSpots[canonicalVt] = Math.min(combined, l.poolSize);
-  } else {
-    Object.keys(S.fleetSpots).forEach(vt=>{
-      const max = vtypeMaxAvail(l, vt);
-      if(S.fleetSpots[vt] > max) S.fleetSpots[vt] = max;
-    });
-  }
-  S.spots = Object.values(S.fleetSpots).reduce((a,b)=>a+b,0);
+  if(!l.vtypeAvail[S.step2VehicleType]) S.step2VehicleType = Object.keys(l.vtypeAvail)[0];
+  const max = vtypeMaxAvail(l, S.step2VehicleType);
+  if(S.spots > max) S.spots = max;
 }
 
 /* ============================================================
@@ -1399,9 +1338,7 @@ function screenBookStep1(){
   const l = LOTS[S.selectedLotId];
   const total = computeStep2Total();
   const rateOptions = ['Daily','Weekly','Monthly'].filter(bt => bt==='Daily' ? l.day!=null : true);
-  // a shared-pool lot has no reason to ask for a per-type split up front — book N generic spots
-  // from the one pool, and the actual vehicle type per driver gets set later during CSV import
-  const sharedVt = l.sharedPool ? Object.keys(l.vtypeAvail)[0] : null;
+  const vtypeMax = vtypeMaxAvail(l, S.step2VehicleType);
   const detailPanel = S.detailPanelOpen ? `
       <div class="detail-panel card">
         <div class="card-body">
@@ -1421,48 +1358,26 @@ function screenBookStep1(){
           <div class="book1-cta-section">
           <div class="fleet-pricing-box" style="margin-top:10px">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
-              <div class="section-label" style="color:var(--ink);margin:0">Pricing &amp; Inventory by Vehicle Type</div>
+              <div class="section-label" style="color:var(--ink);margin:0">Pricing &amp; Inventory</div>
               <button class="btn-text" id="refreshAvailBtn" style="font-size:11.5px;white-space:nowrap">↻ Refresh</button>
             </div>
-            <div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px">${l.sharedPool ? `One shared pool of ${l.poolSize} spots — book either vehicle type from the same pool at the same rate.` : 'Set how many spots you need for each vehicle type'}</div>
-            ${l.sharedPool ? (()=>{
-              const count = S.fleetSpots[sharedVt]||0;
-              const max = vtypeMaxAvail(l, sharedVt);
-              return `
-              <div class="fleet-price-row stepped">
-                <div class="fp-line">
-                  <span class="fp-type">Truck + Trailer / Trailer Only</span>
-                  <span class="fp-avail tabular">${max} available</span>
+            <div class="field" style="margin-top:0"><label>Vehicle Type</label><select class="pill-select" id="step2VehicleType">
+              ${Object.keys(l.vtypeAvail).map(vt=>`<option ${S.step2VehicleType===vt?'selected':''}>${vt}</option>`).join('')}
+            </select></div>
+            <div class="fleet-price-row stepped" style="margin-top:10px">
+              <div class="fp-line">
+                <span class="fp-type">${S.step2VehicleType}</span>
+                <span class="fp-avail tabular">${vtypeMax} available</span>
+              </div>
+              <div class="fp-line">
+                <span class="fp-rate tabular">$${batchVehicleRate(S.step2VehicleType,S.step2BookingType,l).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</span>
+                <div class="stepper-inline sm">
+                  <button type="button" id="spotsMinus" ${S.spots<=0?'disabled':''}>−</button>
+                  <input id="spotsInput" value="${S.spots}" inputmode="numeric">
+                  <button type="button" id="spotsPlus" ${S.spots>=vtypeMax?'disabled':''}>+</button>
                 </div>
-                <div class="fp-line">
-                  <span class="fp-rate tabular">$${batchVehicleRate(sharedVt,S.step2BookingType,l).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</span>
-                  <div class="stepper-inline sm">
-                    <button type="button" data-fleetspotminus="${sharedVt}" ${count<=0?'disabled':''}>−</button>
-                    <input data-fleetspotinput="${sharedVt}" value="${count}" inputmode="numeric">
-                    <button type="button" data-fleetspotplus="${sharedVt}" ${count>=max?'disabled':''}>+</button>
-                  </div>
-                </div>
-              </div>`;
-            })() : Object.entries(l.vtypeAvail).map(([vt])=>{
-              const count = S.fleetSpots[vt]||0;
-              const max = vtypeMaxAvail(l, vt);
-              return `
-              <div class="fleet-price-row stepped">
-                <div class="fp-line">
-                  <span class="fp-type">${vt}</span>
-                  <span class="fp-avail tabular">${max} available</span>
-                </div>
-                <div class="fp-line">
-                  <span class="fp-rate tabular">$${batchVehicleRate(vt,S.step2BookingType,l).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</span>
-                  <div class="stepper-inline sm">
-                    <button type="button" data-fleetspotminus="${vt}" ${count<=0?'disabled':''}>−</button>
-                    <input data-fleetspotinput="${vt}" value="${count}" inputmode="numeric">
-                    <button type="button" data-fleetspotplus="${vt}" ${count>=max?'disabled':''}>+</button>
-                  </div>
-                </div>
-              </div>`;
-            }).join('')}
-            <div class="fleet-spots-total">${S.spots} spot${S.spots===1?'':'s'} selected</div>
+              </div>
+            </div>
             <span class="refresh">Last refreshed ${timeAgo(S.availRefreshedAt)}</span>
           </div>
           <div class="total-row"><span>Total</span><b class="tabular">$${total.toFixed(2)}</b></div>
@@ -1484,7 +1399,6 @@ function screenBookStep1(){
           <h1 style="font-size:24px;margin:0 0 4px">Find truck parking near you</h1>
           <p style="color:var(--ink-soft);margin:0 0 16px">Search live availability and book a space in seconds.</p>
         </div>
-        ${S.detailPanelOpen ? `<span class="step-pill">STEP 1 OF 3</span>` : ''}
       </div>
       <div class="searchcard" style="padding:14px">
         <div class="sc-field field"><label>Location</label><input class="control" id="b1Location" value="${S.search.location}"></div>
@@ -1505,35 +1419,75 @@ function screenBookStep1(){
 }
 
 /* ============================================================
-   Book Step 3 — Vehicle & Trailer Info
+   Book Step 3 — Vehicle & Trailer Details
+   Shared by single-spot and fleet bookings alike: N sections are auto-generated from the spot
+   count chosen in Step 1 and filled in by hand, with an optional "Batch upload file" shortcut
+   that fills the same sections from a (simulated) file instead of typing each one manually.
 ============================================================ */
-function vfInput(key, label, placeholder, optional){
-  return `<div class="field"><label>${label}${optional?' <span style="text-transform:none;font-weight:400">(optional)</span>':''}</label><input class="control" id="vf_${key}" data-vf="${key}" placeholder="${placeholder}" value="${S.vehicleForm[key]}"></div>`;
+function vfInput(i, key, label, placeholder, optional){
+  return `<div class="field"><label>${label}${optional?' <span style="text-transform:none;font-weight:400">(optional)</span>':''}</label><input class="control" id="vf_${i}_${key}" data-vf="${key}" data-vfrow="${i}" placeholder="${placeholder}" value="${S.vehicleForms[i][key]}"></div>`;
+}
+// fake data for the batch-upload modal's simulated file — no vehicle-type column, since one
+// booking now always books a single vehicle type (set back in Step 1), not a per-row mix
+function buildVehicleFormRow(i){
+  const name = FIRST[i%FIRST.length]+' '+LAST[i%LAST.length];
+  const plate = String.fromCharCode(65+((i*7)%26))+String.fromCharCode(65+((i*11)%26))+String.fromCharCode(65+((i*13)%26))+'-'+(1000+i*37)%9000;
+  const trailerPlate = String.fromCharCode(65+((i*17)%26))+String.fromCharCode(65+((i*19)%26))+String.fromCharCode(65+((i*23)%26))+'-'+(1000+i*53)%9000;
+  return {
+    truckCompany: name+' Trucking', truckNum: String(2000+i), truckMake: ['Freightliner','Kenworth','Peterbilt','Volvo'][i%4],
+    truckPlate: plate, truckDot: String(1500000+i*271), driverPhone: `(555) ${String(200+i).padStart(3,'0')}-${String(1000+(i*37)%9000).padStart(4,'0')}`,
+    trailerType: '53 dry van', trailerNum: String(9000+i), trailerCompany: name+' Trucking', trailerPlate: trailerPlate,
+  };
+}
+function vehicleUploadModalHtml(){
+  if(!S.vehicleUploadModalOpen) return '';
+  return `
+    <div class="modal-overlay" id="vehicleUploadOverlay">
+      <div class="modal-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font-weight:700;font-size:15px">Batch upload file</div>
+          <button class="dp-close" id="closeVehicleUploadModal">${ic.x}</button>
+        </div>
+        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:12px">One row per vehicle: Truck company, Truck #, Truck make, Truck plate #, Truck DOT #, Driver phone, Trailer type, Trailer #, Trailer company, Trailer plate #. All rows book the ${S.step2VehicleType} spots reserved in Step 1.</div>
+        <div class="dropzone" id="vehicleUploadZone">
+          ${ic.file}
+          <div style="margin-top:8px;font-size:13.5px">Drag &amp; drop your file or <span style="color:var(--brand);font-weight:600">browse</span> to upload</div>
+          <div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px">CSV or XLSX · up to 2,000 rows · 10MB max</div>
+        </div>
+      </div>
+    </div>`;
 }
 function screenBookStep3Vehicle(){
   const l = LOTS[S.selectedLotId];
   return `
   ${topNav('book')}
   <div class="page">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div style="margin-bottom:8px">
       <button class="btn btn-outline" id="step3Back">← Back</button>
-      <span class="step-pill">STEP 2 OF 3</span>
     </div>
     <div class="results-row" style="align-items:flex-start">
-      <div class="card" style="flex:1">
-        <div class="card-body">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-            <h2 class="card-title" style="margin:0">Vehicle &amp; trailer details</h2>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <h2 class="card-title" style="margin:0">Vehicle &amp; Trailer Details</h2>
             <span class="autosaved" id="autosaved">${ic.check} Saved</span>
           </div>
-          <div class="section-label">Truck</div>
-          <div class="grid-2" style="margin-bottom:12px">${vfInput('truckCompany','Truck company name','Type here…')}${vfInput('truckNum','Truck #','Type here…')}</div>
-          <div class="grid-2" style="margin-bottom:12px">${vfInput('truckMake','Truck make','Type here…')}${vfInput('truckPlate','Truck plate #','Type here…',true)}</div>
-          <div class="grid-2" style="margin-bottom:16px">${vfInput('truckDot','Truck DOT #','Type here…',true)}${vfInput('driverPhone','Driver phone number','(555) 555-0123')}</div>
-          <div class="section-label">Trailer</div>
-          <div class="grid-2" style="margin-bottom:12px">${vfInput('trailerType','Trailer type','Ex: 53 dry van')}${vfInput('trailerNum','Trailer #','Type here…')}</div>
-          <div class="grid-2">${vfInput('trailerCompany','Trailer company name','Type here…')}${vfInput('trailerPlate','Trailer plate #','Type here…',true)}</div>
+          <button class="btn btn-outline" id="openVehicleUploadModal">${ic.file}&nbsp;Batch upload file</button>
         </div>
+        <div class="card" style="margin-bottom:16px"><div class="card-body">
+          <div class="field" style="margin-top:0;max-width:220px"><label>Check-in time</label><input type="time" class="control" id="vfCheckInTime" value="${S.checkInTime}"></div>
+        </div></div>
+        ${S.vehicleForms.map((vf,i)=>`
+        <div class="card" style="margin-bottom:16px"><div class="card-body">
+          <h3 class="card-title" style="margin:0 0 16px;font-size:15px">Vehicle ${i+1}</h3>
+          <div class="section-label">Truck</div>
+          <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'truckCompany','Truck company name','Type here…')}${vfInput(i,'truckNum','Truck #','Type here…')}</div>
+          <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'truckMake','Truck make','Type here…')}${vfInput(i,'truckPlate','Truck plate #','Type here…',true)}</div>
+          <div class="grid-2" style="margin-bottom:16px">${vfInput(i,'truckDot','Truck DOT #','Type here…',true)}${vfInput(i,'driverPhone','Driver phone number','(555) 555-0123')}</div>
+          <div class="section-label">Trailer</div>
+          <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'trailerType','Trailer type','Ex: 53 dry van')}${vfInput(i,'trailerNum','Trailer #','Type here…')}</div>
+          <div class="grid-2">${vfInput(i,'trailerCompany','Trailer company name','Type here…')}${vfInput(i,'trailerPlate','Trailer plate #','Type here…',true)}</div>
+        </div></div>`).join('')}
       </div>
       <div class="rail card">
         <div class="card-body">
@@ -1542,13 +1496,15 @@ function screenBookStep3Vehicle(){
           <div class="rail-row"><span class="k">Dates</span><span>Jul 31 – Aug 7</span></div>
           <div class="rail-row"><span class="k">Booking type</span><span>${S.step2BookingType}</span></div>
           <div class="rail-row"><span class="k">Vehicle</span><span>${S.step2VehicleType}</span></div>
-          <div class="total-row"><span>Total (1 week)</span><b class="tabular">$${computeStep2Total().toFixed(2)}</b></div>
+          <div class="rail-row"><span class="k">Spots</span><span>${S.spots}</span></div>
+          <div class="total-row"><span>Total</span><b class="tabular">$${computeStep2Total().toFixed(2)}</b></div>
           <div style="font-size:11px;color:var(--ink-soft);text-align:right;margin-top:2px">Price shown does not include tax</div>
           <button class="btn btn-primary btn-lg" style="width:100%;margin-top:12px" id="step3Continue">Continue to payment</button>
         </div>
       </div>
     </div>
-  </div>`;
+  </div>
+  ${vehicleUploadModalHtml()}`;
 }
 
 /* ============================================================
@@ -1573,25 +1529,22 @@ function screenPayment(context){
     <div class="orderline"><span>Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${singleOrder.tax.toFixed(2)}</span></div>
     <div class="orderline total"><span>Total due today</span><span>$${singleOrder.total.toFixed(2)}</span></div>
   ` : `
-    <div style="font-size:11px;color:var(--green-deep);font-weight:700;margin-bottom:2px">✓ VALID DRIVERS</div>
-    <div style="margin-bottom:8px">${batchOrder.validCount} of ${batchOrder.roster.length} rows imported</div>
-    <div style="font-size:11px;color:var(--green-deep);font-weight:700;margin-bottom:2px">✓ SPOTS</div>
-    <div style="font-size:12.5px;margin-bottom:10px">${batchOrder.spotsReserved} spot(s) reserved for ${batchOrder.validCount} driver(s)<br><span style="color:var(--ink-soft)">${batchOrder.trailerOnlyCount} Trailer Only + ${batchOrder.truckTrailerCount} Truck + Trailer</span></div>
-    ${batchOrder.trailerOnlyCount>0 ? `<div class="orderline"><span>Trailer Only parking</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div><div class="orderline-detail">${batchOrder.trailerOnlyCount} driver(s) × billed ${batchOrder.unit}</div>` : ''}
-    ${batchOrder.truckTrailerCount>0 ? `<div class="orderline"><span>Truck + Trailer parking</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div><div class="orderline-detail">${batchOrder.truckTrailerCount} driver(s) × billed ${batchOrder.unit}</div>` : ''}
+    <div style="font-size:11px;color:var(--green-deep);font-weight:700;margin-bottom:2px">✓ VEHICLES</div>
+    <div style="font-size:12.5px;margin-bottom:10px">${batchOrder.spotsReserved} spot(s) reserved · ${S.step2VehicleType}</div>
+    ${batchOrder.trailerOnlyCount>0 ? `<div class="orderline"><span>Trailer Only parking</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div><div class="orderline-detail">${batchOrder.trailerOnlyCount} vehicle(s) × billed ${batchOrder.unit}</div>` : ''}
+    ${batchOrder.truckTrailerCount>0 ? `<div class="orderline"><span>Truck + Trailer parking</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div><div class="orderline-detail">${batchOrder.truckTrailerCount} vehicle(s) × billed ${batchOrder.unit}</div>` : ''}
     <div class="orderline"><span>Volume discount (5%)</span><span class="green">−$${batchOrder.discount.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
     <div class="orderline"><span>Service fee (2%)</span><span>$${batchOrder.serviceFee.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
     <div class="orderline"><span>Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
     <div class="orderline total"><span>Total</span><span>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
   `;
-  const headBadge = context==='single' ? `<span class="step-pill">STEP 3 OF 3</span>` : '';
   return `
   ${topNav('book')}
   <div class="page">
     ${context==='batch' ? '<h1 class="batch-title">Batch Parking</h1>' : ''}
     <div class="results-row" style="align-items:flex-start">
       <div class="card" style="flex:1">
-        <div class="card-head"><h2 class="card-title">Payment</h2>${headBadge}</div>
+        <div class="card-head"><h2 class="card-title">Payment</h2></div>
         <div class="card-body">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
             <div style="font-size:13px;font-weight:600">Saved cards</div>
@@ -1674,7 +1627,7 @@ function singleOrderDetailBody(){
     </div>`;
 }
 function screenBookStep5Confirm(){
-  const phone = S.vehicleForm.driverPhone;
+  const phone = S.vehicleForms[0] && S.vehicleForms[0].driverPhone;
   return `
   ${topNav('orders')}
   <div class="page">
@@ -1690,211 +1643,21 @@ function screenBookStep5Confirm(){
   </div>`;
 }
 
-/* ============================================================
-   Batch flow
-============================================================ */
-function batchStepper(active){
-  const steps=['Find Parking','Booking Details','Import Drivers','Payment','Confirmation'];
-  return `<div class="stepper">${steps.map((s,i)=>{
-    const done=i<active, cur=i===active;
-    return (i? `<div class="step-line ${i<=active?'filled':''}"></div>`:'') +
-      `<div class="step ${done?'done':cur?'current':''}"><span class="step-dot">${done?ic.check:i+1}</span><span class="step-label">${s}</span></div>`;
-  }).join('')}</div>`;
-}
-
-function screenBatchDetails(){
-  const rowCount = S.presenterTool.rowCount;
-  return `
-  ${topNav('book')}
-  <div class="page">
-    ${batchStepper(1)}
-    <h1 class="batch-title">Batch Parking</h1>
-    <div class="card"><div class="card-body">
-      <div class="card-icon-head"><div class="card-icon-badge">${ic.file}</div><b>Driver import</b></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="step-num">1</span><span style="font-weight:600;font-size:13px">Download the template</span></div>
-      <div style="font-size:12px;color:var(--ink-soft);margin:0 0 12px 28px">One row per driver: Driver Name, DOT Number, Plate Number, Vehicle Type. Email and phone are optional — needed only for delivery notifications. Template reflects the ${S.batch.bookingType.toLowerCase()} billing selected in step 1.</div>
-      <div style="display:flex;gap:8px;margin:0 0 20px 28px">
-        <button class="btn btn-outline" data-toast="CSV template downloaded (${S.batch.bookingType} billing)">${ic.download}&nbsp;CSV template</button>
-        <button class="btn btn-outline" data-toast="XLSX template downloaded (${S.batch.bookingType} billing)">${ic.download}&nbsp;XLSX template</button>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span class="step-num">2</span><span style="font-weight:600;font-size:13px">Upload your driver list</span></div>
-      <div style="margin-left:28px">
-        ${S.batch.uploading ? `
-        <div class="dropzone" style="cursor:default">
-          ${ic.file}
-          <div style="margin-top:8px;font-size:13.5px">Uploading drivers-jul14.xlsx…</div>
-          <div class="progress-track" style="max-width:320px;margin:10px auto 0"><div class="progress-fill" style="width:${S.batch.uploadPct}%"></div></div>
-        </div>` : S.batch.uploaded ? `
-        <div class="uploaded-file-row">
-          <div class="uploaded-file-ic">${ic.file}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:600;font-size:13.5px">drivers-jul14.xlsx</div>
-            <div style="font-size:11.5px;color:var(--green-deep);display:flex;align-items:center;gap:4px">${ic.check} Uploaded</div>
-          </div>
-          <button class="icon-btn" id="removeUploadBtn" title="Remove file">${ic.x}</button>
-        </div>` : `
-        <div class="dropzone" id="uploadZone">
-          ${ic.file}
-          <div style="margin-top:8px;font-size:13.5px">Drag &amp; drop your file or <span style="color:var(--brand);font-weight:600">browse</span> to upload</div>
-          <div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px">CSV or XLSX · up to 2,000 rows · 10MB max</div>
-        </div>`}
-      </div>
-    </div></div>
-    <div class="card presenter-tool"><div class="card-body">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-        <span class="presenter-tool-badge">Presenter tool</span>
-        <span style="font-size:12px;color:var(--ink-soft)">Not part of the product design — lets you demo this flow without a real file</span>
-      </div>
-      <div style="font-weight:700;margin-bottom:6px">Simulate uploaded file row count</div>
-      <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px">Sets how many rows appear in the Import Summary (step 3) after you upload — leave blank to use the default ${ROSTER.length}-row sample.</div>
-      <input class="control" style="width:140px" id="presenterRowCount" inputmode="numeric" placeholder="e.g. 15" value="${rowCount===null||rowCount===undefined?'':rowCount}">
-    </div></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
-      <button class="btn btn-outline" id="batchBack1">← Back</button>
-      <button class="btn btn-primary btn-lg" id="batchToImport" ${(S.batch.uploading||!S.batch.uploaded)?'disabled':''}>Continue to import summary →</button>
-    </div>
-  </div>`;
-}
-
-// error rows can be fixed inline (instead of forcing a full re-upload) — edit mode swaps the row's
-// cells for inputs; Save validates and flips status to 'ok' in place on the same roster array object.
-// isOverage flags an otherwise-valid row whose vehicle type has more drivers uploaded than spots
-// reserved — it's not a data error, just contextually unassignable right now, so it's highlighted
-// the same way but keeps its own "No spot reserved" pill instead of overwriting d.status.
-function importRowHtml(d, isOverage){
-  const isEditing = S.batch.editingRow === d.row;
-  if(!isEditing){
-    const flagged = d.status==='err' || isOverage;
-    return `<tr class="${flagged?'warn':''}">
-      <td>${d.row}</td><td>${d.name||'—'}</td><td class="tabular">${d.dot||'—'}</td><td>${d.plate||'—'}</td><td>${d.vtype||'—'}</td>
-      <td>${d.email||'—'}</td><td>${d.phone||'—'}</td><td>${d.ci||'—'}</td><td>${d.co||'—'}</td>
-      <td><div style="display:flex;align-items:center;gap:6px">
-        ${d.status==='err' ? `<span class="pill-warn">${d.msg}</span>` : isOverage ? `<span class="pill-warn">No spot reserved</span>` : '<span class="pill-ok">Valid</span>'}
-        <button class="btn-text" style="font-size:11.5px" data-editrow="${d.row}">Edit</button>
-        ${flagged ? `<button class="btn-text" style="font-size:11.5px;color:var(--red)" data-deleterow="${d.row}">Delete</button>` : ''}
-      </div></td>
-    </tr>`;
-  }
-  return `<tr class="warn">
-    <td>${d.row}</td>
-    <td><input class="control" style="height:30px;font-size:12.5px" id="editName_${d.row}" value="${d.name||''}" placeholder="Driver name"></td>
-    <td><input class="control" style="height:30px;font-size:12.5px" id="editDot_${d.row}" value="${d.dot||''}" placeholder="DOT #"></td>
-    <td><input class="control" style="height:30px;font-size:12.5px" id="editPlate_${d.row}" value="${d.plate||''}" placeholder="Plate #"></td>
-    <td><select class="control" style="height:30px;font-size:12.5px" id="editVtype_${d.row}">
-      <option value="">Select…</option>
-      ${VTYPES.filter(v=>v!=='Bobtail').map(v=>`<option ${d.vtype===v?'selected':''}>${v}</option>`).join('')}
-    </select></td>
-    <td><input class="control" style="height:30px;font-size:12.5px" id="editEmail_${d.row}" value="${d.email||''}" placeholder="Optional"></td>
-    <td><input class="control" style="height:30px;font-size:12.5px" id="editPhone_${d.row}" value="${d.phone||''}" placeholder="Optional"></td>
-    <td>${d.ci||'—'}</td><td>${d.co||'—'}</td>
-    <td><div style="display:flex;gap:6px"><button class="btn btn-primary" style="height:30px;padding:0 10px;font-size:12px" data-saverow="${d.row}">Save</button><button class="btn btn-outline" style="height:30px;padding:0 10px;font-size:12px" data-cancelrow="${d.row}">Cancel</button></div></td>
-  </tr>`;
-}
-function screenBatchImport(){
-  // simulates a brief server-side pass matching uploaded vehicle types against reserved spots,
-  // distinct from the instant client-side field checks (missing info / unsupported vehicle)
-  if(S.batch.checkingCapacity){
-    return `
-    ${topNav('book')}
-    <div class="page">
-      ${batchStepper(2)}
-      <h1 class="batch-title">Batch Parking</h1>
-      <div class="card"><div class="card-body">
-        <div class="capacity-check-loading">
-          <div class="spinner"></div>
-          <div style="margin-top:14px;font-weight:600;font-size:14px">Checking driver capacity against reserved spots…</div>
-          <div style="font-size:12.5px;color:var(--ink-soft);margin-top:4px">Matching each uploaded vehicle type to what you reserved in step 1.</div>
-        </div>
-      </div></div>
-    </div>`;
-  }
-  const q = S.importSearch.trim().toLowerCase();
-  const activeRoster = getImportRoster();
-  const validCount = activeRoster.filter(d=>d.status==='ok').length;
-  const errCount = activeRoster.filter(d=>d.status==='err').length;
-  let rows = activeRoster;
-  if(S.importTab==='errors') rows = rows.filter(d=>d.status==='err');
-  if(q) rows = rows.filter(d => (d.name+' '+d.dot+' '+d.plate).toLowerCase().includes(q));
-  const spotsReserved = S.spots || 0;
-  const bookingLot = LOTS[S.selectedLotId];
-  const validRows = activeRoster.filter(d=>d.status==='ok');
-  const vtypeCounts = {};
-  validRows.forEach(d=>{ vtypeCounts[d.vtype] = (vtypeCounts[d.vtype]||0)+1; });
-  // a shared-pool lot has no per-type cap to violate — only the combined total against the pool
-  // matters there. Everywhere else, capacity must be checked per vehicle type: a fleet total that
-  // fits in aggregate can still leave a driver unassigned if e.g. 4 Truck + Trailer drivers are
-  // uploaded but only 3 Truck + Trailer spots were reserved (even if enough Trailer Only spots go
-  // unused to cover the total)
-  const vtypeOverages = bookingLot.sharedPool ? [] : Object.keys(S.fleetSpots).filter(vt => (vtypeCounts[vt]||0) > (S.fleetSpots[vt]||0));
-  const overCapacity = bookingLot.sharedPool ? (validRows.length > spotsReserved) : vtypeOverages.length > 0;
-  return `
-  ${topNav('book')}
-  <div class="page">
-    ${batchStepper(2)}
-    <h1 class="batch-title">Batch Parking</h1>
-    <div class="card"><div class="card-body">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div style="font-weight:700">Import summary — drivers-jul14.xlsx</div>
-        <button class="btn-text" id="reuploadBtn">Re-upload file</button>
-      </div>
-      <div class="stat-tiles">
-        <div class="stat-tile"><div class="n">${activeRoster.length}</div><div class="l">Rows uploaded</div></div>
-        <div class="stat-tile"><div class="n" style="color:var(--green-deep)">${validCount}</div><div class="l">Valid</div></div>
-        <div class="stat-tile"><div class="n" style="color:var(--red)">${errCount}</div><div class="l">Errors — excluded</div></div>
-      </div>
-      ${overCapacity ? `
-      <div class="capacity-alert">
-        <div class="capacity-alert-ic">${ic.warn}</div>
-        <div style="flex:1;min-width:0">
-          <div class="capacity-alert-title">Not every driver can be assigned a spot</div>
-          ${bookingLot.sharedPool ? `
-          <div style="font-size:13px;margin-top:8px">${validRows.length} valid drivers found, but only ${spotsReserved} of the shared ${bookingLot.poolSize} spots were reserved.</div>
-          ` : `
-          <ul style="margin:8px 0 0;padding-left:18px;font-size:13px;line-height:1.6">
-            ${vtypeOverages.map(vt=>`<li>${vtypeCounts[vt]} ${vt} driver${vtypeCounts[vt]===1?'':'s'} found, but only ${S.fleetSpots[vt]||0} ${vt} spot${(S.fleetSpots[vt]||0)===1?'':'s'} reserved</li>`).join('')}
-          </ul>
-          `}
-          <div style="font-size:13px;margin-top:10px">You can't continue to payment until this is fixed — go back and reserve more spots for the vehicle type(s) above, or fix it directly below: the affected rows are highlighted so you can change their vehicle type or delete them.</div>
-        </div>
-      </div>` : ''}
-      <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px">Drivers are assigned to available spots at your reserved location. All ${activeRoster.length} uploaded rows are shown below.</div>
-      <div class="tabs-row">
-        <button class="tab-btn ${S.importTab==='all'?'on':''}" data-itab="all">All rows</button>
-        <button class="tab-btn ${S.importTab==='errors'?'on':''}" data-itab="errors">Errors (${errCount})</button>
-      </div>
-      <div class="search-box">${ic.search}<input id="importSearchInput" placeholder="Search driver name, DOT #, or plate" value="${S.importSearch}"></div>
-      <div class="dtable-scroll"><table class="dtable">
-        <thead><tr><th>Row</th><th>Driver</th><th>DOT Number</th><th>Plate</th><th>Vehicle Type</th><th>Email (optional)</th><th>Phone Number (optional)</th><th>Check-in</th><th>Check-out</th><th>Status</th></tr></thead>
-        <tbody>${rows.length ? rows.map(d=>importRowHtml(d, !bookingLot.sharedPool && d.status==='ok' && vtypeOverages.includes(d.vtype))).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:16px">No rows match your search.</td></tr>'}</tbody>
-      </table></div>
-    </div></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
-      <button class="btn btn-outline" id="batchBack2">← Back</button>
-      <div style="display:flex;gap:12px;align-items:center">
-        <span style="font-size:12.5px;color:${overCapacity?'var(--red)':'var(--ink-soft)'}">${overCapacity ? 'Fix the spots/drivers mismatch above to continue' : `${errCount} error row${errCount===1?'':'s'} will be excluded — you can add them after checkout`}</span>
-        <button class="btn btn-primary btn-lg" id="batchToPayment" ${overCapacity?'disabled':''}>Continue to payment — ${validCount} driver${validCount===1?'':'s'} →</button>
-      </div>
-    </div>
-  </div>`;
-}
-
 // mirrors the Order Detail layout (order-detail-top-row with gate code, Booking Details card
 // with Charges + Location, collapsible Drivers card) so a just-completed booking looks exactly
 // like viewing that same order later would — this screen uses LIVE booking-flow state, which is
 // correct here (unlike the historical Order Detail view, this IS that state, right now)
 function screenBatchConfirm(){
   const batchOrder = computeBatchOrder();
-  const validRoster = batchOrder.roster.filter(d=>d.status==='ok');
   const q = S.confirmSearch.trim().toLowerCase();
-  let rows = validRoster;
-  if(q) rows = rows.filter(d => (d.name+' '+d.id+' '+d.plate).toLowerCase().includes(q));
+  let rows = S.vehicleForms;
+  if(q) rows = rows.filter(vf => (vf.truckCompany+' '+vf.truckPlate+' '+vf.driverPhone).toLowerCase().includes(q));
   const l = LOTS[S.selectedLotId];
   const shortName = l.name.split(' at ').pop();
   const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
   return `
   ${topNav('orders')}
   <div class="page">
-    ${batchStepper(4)}
     <div class="orderdetail-top-row">
       <div class="confirm-banner">
         <div class="confirm-ic">${ic.checkW}</div>
@@ -1930,7 +1693,7 @@ function screenBatchConfirm(){
       <div class="card-head">
         <button class="drivers-toggle" id="toggleDriversSection">
           ${S.driversSectionExpanded?ic.chevDown:ic.chevRight}
-          <h2 class="card-title" style="margin:0">Drivers (${batchOrder.validCount})</h2>
+          <h2 class="card-title" style="margin:0">Vehicles (${batchOrder.validCount})</h2>
         </button>
         <div style="display:flex;gap:8px">
           <button class="btn btn-outline" data-toast="CSV exported (${batchOrder.validCount} rows)">${ic.download}&nbsp;Export CSV</button>
@@ -1938,12 +1701,12 @@ function screenBatchConfirm(){
         </div>
       </div>
       ${S.driversSectionExpanded ? `<div class="card-body">
-        <div class="search-box">${ic.search}<input id="confirmSearchInput" placeholder="Search driver, ID, plate, or spot" value="${S.confirmSearch}"></div>
+        <div class="search-box">${ic.search}<input id="confirmSearchInput" placeholder="Search truck company, plate, or phone" value="${S.confirmSearch}"></div>
         <div class="dtable-scroll"><table class="dtable">
-          <thead><tr><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle Type</th><th>Gate Code</th><th>Access PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th><th></th></tr></thead>
-          <tbody>${rows.length ? rows.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td class="tabular">${d.gate}</td><td class="tabular">${d.pin}</td><td>${d.ci}</td><td>${d.co}</td><td><span class="pill-ok">Assigned</span></td><td><button class="icon-btn" data-pdfrow="${d.name}" title="Download this driver's PDF">${ic.download}</button></td></tr>`).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
+          <thead><tr><th>Vehicle</th><th>Truck Company</th><th>Truck #</th><th>Truck Plate</th><th>Driver Phone</th><th>Trailer #</th><th>Trailer Plate</th></tr></thead>
+          <tbody>${rows.length ? rows.map((vf,i)=>`<tr><td>Vehicle ${S.vehicleForms.indexOf(vf)+1}</td><td>${vf.truckCompany||'—'}</td><td>${vf.truckNum||'—'}</td><td>${vf.truckPlate||'—'}</td><td>${vf.driverPhone||'—'}</td><td>${vf.trailerNum||'—'}</td><td>${vf.trailerPlate||'—'}</td></tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--ink-soft);padding:16px">No vehicles match your search.</td></tr>'}</tbody>
         </table></div>
-        <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${batchOrder.validCount} drivers assigned to this order.</div>
+        <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${batchOrder.validCount} vehicles on this order.</div>
       </div>` : ''}
     </div>
     <button class="btn btn-primary" style="margin-top:16px" id="backToOrdersConfirm">Back to My Orders</button>
@@ -2140,7 +1903,7 @@ function screenOrderDetailBatch(){
 const SCREENS = {
   homepage: screenHomepage, login: screenLogin,
   book1: screenBookStep1, allListings: screenAllListings, book3: screenBookStep3Vehicle, book4: screenBookStep4Payment, book5: screenBookStep5Confirm,
-  batchDetails: screenBatchDetails, batchImport: screenBatchImport, batchPayment: screenBatchPayment, batchConfirm: screenBatchConfirm,
+  batchPayment: screenBatchPayment, batchConfirm: screenBatchConfirm,
   orders: screenOrders, wallet: screenWallet,
   orderDetailSingle: screenOrderDetailSingle, orderDetailBatch: screenOrderDetailBatch,
 };
@@ -2251,52 +2014,64 @@ function wireScreen(root){
   const dpClose = root.querySelector('#dpClose'); if(dpClose) dpClose.addEventListener('click',()=>{ S.detailPanelOpen=false; render(); });
   const step2BT = root.querySelector('#step2BookingType');
   if(step2BT) step2BT.addEventListener('change',()=>{ S.step2BookingType = step2BT.value; render(); });
-  function setFleetSpots(vt, n){
-    const max = vtypeMaxAvail(LOTS[S.selectedLotId], vt);
-    S.fleetSpots[vt] = isNaN(n) ? 0 : Math.max(0, Math.min(n, max));
-    S.spots = Object.values(S.fleetSpots).reduce((a,b)=>a+b,0);
+  const step2VT = root.querySelector('#step2VehicleType');
+  if(step2VT) step2VT.addEventListener('change',()=>{
+    S.step2VehicleType = step2VT.value;
+    const max = vtypeMaxAvail(LOTS[S.selectedLotId], S.step2VehicleType);
+    if(S.spots > max) S.spots = max;
+    render();
+  });
+  function setSpots(n){
+    const max = vtypeMaxAvail(LOTS[S.selectedLotId], S.step2VehicleType);
+    S.spots = isNaN(n) ? 0 : Math.max(0, Math.min(n, max));
   }
-  root.querySelectorAll('[data-fleetspotminus]').forEach(b=>b.addEventListener('click',()=>{
-    const vt = b.dataset.fleetspotminus; setFleetSpots(vt, (S.fleetSpots[vt]||0)-1); render();
-  }));
-  root.querySelectorAll('[data-fleetspotplus]').forEach(b=>b.addEventListener('click',()=>{
-    const vt = b.dataset.fleetspotplus; setFleetSpots(vt, (S.fleetSpots[vt]||0)+1); render();
-  }));
-  root.querySelectorAll('[data-fleetspotinput]').forEach(inp=>inp.addEventListener('input',()=>{
-    const vt = inp.dataset.fleetspotinput;
-    const max = vtypeMaxAvail(LOTS[S.selectedLotId], vt);
-    const n = parseInt(inp.value.replace(/\D/g,''),10);
-    if(!isNaN(n) && n > max) toast(`Only ${max} spot(s) available for ${vt}`);
-    setFleetSpots(vt, n);
+  const spotsMinus = root.querySelector('#spotsMinus'); if(spotsMinus) spotsMinus.addEventListener('click',()=>{ setSpots(S.spots-1); render(); });
+  const spotsPlus = root.querySelector('#spotsPlus'); if(spotsPlus) spotsPlus.addEventListener('click',()=>{ setSpots(S.spots+1); render(); });
+  const spotsInput = root.querySelector('#spotsInput'); if(spotsInput) spotsInput.addEventListener('input',()=>{
+    const max = vtypeMaxAvail(LOTS[S.selectedLotId], S.step2VehicleType);
+    const n = parseInt(spotsInput.value.replace(/\D/g,''),10);
+    if(!isNaN(n) && n > max) toast(`Only ${max} spot(s) available for ${S.step2VehicleType}`);
+    setSpots(n);
     rerenderKeepFocus();
-  }));
+  });
   const step2Continue = root.querySelector('#step2Continue');
   if(step2Continue && !step2Continue.disabled) step2Continue.addEventListener('click',()=>{
-    if(S.spots<=1){
-      // exactly one spot selected — this is the single-location flow; remember which
-      // vehicle type it was for so book3's "Your reservation" summary shows it correctly
-      S.step2VehicleType = Object.keys(S.fleetSpots).find(vt=>S.fleetSpots[vt]>0) || S.step2VehicleType;
-      go('book3');
-    } else {
-      // the fleet flow's own Booking Type selector was removed from step 2 — carry over
-      // whatever was chosen back in step 1 instead of silently resetting it
-      S.batch.bookingType = S.step2BookingType;
-      go('batchDetails');
-    }
+    // single-spot vs. fleet booking share the same Vehicle & Trailer Details page now —
+    // the distinction only matters later, at payment, for pricing/copy
+    S.vehicleForms = Array.from({length: S.spots}, ()=>({ truckCompany:'', truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' }));
+    go('book3');
   });
 
-  /* ---- book3 (vehicle/trailer form) ---- */
+  /* ---- book3 (vehicle/trailer details — shared by single-spot and fleet bookings) ---- */
   const step3Back = root.querySelector('#step3Back'); if(step3Back) step3Back.addEventListener('click',()=>go('book1'));
+  bindText(root,'vfCheckInTime', v=>S.checkInTime=v);
   root.querySelectorAll('[data-vf]').forEach(inp=>{
     inp.addEventListener('input',()=>{
-      S.vehicleForm[inp.dataset.vf] = inp.value;
+      S.vehicleForms[parseInt(inp.dataset.vfrow,10)][inp.dataset.vf] = inp.value;
       const badge = root.querySelector('#autosaved');
       if(badge){ badge.classList.add('show'); clearTimeout(window.__autosaveTimer); window.__autosaveTimer=setTimeout(()=>badge.classList.remove('show'),1200); }
     });
   });
+  const openVehicleUploadModal = root.querySelector('#openVehicleUploadModal'); if(openVehicleUploadModal) openVehicleUploadModal.addEventListener('click',()=>{ S.vehicleUploadModalOpen=true; render(); });
+  const closeVehicleUploadModal = root.querySelector('#closeVehicleUploadModal'); if(closeVehicleUploadModal) closeVehicleUploadModal.addEventListener('click',()=>{ S.vehicleUploadModalOpen=false; render(); });
+  const vehicleUploadOverlay = root.querySelector('#vehicleUploadOverlay');
+  if(vehicleUploadOverlay) vehicleUploadOverlay.addEventListener('click',(e)=>{ if(e.target===vehicleUploadOverlay){ S.vehicleUploadModalOpen=false; render(); } });
+  const vehicleUploadZone = root.querySelector('#vehicleUploadZone'); if(vehicleUploadZone) vehicleUploadZone.addEventListener('click',()=>{
+    const n = S.vehicleForms.length;
+    // simulate an uploaded file with an arbitrary row count, independent of how many spots were
+    // actually reserved — mirrors the real-world case where a fleet's spreadsheet doesn't line up 1:1
+    const fileRowCount = Math.max(n + 3, Math.round(n * 1.4) + 2);
+    const rows = Array.from({length: fileRowCount}, (_,i)=>buildVehicleFormRow(i));
+    S.vehicleForms = rows.slice(0, n);
+    S.vehicleUploadModalOpen = false;
+    render();
+    if(fileRowCount > n) toast(`We've only included the first ${n} and filled it out for you — ${fileRowCount-n} additional row(s) were not included.`);
+    else toast('File uploaded — all vehicle sections filled in.');
+  });
   const step3Continue = root.querySelector('#step3Continue'); if(step3Continue) step3Continue.addEventListener('click',()=>{
-    if(!S.loggedIn){ S.postLoginGoto='book4'; toast('Please sign in to continue to payment'); go('login'); return; }
-    go('book4');
+    const dest = S.spots<=1 ? 'book4' : 'batchPayment';
+    if(!S.loggedIn){ S.postLoginGoto=dest; toast('Please sign in to continue to payment'); go('login'); return; }
+    go(dest);
   });
 
   /* ---- payment (single + batch share this) ---- */
@@ -2318,73 +2093,6 @@ function wireScreen(root){
   const backToOrdersConfirm = root.querySelector('#backToOrdersConfirm'); if(backToOrdersConfirm) backToOrdersConfirm.addEventListener('click',()=>go('orders'));
   root.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>copyText(b.dataset.copy)));
   root.querySelectorAll('[data-toast]').forEach(b=>b.addEventListener('click',()=>toast(b.dataset.toast)));
-
-  /* ---- batch flow ---- */
-  const batchBack1 = root.querySelector('#batchBack1'); if(batchBack1) batchBack1.addEventListener('click',()=>go('book1'));
-  bindText(root,'presenterRowCount', v=>{
-    const n = v.trim()==='' ? null : parseInt(v.replace(/\D/g,''),10);
-    S.presenterTool.rowCount = (n===null || isNaN(n)) ? null : n;
-  }, {rerender:true});
-  const uploadZone = root.querySelector('#uploadZone');
-  if(uploadZone) uploadZone.addEventListener('click',()=>{
-    S.batch.uploading = true; S.batch.uploadPct = 0; render();
-    const iv = setInterval(()=>{
-      S.batch.uploadPct = Math.min(100, S.batch.uploadPct + 18 + Math.floor(Math.random()*12));
-      if(S.batch.uploadPct >= 100){
-        clearInterval(iv); S.batch.uploading=false; S.batch.uploaded=true;
-        const foundCount = S.presenterTool.rowCount || 500;
-        toast(`drivers-jul14.xlsx uploaded — ${foundCount} rows found`);
-        render(); return;
-      }
-      render();
-    }, 220);
-  });
-  const removeUploadBtn = root.querySelector('#removeUploadBtn'); if(removeUploadBtn) removeUploadBtn.addEventListener('click',()=>{ S.batch.uploaded=false; render(); toast('File removed'); });
-  const batchToImport = root.querySelector('#batchToImport'); if(batchToImport && !batchToImport.disabled) batchToImport.addEventListener('click',()=>{
-    S.batch.checkingCapacity = true; go('batchImport');
-    setTimeout(()=>{ S.batch.checkingCapacity = false; render(); }, 900);
-  });
-  root.querySelectorAll('[data-itab]').forEach(b=>b.addEventListener('click',()=>{ S.importTab=b.dataset.itab; render(); }));
-  const importSearchInput = root.querySelector('#importSearchInput');
-  if(importSearchInput) importSearchInput.addEventListener('input',()=>{ S.importSearch=importSearchInput.value; rerenderKeepFocus(); });
-  root.querySelectorAll('[data-editrow]').forEach(b=>b.addEventListener('click',()=>{ S.batch.editingRow=parseInt(b.dataset.editrow,10); render(); }));
-  root.querySelectorAll('[data-cancelrow]').forEach(b=>b.addEventListener('click',()=>{ S.batch.editingRow=null; render(); }));
-  root.querySelectorAll('[data-deleterow]').forEach(b=>b.addEventListener('click',()=>{
-    const row = parseInt(b.dataset.deleterow,10);
-    const roster = getImportRoster();
-    const idx = roster.findIndex(d=>d.row===row);
-    if(idx>-1) roster.splice(idx,1);
-    if(S.batch.editingRow===row) S.batch.editingRow=null;
-    render(); toast(`Row ${row} removed`);
-  }));
-  root.querySelectorAll('[data-saverow]').forEach(b=>b.addEventListener('click',()=>{
-    const row = parseInt(b.dataset.saverow,10);
-    const name = (root.querySelector(`#editName_${row}`).value||'').trim();
-    const dot = (root.querySelector(`#editDot_${row}`).value||'').trim();
-    const vtype = root.querySelector(`#editVtype_${row}`).value;
-    const plate = (root.querySelector(`#editPlate_${row}`).value||'').trim();
-    const email = (root.querySelector(`#editEmail_${row}`).value||'').trim();
-    const phone = (root.querySelector(`#editPhone_${row}`).value||'').trim();
-    if(!name || !dot || !vtype || !plate){ toast('Fill in every required field before saving'); return; }
-    const entry = getImportRoster().find(d=>d.row===row);
-    if(entry){
-      entry.name=name; entry.dot=dot; entry.vtype=vtype; entry.plate=plate; entry.email=email; entry.phone=phone; entry.status='ok'; entry.msg='';
-      // a row created via the "missing information" error path never got its system-assigned
-      // fields (Driver ID, gate code, PIN, check-in/out) — backfill them now that it's fixed
-      if(!entry.id) entry.id = 'DRV-'+(1200+row);
-      if(!entry.gate) entry.gate = '1199#';
-      if(!entry.pin) entry.pin = String(300000+row*4113);
-      if(!entry.ci) entry.ci = 'Jul 14, '+(16+(row%6))+':00';
-      if(!entry.co) entry.co = 'Jul 17, 0'+(5+(row%3))+':30';
-    }
-    S.batch.editingRow=null; render(); toast(`Row ${row} fixed and marked valid`);
-  }));
-  const reuploadBtn = root.querySelector('#reuploadBtn'); if(reuploadBtn) reuploadBtn.addEventListener('click',()=>go('batchDetails'));
-  const batchBack2 = root.querySelector('#batchBack2'); if(batchBack2) batchBack2.addEventListener('click',()=>go('batchDetails'));
-  const batchToPayment = root.querySelector('#batchToPayment'); if(batchToPayment && !batchToPayment.disabled) batchToPayment.addEventListener('click',()=>{
-    if(!S.loggedIn){ S.postLoginGoto='batchPayment'; toast('Please sign in to continue to payment'); go('login'); return; }
-    go('batchPayment');
-  });
 
   const confirmSearchInput = root.querySelector('#confirmSearchInput');
   if(confirmSearchInput) confirmSearchInput.addEventListener('input',()=>{ S.confirmSearch=confirmSearchInput.value; rerenderKeepFocus(); });
