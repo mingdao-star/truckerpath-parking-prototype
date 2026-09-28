@@ -451,6 +451,7 @@ const S = {
   checkinCodeRevealed: false,
   amenitiesExpanded: false,
   driversSectionExpanded: false,
+  locationDetailsExpanded: false,
 
   // All Listings must land blank (no pre-filtered state) — see screenAllListings
   search: { location:'', bookingType:'Daily', checkIn:'2026-07-17', checkOut:'2026-07-19', vehicleType:'Truck + Trailer', priceRange:'Any Price' },
@@ -604,6 +605,31 @@ function poiInfoBlock(l){
       </div>`).join('') : ''}
     </div>
     <button class="btn-text" id="amenitiesToggle" style="font-size:12.5px;display:block;margin-top:10px;width:100%;text-align:center">${S.amenitiesExpanded ? 'Show Less' : 'Show More'}</button>`;
+}
+// the extra location facts an Order Detail screen hides behind "View location details" — kept
+// out of the always-visible summary (name/address/dates/booking type) so the Location card stays
+// short; shared by the single- and batch-order detail/confirm screens
+function locationDetailsHtml(l){
+  const amenities = AMENITY_DEFS.map(d=>({ ic:ic[d.ic], label:d.label, on: !!(l.amenities && l.amenities[d.key]) }));
+  return `
+    <div class="info-row"><span class="k">Coordinates</span><span>${l.lat.toFixed(6)}, ${l.lng.toFixed(6)} <button class="copy-btn" data-copy="${l.lat.toFixed(6)}, ${l.lng.toFixed(6)}">Copy</button></span></div>
+    <div class="info-row"><span class="k">Highway</span><span>${l.highway}</span></div>
+    <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — check-in code required</span></div>
+    <div class="info-row"><span class="k">Call</span><span><a href="tel:${l.phone.replace(/\D/g,'')}" style="color:var(--brand)">${l.phone}</a></span></div>
+    <div class="poi-head-divider" style="margin:12px 0"></div>
+    ${operatingHoursBanner(l)}
+    <div class="poi-head-divider" style="margin:12px 0"></div>
+    <div class="section-label" style="color:var(--ink)">Amenities</div>
+    <div class="amenities-grid">
+      ${amenities.map(a=>`<div class="amenity ${a.on?'':'off'}">
+        <div class="amenity-ic">${a.ic}</div>
+        <span>${a.label}</span>
+      </div>`).join('')}
+    </div>`;
+}
+function locationDetailsToggleHtml(l){
+  return `<button class="btn-text" id="toggleLocationDetails" style="font-size:12.5px;margin-top:10px;display:flex;align-items:center;gap:4px">${S.locationDetailsExpanded?ic.chevDown:ic.chevRight}${S.locationDetailsExpanded ? 'Hide location details' : 'View location details'}</button>
+    ${S.locationDetailsExpanded ? `<div style="margin-top:10px">${locationDetailsHtml(l)}</div>` : ''}`;
 }
 
 const US_STATES = [
@@ -1641,10 +1667,9 @@ function singleOrderDetailBody(){
         <div style="font-weight:700;font-size:16px">${shortName}</div>
         <div class="poi-head-divider" style="margin:12px 0"></div>
         <div class="info-row"><span class="k">Address</span><span>3100 S Barrett Rd, Eloy, AZ 85131 <button class="copy-btn" data-copy="3100 S Barrett Rd, Eloy, AZ 85131">Copy</button></span></div>
-        <div class="info-row"><span class="k">Coordinates</span><span>32.701693, -111.516104 <button class="copy-btn" data-copy="32.701693, -111.516104">Copy</button></span></div>
-        <div class="info-row"><span class="k">Highway</span><span>${l.highway}</span></div>
         <div class="info-row"><span class="k">Reservation Dates</span><span>Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM</span></div>
-        <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — check-in code required</span></div>
+        <div class="info-row"><span class="k">Booking Type</span><span>Weekly</span></div>
+        ${locationDetailsToggleHtml(l)}
       </div>
     </div>`;
 }
@@ -1896,10 +1921,9 @@ function screenBatchConfirm(){
         <div style="font-weight:700;font-size:16px">${shortName}</div>
         <div class="poi-head-divider" style="margin:12px 0"></div>
         <div class="info-row"><span class="k">Address</span><span>${l.address} <button class="copy-btn" data-copy="${l.address}">Copy</button></span></div>
-        <div class="info-row"><span class="k">Coordinates</span><span>${l.lat.toFixed(6)}, ${l.lng.toFixed(6)} <button class="copy-btn" data-copy="${l.lat.toFixed(6)}, ${l.lng.toFixed(6)}">Copy</button></span></div>
-        <div class="info-row"><span class="k">Highway</span><span>${l.highway}</span></div>
+        <div class="info-row"><span class="k">Booking Type</span><span>${S.batch.bookingType}</span></div>
         <div class="info-row"><span class="k">Spots Reserved</span><span>${batchOrder.validCount}</span></div>
-        <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — check-in code required</span></div>
+        ${locationDetailsToggleHtml(l)}
       </div>
     </div>
     <div class="card" style="margin-top:16px">
@@ -2080,11 +2104,10 @@ function screenOrderDetailBatch(){
         <div style="font-weight:700;font-size:16px">${shortName}</div>
         <div class="poi-head-divider" style="margin:12px 0"></div>
         <div class="info-row"><span class="k">Address</span><span>${l.address} <button class="copy-btn" data-copy="${l.address}">Copy</button></span></div>
-        <div class="info-row"><span class="k">Coordinates</span><span>${l.lat.toFixed(6)}, ${l.lng.toFixed(6)} <button class="copy-btn" data-copy="${l.lat.toFixed(6)}, ${l.lng.toFixed(6)}">Copy</button></span></div>
-        <div class="info-row"><span class="k">Highway</span><span>${l.highway}</span></div>
         <div class="info-row"><span class="k">Reservation Dates</span><span>${order.dates}</span></div>
+        <div class="info-row"><span class="k">Booking Type</span><span>Daily</span></div>
         <div class="info-row"><span class="k">Spots Reserved</span><span>${batchOrder.validCount}</span></div>
-        <div class="info-row"><span class="k">Gate Hours</span><span>24/7 — check-in code required</span></div>
+        ${locationDetailsToggleHtml(l)}
       </div>
     </div>
     <div class="card" style="margin-top:16px">
@@ -2290,6 +2313,7 @@ function wireScreen(root){
   const toggleCheckinCode = root.querySelector('#toggleCheckinCode'); if(toggleCheckinCode) toggleCheckinCode.addEventListener('click',()=>{ S.checkinCodeRevealed=!S.checkinCodeRevealed; render(); });
   const amenitiesToggle = root.querySelector('#amenitiesToggle'); if(amenitiesToggle) amenitiesToggle.addEventListener('click',()=>{ S.amenitiesExpanded=!S.amenitiesExpanded; render(); });
   const toggleDriversSection = root.querySelector('#toggleDriversSection'); if(toggleDriversSection) toggleDriversSection.addEventListener('click',()=>{ S.driversSectionExpanded=!S.driversSectionExpanded; render(); });
+  const toggleLocationDetails = root.querySelector('#toggleLocationDetails'); if(toggleLocationDetails) toggleLocationDetails.addEventListener('click',()=>{ S.locationDetailsExpanded=!S.locationDetailsExpanded; render(); });
   const backHome = root.querySelector('#backHomeBtn'); if(backHome) backHome.addEventListener('click',()=>go('orders'));
   const backToOrdersConfirm = root.querySelector('#backToOrdersConfirm'); if(backToOrdersConfirm) backToOrdersConfirm.addEventListener('click',()=>go('orders'));
   root.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>copyText(b.dataset.copy)));
