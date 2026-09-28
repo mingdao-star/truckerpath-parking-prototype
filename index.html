@@ -929,6 +929,11 @@ function formatDateWeekday(dateStr){
   if(!dateStr) return '';
   return new Date(dateStr+'T00:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
 }
+function addDays(dateStr, n){
+  const d = new Date(dateStr+'T00:00:00');
+  d.setDate(d.getDate()+n);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 // real check-in/checkout-based pricing for the Payment screen's Order Summary (single- and
 // fleet-spot bookings alike, now that Step 1 collects real dates for every booking regardless of
 // spot count). Weekly bookings bill in whole weeks, then any leftover (<7) days at the daily
@@ -1427,7 +1432,7 @@ function screenBookStep1(){
             <div class="field" style="margin-top:0"><label>Check-in time</label><input type="time" class="control" id="step2CheckInTime" value="${S.search.checkInTime}"></div>
           </div>
           <div class="grid-2" style="margin-top:10px">
-            <div class="field" style="margin-top:0"><label>Check-out date</label><input type="date" class="control" id="step2CheckOut" value="${S.search.checkOut}"></div>
+            <div class="field" style="margin-top:0"><label>Check-out date</label><input type="date" class="control" id="step2CheckOut" value="${S.search.checkOut}" ${S.step2BookingType==='Weekly' ? `min="${addDays(S.search.checkIn,7)}"` : ''}></div>
             <div class="field" style="margin-top:0"><label>Check-out time</label><input type="time" class="control" id="step2CheckOutTime" value="${S.search.checkOutTime}"></div>
           </div>
           `}
@@ -2129,10 +2134,29 @@ function wireScreen(root){
   const refreshAvailBtn = root.querySelector('#refreshAvailBtn'); if(refreshAvailBtn) refreshAvailBtn.addEventListener('click',()=>{ S.availRefreshedAt=Date.now(); render(); toast('Availability refreshed'); });
   const dpClose = root.querySelector('#dpClose'); if(dpClose) dpClose.addEventListener('click',()=>{ S.detailPanelOpen=false; render(); });
   const step2BT = root.querySelector('#step2BookingType');
-  if(step2BT) step2BT.addEventListener('change',()=>{ S.step2BookingType = step2BT.value; render(); });
-  bindText(root,'step2CheckIn', v=>S.search.checkIn=v);
+  if(step2BT) step2BT.addEventListener('change',()=>{
+    S.step2BookingType = step2BT.value;
+    if(S.step2BookingType==='Weekly'){
+      const minCheckOut = addDays(S.search.checkIn,7);
+      if(S.search.checkOut < minCheckOut) S.search.checkOut = minCheckOut;
+    }
+    render();
+  });
+  bindText(root,'step2CheckIn', v=>{
+    S.search.checkIn = v;
+    if(S.step2BookingType==='Weekly'){
+      const minCheckOut = addDays(v,7);
+      if(S.search.checkOut < minCheckOut) S.search.checkOut = minCheckOut;
+    }
+  }, {rerender:true});
   bindText(root,'step2CheckInTime', v=>S.search.checkInTime=v);
-  bindText(root,'step2CheckOut', v=>S.search.checkOut=v);
+  bindText(root,'step2CheckOut', v=>{
+    S.search.checkOut = v;
+    if(S.step2BookingType==='Weekly'){
+      const minCheckOut = addDays(S.search.checkIn,7);
+      if(S.search.checkOut < minCheckOut) S.search.checkOut = minCheckOut;
+    }
+  }, {rerender:true});
   bindText(root,'step2CheckOutTime', v=>S.search.checkOutTime=v);
   const step2VT = root.querySelector('#step2VehicleType');
   if(step2VT) step2VT.addEventListener('change',()=>{
