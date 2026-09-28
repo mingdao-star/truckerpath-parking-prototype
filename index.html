@@ -1438,6 +1438,14 @@ function buildVehicleFormRow(i){
   };
 }
 function screenBookStep3Vehicle(){
+  const VEHICLE_PAGE_SIZE = 5;
+  const totalVehicles = S.vehicleForms.length;
+  const vehiclePages = Math.max(1, Math.ceil(totalVehicles/VEHICLE_PAGE_SIZE));
+  const vehiclePage = Math.min(S.vehiclePage||1, vehiclePages);
+  const pageStart = (vehiclePage-1)*VEHICLE_PAGE_SIZE;
+  const pageIndices = Array.from({length: Math.max(0, Math.min(VEHICLE_PAGE_SIZE, totalVehicles-pageStart))}, (_,k)=>pageStart+k);
+  let vehiclePageBtns = '';
+  for(let i=1;i<=vehiclePages;i++) vehiclePageBtns += `<button class="page-btn ${i===vehiclePage?'on':''}" data-vp="${i}">${i}</button>`;
   return `
   ${topNav('book')}
   <div class="page">
@@ -1446,21 +1454,49 @@ function screenBookStep3Vehicle(){
     </div>
     <div class="results-row" style="align-items:flex-start">
       <div style="flex:1">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-          <h2 class="card-title" style="margin:0">Vehicle &amp; Trailer Details</h2>
-          <span class="autosaved" id="autosaved">${ic.check} Saved</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <h2 class="card-title" style="margin:0">Vehicle &amp; Trailer Details</h2>
+            <span class="autosaved" id="autosaved">${ic.check} Saved</span>
+          </div>
+          <div style="display:flex;gap:16px">
+            <button class="btn-text" id="expandAllVehicles" style="font-size:12.5px">Expand all</button>
+            <button class="btn-text" id="collapseAllVehicles" style="font-size:12.5px">Collapse all</button>
+          </div>
         </div>
-        ${S.vehicleForms.map((vf,i)=>`
-        <div class="card" style="margin-bottom:16px"><div class="card-body">
-          <h3 class="card-title" style="margin:0 0 16px;font-size:15px">Vehicle ${i+1}</h3>
-          <div class="section-label">Truck</div>
-          <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'truckCompany','Truck company name','Type here…')}${vfInput(i,'truckNum','Truck #','Type here…')}</div>
-          <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'truckMake','Truck make','Type here…')}${vfInput(i,'truckPlate','Truck plate #','Type here…',true)}</div>
-          <div class="grid-2" style="margin-bottom:16px">${vfInput(i,'truckDot','Truck DOT #','Type here…',true)}${vfInput(i,'driverPhone','Driver phone number','(555) 555-0123')}</div>
-          <div class="section-label">Trailer</div>
-          <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'trailerType','Trailer type','Ex: 53 dry van')}${vfInput(i,'trailerNum','Trailer #','Type here…')}</div>
-          <div class="grid-2">${vfInput(i,'trailerCompany','Trailer company name','Type here…')}${vfInput(i,'trailerPlate','Trailer plate #','Type here…',true)}</div>
-        </div></div>`).join('')}
+        ${pageIndices.map(i=>{
+          const vf = S.vehicleForms[i];
+          const expanded = S.vehicleFormsExpanded[i] !== false;
+          const summary = [vf.truckCompany, vf.truckPlate].filter(Boolean).join(' · ') || 'Not filled in yet';
+          return `
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-head">
+            <button class="drivers-toggle" data-togglevehicle="${i}">
+              ${expanded?ic.chevDown:ic.chevRight}
+              <h3 class="card-title" style="margin:0;font-size:15px">Vehicle ${i+1}</h3>
+            </button>
+            ${!expanded ? `<span style="font-size:12px;color:var(--ink-soft)">${summary}</span>` : ''}
+          </div>
+          ${expanded ? `<div class="card-body">
+            <div class="section-label">Truck</div>
+            <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'truckCompany','Truck company name','Type here…')}${vfInput(i,'truckNum','Truck #','Type here…')}</div>
+            <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'truckMake','Truck make','Type here…')}${vfInput(i,'truckPlate','Truck plate #','Type here…',true)}</div>
+            <div class="grid-2" style="margin-bottom:16px">${vfInput(i,'truckDot','Truck DOT #','Type here…',true)}${vfInput(i,'driverPhone','Driver phone number','(555) 555-0123')}</div>
+            <div class="section-label">Trailer</div>
+            <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'trailerType','Trailer type','Ex: 53 dry van')}${vfInput(i,'trailerNum','Trailer #','Type here…')}</div>
+            <div class="grid-2">${vfInput(i,'trailerCompany','Trailer company name','Type here…')}${vfInput(i,'trailerPlate','Trailer plate #','Type here…',true)}</div>
+          </div>` : ''}
+        </div>`;
+        }).join('')}
+        ${vehiclePages>1 ? `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+          <span style="font-size:12.5px;color:var(--ink-soft)">${totalVehicles} vehicle(s) · page ${vehiclePage} of ${vehiclePages}</span>
+          <div class="pager">
+            <button class="page-btn" data-vp="${vehiclePage-1}" ${vehiclePage<=1?'disabled':''}>‹</button>
+            ${vehiclePageBtns}
+            <button class="page-btn" data-vp="${vehiclePage+1}" ${vehiclePage>=vehiclePages?'disabled':''}>›</button>
+          </div>
+        </div>` : ''}
       </div>
       <div class="rail card">
         <div class="card-body">
@@ -2023,6 +2059,8 @@ function wireScreen(root){
     // single-spot vs. fleet booking share the same Vehicle & Trailer Details page now —
     // the distinction only matters later, at payment, for pricing/copy
     S.vehicleForms = Array.from({length: S.spots}, ()=>({ truckCompany:'', truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' }));
+    S.vehicleFormsExpanded = Array.from({length: S.spots}, ()=>true);
+    S.vehiclePage = 1;
     go('book3');
   });
 
@@ -2035,6 +2073,14 @@ function wireScreen(root){
       if(badge){ badge.classList.add('show'); clearTimeout(window.__autosaveTimer); window.__autosaveTimer=setTimeout(()=>badge.classList.remove('show'),1200); }
     });
   });
+  root.querySelectorAll('[data-togglevehicle]').forEach(b=>b.addEventListener('click',()=>{
+    const i = parseInt(b.dataset.togglevehicle,10);
+    S.vehicleFormsExpanded[i] = !(S.vehicleFormsExpanded[i] !== false);
+    render();
+  }));
+  const expandAllVehicles = root.querySelector('#expandAllVehicles'); if(expandAllVehicles) expandAllVehicles.addEventListener('click',()=>{ S.vehicleFormsExpanded = S.vehicleForms.map(()=>true); render(); });
+  const collapseAllVehicles = root.querySelector('#collapseAllVehicles'); if(collapseAllVehicles) collapseAllVehicles.addEventListener('click',()=>{ S.vehicleFormsExpanded = S.vehicleForms.map(()=>false); render(); });
+  root.querySelectorAll('[data-vp]').forEach(b=>b.addEventListener('click',()=>{ const n=parseInt(b.dataset.vp,10); if(n>=1){ S.vehiclePage=n; render(); } }));
   const vehicleUploadZone = root.querySelector('#vehicleUploadZone'); if(vehicleUploadZone) vehicleUploadZone.addEventListener('click',()=>{
     const n = S.vehicleForms.length;
     // simulate an uploaded file with an arbitrary row count, independent of how many spots were
