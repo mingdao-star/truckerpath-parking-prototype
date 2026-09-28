@@ -283,8 +283,10 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .orderdetail-top-row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:16px}
 .orderdetail-top-row>.confirm-banner,.orderdetail-top-row>.orderdetail-banner{flex:2 1 320px;margin-bottom:0}
 .orderdetail-top-row>.qrcard{flex:1 1 260px;margin-bottom:0}
-.location-summary-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px}
+.location-summary-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;position:relative}
 .orderdetail-top-row>.location-summary-card{flex:1 1 280px;margin-bottom:0}
+/* floats over whatever is below instead of pushing the page down when expanded, same pattern as .qrcard-expand */
+.location-expand{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:0 14px 32px rgba(20,20,10,.16);padding:16px 18px;z-index:20;max-height:min(70vh,520px);overflow-y:auto}
 
 /* ---- batch flow specific ---- */
 .batch-title{font-size:19px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em}
@@ -592,10 +594,6 @@ function locationDetailsHtml(l){
         <span>${a.label}</span>
       </div>`).join('')}
     </div>`;
-}
-function locationDetailsToggleHtml(l){
-  return `<button class="btn-text" id="toggleLocationDetails" style="font-size:12.5px;margin-top:10px;display:flex;align-items:center;gap:4px">${S.locationDetailsExpanded?ic.chevDown:ic.chevRight}${S.locationDetailsExpanded ? 'Hide location details' : 'View location details'}</button>
-    ${S.locationDetailsExpanded ? `<div style="margin-top:10px">${locationDetailsHtml(l)}</div>` : ''}`;
 }
 
 const US_STATES = [
@@ -1575,17 +1573,26 @@ function gateCodeCard(code, caption){
   </div>`;
 }
 // standalone Location card — lives in the top row alongside the confirm/order banner and gate
-// code card, instead of buried inside the Booking Details box; opts.dates and opts.spots are
-// optional since the single-spot confirmation doesn't show a spot count
+// code card, instead of buried inside the Booking Details box. Stays name+address tall to match
+// its row-mates; everything else (dates, booking type, spots, coordinates, amenities...) lives
+// behind "View location details" in a floating overlay, same pattern as the Gate Code card's
+// expand panel — it overlays instead of pushing the page down. opts.dates and opts.spots are
+// optional since the single-spot confirmation doesn't show a spot count.
 function locationSummaryCard(l, opts){
+  const expanded = S.locationDetailsExpanded;
   return `<div class="location-summary-card">
     <div class="section-label" style="color:var(--ink);margin:0">Location</div>
-    <div style="font-weight:700;font-size:15px;margin:6px 0 8px">${l.name.split(' at ').pop()}</div>
-    <div style="padding:7px 0;font-size:13px;border-bottom:1px solid #f0f0ee"><div class="k" style="color:var(--ink-soft);margin-bottom:2px">Address</div><div>${opts.address} <button class="copy-btn" data-copy="${opts.address}">Copy</button></div></div>
-    ${opts.dates ? `<div class="info-row"><span class="k">Reservation Dates</span><span>${opts.dates}</span></div>` : ''}
-    <div class="info-row"><span class="k">Booking Type</span><span>${opts.bookingType}</span></div>
-    ${opts.spots!=null ? `<div class="info-row"><span class="k">Spots Reserved</span><span>${opts.spots}</span></div>` : ''}
-    ${locationDetailsToggleHtml(l)}
+    <div style="font-weight:700;font-size:15px;margin:6px 0 4px">${l.name.split(' at ').pop()}</div>
+    <div style="font-size:13px;color:var(--ink-soft)">${opts.address}</div>
+    <button class="btn-text" id="toggleLocationDetails" style="font-size:12.5px;margin-top:10px;display:flex;align-items:center;gap:4px">${expanded?ic.chevDown:ic.chevRight}${expanded ? 'Hide location details' : 'View location details'}</button>
+    ${expanded ? `<div class="location-expand">
+      <div class="info-row"><span class="k">Address</span><span>${opts.address} <button class="copy-btn" data-copy="${opts.address}">Copy</button></span></div>
+      ${opts.dates ? `<div class="info-row"><span class="k">Reservation Dates</span><span>${opts.dates}</span></div>` : ''}
+      <div class="info-row"><span class="k">Booking Type</span><span>${opts.bookingType}</span></div>
+      ${opts.spots!=null ? `<div class="info-row"><span class="k">Spots Reserved</span><span>${opts.spots}</span></div>` : ''}
+      <div class="poi-head-divider" style="margin:12px 0"></div>
+      ${locationDetailsHtml(l)}
+    </div>` : ''}
   </div>`;
 }
 // shared body for the single-spot "just booked" screen and its My Orders detail view —
