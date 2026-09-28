@@ -237,12 +237,6 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 
 /* rail */
 .rail{width:280px;flex:none}
-.rail-lot{display:flex;gap:10px}
-.rail-thumb{width:48px;height:42px;border-radius:8px;flex:none;background:linear-gradient(135deg,#8a7550,#b0996f)}
-.rail-name{font-size:12.5px;font-weight:700}
-.rail-addr{font-size:11px;color:var(--ink-soft)}
-.rail-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0}
-.rail-row .k{color:var(--ink-soft)}
 
 /* ---- vehicle/trailer form ---- */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -441,7 +435,6 @@ const S = {
   // one plain vehicle/trailer form per spot — resized to match S.spots when entering the
   // Vehicle & Trailer Details page (see go())
   vehicleForms: [{ truckCompany:'', truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' }],
-  vehicleUploadModalOpen: false,
 
   payment: { context:'single', selectedCardId:'card_visa' },
 
@@ -884,11 +877,6 @@ function timeAgo(ts){
   if(m < 60) return `${m}m ago`;
   const h = Math.floor(m/60);
   return `${h}h ago`;
-}
-// 'YYYY-MM-DD' date input value -> 'Mon D' for the reservation summary
-function formatDateShort(dateStr){
-  if(!dateStr) return '';
-  return new Date(dateStr+'T00:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric' });
 }
 function lotRate(l, bookingType){
   if(bookingType==='Weekly') return l.week;
@@ -1455,26 +1443,7 @@ function buildVehicleFormRow(i){
     trailerType: '53 dry van', trailerNum: String(9000+i), trailerCompany: name+' Trucking', trailerPlate: trailerPlate,
   };
 }
-function vehicleUploadModalHtml(){
-  if(!S.vehicleUploadModalOpen) return '';
-  return `
-    <div class="modal-overlay" id="vehicleUploadOverlay">
-      <div class="modal-box">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-          <div style="font-weight:700;font-size:15px">Batch upload file</div>
-          <button class="dp-close" id="closeVehicleUploadModal">${ic.x}</button>
-        </div>
-        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:12px">One row per vehicle: Truck company, Truck #, Truck make, Truck plate #, Truck DOT #, Driver phone, Trailer type, Trailer #, Trailer company, Trailer plate #. All rows book the ${S.step2VehicleType} spots reserved in Step 1.</div>
-        <div class="dropzone" id="vehicleUploadZone">
-          ${ic.file}
-          <div style="margin-top:8px;font-size:13.5px">Drag &amp; drop your file or <span style="color:var(--brand);font-weight:600">browse</span> to upload</div>
-          <div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px">CSV or XLSX · up to 2,000 rows · 10MB max</div>
-        </div>
-      </div>
-    </div>`;
-}
 function screenBookStep3Vehicle(){
-  const l = LOTS[S.selectedLotId];
   return `
   ${topNav('book')}
   <div class="page">
@@ -1483,12 +1452,9 @@ function screenBookStep3Vehicle(){
     </div>
     <div class="results-row" style="align-items:flex-start">
       <div style="flex:1">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <h2 class="card-title" style="margin:0">Vehicle &amp; Trailer Details</h2>
-            <span class="autosaved" id="autosaved">${ic.check} Saved</span>
-          </div>
-          <button class="btn btn-outline" id="openVehicleUploadModal">${ic.file}&nbsp;Batch upload file</button>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <h2 class="card-title" style="margin:0">Vehicle &amp; Trailer Details</h2>
+          <span class="autosaved" id="autosaved">${ic.check} Saved</span>
         </div>
         ${S.vehicleForms.map((vf,i)=>`
         <div class="card" style="margin-bottom:16px"><div class="card-body">
@@ -1504,20 +1470,20 @@ function screenBookStep3Vehicle(){
       </div>
       <div class="rail card">
         <div class="card-body">
-          <h3 class="card-title" style="font-size:14px;margin-bottom:12px">Your reservation</h3>
-          <div class="rail-lot"><div class="rail-thumb"></div><div><div class="rail-name">${l.name.split(' at ').pop()}</div><div class="rail-addr">${l.city}</div></div></div>
-          <div class="rail-row"><span class="k">${S.step2BookingType==='Monthly'?'Start date':'Dates'}</span><span>${S.step2BookingType==='Monthly' ? formatDateShort(S.search.checkIn) : `${formatDateShort(S.search.checkIn)}, ${S.search.checkInTime} – ${formatDateShort(S.search.checkOut)}, ${S.search.checkOutTime}`}</span></div>
-          <div class="rail-row"><span class="k">Booking type</span><span>${S.step2BookingType}</span></div>
-          <div class="rail-row"><span class="k">Vehicle</span><span>${S.step2VehicleType}</span></div>
-          <div class="rail-row"><span class="k">Spots</span><span>${S.spots}</span></div>
+          <h3 class="card-title" style="font-size:14px;margin-bottom:4px">Batch upload file</h3>
+          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:12px">One row per vehicle: Truck company, Truck #, Truck make, Truck plate #, Truck DOT #, Driver phone, Trailer type, Trailer #, Trailer company, Trailer plate #. All rows book the ${S.step2VehicleType} spots reserved in Step 1.</div>
+          <div class="dropzone" id="vehicleUploadZone">
+            ${ic.file}
+            <div style="margin-top:8px;font-size:13.5px">Drag &amp; drop your file or <span style="color:var(--brand);font-weight:600">browse</span> to upload</div>
+            <div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px">CSV or XLSX · up to 2,000 rows · 10MB max</div>
+          </div>
           <div class="total-row"><span>Total</span><b class="tabular">$${computeStep2Total().toFixed(2)}</b></div>
           <div style="font-size:11px;color:var(--ink-soft);text-align:right;margin-top:2px">Price shown does not include tax</div>
           <button class="btn btn-primary btn-lg" style="width:100%;margin-top:12px" id="step3Continue">Continue to payment</button>
         </div>
       </div>
     </div>
-  </div>
-  ${vehicleUploadModalHtml()}`;
+  </div>`;
 }
 
 /* ============================================================
@@ -2068,10 +2034,6 @@ function wireScreen(root){
       if(badge){ badge.classList.add('show'); clearTimeout(window.__autosaveTimer); window.__autosaveTimer=setTimeout(()=>badge.classList.remove('show'),1200); }
     });
   });
-  const openVehicleUploadModal = root.querySelector('#openVehicleUploadModal'); if(openVehicleUploadModal) openVehicleUploadModal.addEventListener('click',()=>{ S.vehicleUploadModalOpen=true; render(); });
-  const closeVehicleUploadModal = root.querySelector('#closeVehicleUploadModal'); if(closeVehicleUploadModal) closeVehicleUploadModal.addEventListener('click',()=>{ S.vehicleUploadModalOpen=false; render(); });
-  const vehicleUploadOverlay = root.querySelector('#vehicleUploadOverlay');
-  if(vehicleUploadOverlay) vehicleUploadOverlay.addEventListener('click',(e)=>{ if(e.target===vehicleUploadOverlay){ S.vehicleUploadModalOpen=false; render(); } });
   const vehicleUploadZone = root.querySelector('#vehicleUploadZone'); if(vehicleUploadZone) vehicleUploadZone.addEventListener('click',()=>{
     const n = S.vehicleForms.length;
     // simulate an uploaded file with an arbitrary row count, independent of how many spots were
@@ -2079,7 +2041,6 @@ function wireScreen(root){
     const fileRowCount = Math.max(n + 3, Math.round(n * 1.4) + 2);
     const rows = Array.from({length: fileRowCount}, (_,i)=>buildVehicleFormRow(i));
     S.vehicleForms = rows.slice(0, n);
-    S.vehicleUploadModalOpen = false;
     render();
     if(fileRowCount > n) toast(`We've only included the first ${n} and filled it out for you — ${fileRowCount-n} additional row(s) were not included.`);
     else toast('File uploaded — all vehicle sections filled in.');
