@@ -1621,11 +1621,11 @@ function screenPayment(context){
             <div class="info-row"><span class="k">Check-out</span><span>${formatDateWeekday(order.checkOutDate)} · ${order.checkOutTime}</span></div>
             <div class="info-row"><span class="k">Billed</span><span>${order.billedLabel}</span></div>
           </div>
-          <div class="orderline"><span><b>${order.vtype} parking</b></span><span><b class="tabular">$${order.lineItemPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</b></span></div>
+          <div class="orderline"><span><b>${order.vtype} parking</b></span><span><b class="tabular">$${order.lineItemPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</b></span></div>
           <div class="orderline-detail">${order.lineItemDetail}</div>
-          <div class="orderline"><span>Tax</span><span class="tabular">$${order.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
-          <div class="orderline total"><span>Total</span><span class="tabular">$${order.total.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
-          <button class="btn btn-primary btn-lg" style="width:100%;margin-top:12px" id="payBtn">${ic.lock}&nbsp;Pay $${order.total.toLocaleString('en-US',{minimumFractionDigits:2})}</button>
+          <div class="orderline"><span>Tax</span><span class="tabular">$${order.tax.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+          <div class="orderline total"><span>Total</span><span class="tabular">$${order.total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+          <button class="btn btn-primary btn-lg" style="width:100%;margin-top:12px" id="payBtn">${ic.lock}&nbsp;Pay $${order.total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</button>
         </div>
       </div>
     </div>
@@ -1768,10 +1768,10 @@ function screenBatchConfirm(){
       </div>
       <div class="card-body">
         <div class="section-label" style="color:var(--ink);margin:0 0 8px">Charges</div>
-        ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} × billed ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
-        ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} × billed ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
-        <div class="info-row"><span class="k">Tax</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
-        <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</b></span></div>
+        ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} × billed ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
+        ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} × billed ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
+        <div class="info-row"><span class="k">Tax</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+        <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</b></span></div>
         <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
       </div>
     </div>
@@ -1941,10 +1941,10 @@ function screenOrderDetailBatch(){
       </div>
       <div class="card-body">
         <div class="section-label" style="color:var(--ink);margin:0 0 8px">Charges</div>
-        ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} × ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
-        ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} × ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>` : ''}
-        <div class="info-row"><span class="k">Tax</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
-        <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</b></span></div>
+        ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} × ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
+        ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} × ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
+        <div class="info-row"><span class="k">Tax</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+        <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</b></span></div>
         <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
         <div class="info-row"><span class="k">Paid on</span><span>${order.paidOn}</span></div>
       </div>
@@ -2163,7 +2163,7 @@ function wireScreen(root){
   const payBtn = root.querySelector('#payBtn');
   if(payBtn) payBtn.addEventListener('click',()=>{
     const isBatch = S.payment.context==='batch';
-    const total = '$' + computeStayBreakdown().total.toLocaleString('en-US',{minimumFractionDigits:2});
+    const total = '$' + computeStayBreakdown().total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
     payBtn.textContent='Processing…'; payBtn.disabled=true;
     setTimeout(()=>{ toast('Payment confirmed — '+total); go(isBatch?'batchConfirm':'book5'); },800);
   });
