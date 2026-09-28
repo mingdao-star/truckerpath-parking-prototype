@@ -211,15 +211,15 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .stars-row .star.on{background:#C2410C}
 .poi-head-divider{height:1px;background:var(--line);margin:10px 0}
 .book1-cta-sticky{position:sticky;bottom:0;background:#fff;padding:14px 0 4px;box-shadow:0 -10px 14px -10px rgba(0,0,0,.12)}
-.fleet-pricing-box{border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px}
-.fleet-pricing-box .refresh{color:var(--orange-deep);display:block;font-size:11px;margin-top:6px}
-.fleet-price-row{display:flex;align-items:center;gap:10px;background:var(--paper-dim);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:12.5px}
-.fleet-price-row .fp-type{flex:1;font-weight:600;color:var(--ink)}
-.fleet-price-row .fp-rate{font-weight:700;color:var(--ink)}
-.fleet-price-row .fp-avail{color:var(--ink-soft);min-width:88px;text-align:right}
-.fleet-price-row.stepped{flex-direction:column;align-items:stretch;gap:6px}
-.fleet-price-row.stepped .fp-line{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.fleet-price-row.stepped .fp-avail{min-width:0}
+.fleet-pricing-box{border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px}
+.fleet-pricing-box .refresh{color:var(--ink-muted);display:block;font-size:11px;margin-top:8px}
+.rate-card{display:flex;align-items:center;gap:12px;background:var(--paper-dim);border-radius:var(--r-md);padding:12px;margin-top:10px}
+.rate-card-icon{width:38px;height:38px;border-radius:var(--r-md);background:#fff;display:grid;place-items:center;color:var(--brand);flex:none;box-shadow:var(--shadow-sm)}
+.rate-card-info{flex:1;min-width:0}
+.rate-card-price{font-family:var(--font-display);font-size:18px;color:var(--ink)}
+.rate-card-price span{font-family:'Inter',-apple-system,sans-serif;font-size:12px;font-weight:500;color:var(--ink-soft);margin-left:2px}
+.avail-pill{display:inline-block;margin-top:3px;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--green-tint);color:var(--green-deep)}
+.avail-pill.low{background:var(--orange-tint);color:var(--orange-deep)}
 .stepper-inline.sm button{width:28px;height:30px;font-size:14px}
 .stepper-inline.sm input{width:40px;height:30px;font-size:12.5px}
 .hours-banner{display:flex;align-items:center;gap:8px;background:var(--brand-tint);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px}
@@ -443,6 +443,8 @@ const S = {
   // one plain vehicle/trailer form per spot — resized to match S.spots when entering the
   // Vehicle & Trailer Details page (see go())
   vehicleForms: [{ truckCompany:'', truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' }],
+  vehicleFormsExpanded: [true],
+  vehiclePage: 1,
 
   payment: { context:'single', selectedCardId:'card_visa' },
 
@@ -1362,18 +1364,16 @@ function screenBookStep1(){
             <div class="field" style="margin-top:0"><label>Vehicle Type</label><select class="pill-select" id="step2VehicleType">
               ${Object.keys(l.vtypeAvail).map(vt=>`<option ${S.step2VehicleType===vt?'selected':''}>${vt}</option>`).join('')}
             </select></div>
-            <div class="fleet-price-row stepped" style="margin-top:10px">
-              <div class="fp-line">
-                <span class="fp-type">${S.step2VehicleType}</span>
-                <span class="fp-avail tabular">${vtypeMax} available</span>
+            <div class="rate-card">
+              <div class="rate-card-icon">${ic.parkP}</div>
+              <div class="rate-card-info">
+                <div class="rate-card-price"><b class="tabular">$${batchVehicleRate(S.step2VehicleType,S.step2BookingType,l).toFixed(2)}</b><span>/${batchRateUnit(S.step2BookingType)}</span></div>
+                <span class="avail-pill ${vtypeMax<=3?'low':''}">${vtypeMax} available</span>
               </div>
-              <div class="fp-line">
-                <span class="fp-rate tabular">$${batchVehicleRate(S.step2VehicleType,S.step2BookingType,l).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</span>
-                <div class="stepper-inline sm">
-                  <button type="button" id="spotsMinus" ${S.spots<=0?'disabled':''}>−</button>
-                  <input id="spotsInput" value="${S.spots}" inputmode="numeric">
-                  <button type="button" id="spotsPlus" ${S.spots>=vtypeMax?'disabled':''}>+</button>
-                </div>
+              <div class="stepper-inline sm">
+                <button type="button" id="spotsMinus" ${S.spots<=0?'disabled':''}>−</button>
+                <input id="spotsInput" value="${S.spots}" inputmode="numeric">
+                <button type="button" id="spotsPlus" ${S.spots>=vtypeMax?'disabled':''}>+</button>
               </div>
             </div>
             <span class="refresh">Last refreshed ${timeAgo(S.availRefreshedAt)}</span>
