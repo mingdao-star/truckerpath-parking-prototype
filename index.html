@@ -326,6 +326,8 @@ table.dtable tbody tr:hover td{background:var(--paper-dim)}
 .orderline.total{border-top:1px solid var(--line);margin-top:6px;padding-top:10px;font-weight:700;font-size:15px}
 .orderline .green{color:var(--green-deep)}
 .orderline-detail{font-size:11px;color:var(--ink-soft);margin:-5px 0 8px}
+.orderline-note{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-soft);margin:4px 0 8px}
+.orderline-note svg{flex:none}
 .booking-type-badge{background:var(--info-tint);color:var(--info);font-size:12.5px;font-weight:700;padding:4px 14px;border-radius:999px;flex:none}
 .stay-summary-box{background:var(--paper-dim);border-radius:var(--r-md);padding:10px 14px;margin-bottom:14px}
 .stay-summary-box .info-row{border-bottom:none;padding:5px 0}
@@ -373,6 +375,7 @@ table.orders tbody tr:hover td{background:var(--paper-dim)}
 ============================================================ */
 const ic = {
   refresh:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>',
+  info:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5" stroke-linecap="round"/><circle cx="12" cy="7.8" r=".9" fill="currentColor" stroke="none"/></svg>',
   check:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-11"/></svg>',
   checkW:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-11"/></svg>',
   chevDown:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
@@ -942,23 +945,34 @@ function computeStayBreakdown(){
   const totalDays = Math.max(1, Math.ceil(Math.max(1, coDT-ciDT) / 3600000 / 24));
   const plural = (n,w) => `${n} ${w}${n===1?'':'s'}`;
 
-  let billedLabel, lineItemPrice, lineItemDetail;
+  let billedLabel, lineItems, note = '';
   if(bookingType==='Weekly'){
     const weeks = Math.floor(totalDays/7);
     const extraDays = totalDays % 7;
     const dailyRate = batchVehicleRate(vtype, 'Daily', l);
     if(weeks===0){
-      lineItemPrice = dailyRate * spots * extraDays;
       billedLabel = plural(extraDays,'day');
-      lineItemDetail = `$${dailyRate.toFixed(2)}/day × ${plural(spots,'spot')} × ${plural(extraDays,'day')}`;
+      lineItems = [{
+        label: `${vtype} parking`,
+        price: dailyRate * spots * extraDays,
+        detail: `$${dailyRate.toFixed(2)}/day × ${plural(spots,'spot')} × ${plural(extraDays,'day')}`,
+      }];
     } else if(extraDays===0){
-      lineItemPrice = rate * spots * weeks;
       billedLabel = plural(weeks,'week');
-      lineItemDetail = `$${rate.toFixed(2)}/week × ${plural(spots,'spot')} × ${plural(weeks,'week')}`;
+      lineItems = [{
+        label: `${vtype} parking`,
+        price: rate * spots * weeks,
+        detail: `$${rate.toFixed(2)}/week × ${plural(spots,'spot')} × ${plural(weeks,'week')}`,
+      }];
     } else {
-      lineItemPrice = rate*spots*weeks + dailyRate*spots*extraDays;
-      billedLabel = `${plural(weeks,'week')} ${plural(extraDays,'day')}`;
-      lineItemDetail = `$${rate.toFixed(2)}/week × ${plural(spots,'spot')} × ${plural(weeks,'week')} + $${dailyRate.toFixed(2)}/day × ${plural(spots,'spot')} × ${plural(extraDays,'day')}`;
+      // billed as two separate line items — one at the weekly rate for the full week(s), one at
+      // the daily rate for whatever's left — instead of one line with a concatenated "+" detail
+      billedLabel = `${plural(weeks,'week')} + ${plural(extraDays,'day')}`;
+      lineItems = [
+        { label: `${vtype} · Weekly`, price: rate*spots*weeks, detail: `$${rate.toFixed(2)}/week × ${plural(spots,'spot')} × ${plural(weeks,'week')}` },
+        { label: `${vtype} · Extra days`, price: dailyRate*spots*extraDays, detail: `$${dailyRate.toFixed(2)}/day × ${plural(spots,'spot')} × ${plural(extraDays,'day')}` },
+      ];
+      note = 'Days beyond a full week are billed at the daily rate.';
     }
   } else if(bookingType==='Monthly'){
     let months = (coDT.getFullYear()-ciDT.getFullYear())*12 + (coDT.getMonth()-ciDT.getMonth());
@@ -966,22 +980,29 @@ function computeStayBreakdown(){
     const ciMinutes = ciDT.getHours()*60+ciDT.getMinutes();
     if(coDT.getDate()>ciDT.getDate() || (coDT.getDate()===ciDT.getDate() && coMinutes>ciMinutes)) months += 1;
     months = Math.max(1, months);
-    lineItemPrice = rate * spots * months;
     billedLabel = plural(months,'month');
-    lineItemDetail = `$${rate.toFixed(2)}/month × ${plural(spots,'spot')} × ${plural(months,'month')}`;
+    lineItems = [{
+      label: `${vtype} parking`,
+      price: rate * spots * months,
+      detail: `$${rate.toFixed(2)}/month × ${plural(spots,'spot')} × ${plural(months,'month')}`,
+    }];
   } else {
-    lineItemPrice = rate * spots * totalDays;
     billedLabel = plural(totalDays,'day');
-    lineItemDetail = `$${rate.toFixed(2)}/day × ${plural(spots,'spot')} × ${plural(totalDays,'day')}`;
+    lineItems = [{
+      label: `${vtype} parking`,
+      price: rate * spots * totalDays,
+      detail: `$${rate.toFixed(2)}/day × ${plural(spots,'spot')} × ${plural(totalDays,'day')}`,
+    }];
   }
 
+  const lineItemPrice = lineItems.reduce((sum,li)=>sum+li.price,0);
   const tax = lineItemPrice * TAX_RATE;
   const total = lineItemPrice + tax;
   return {
     bookingType, vtype, spots,
     checkInDate: S.search.checkIn, checkInTime: S.search.checkInTime,
     checkOutDate: S.search.checkOut, checkOutTime: S.search.checkOutTime,
-    billedLabel, lineItemPrice, lineItemDetail, tax, total,
+    billedLabel, lineItems, lineItemPrice, note, tax, total,
   };
 }
 
@@ -991,14 +1012,9 @@ function computeStayBreakdown(){
 // repackaged into the shape screenBatchConfirm's Charges breakdown already expects.
 function computeBatchOrder(){
   const order = computeStayBreakdown();
-  const truckTrailerCount = S.step2VehicleType==='Truck + Trailer' ? S.spots : 0;
-  const trailerOnlyCount = S.step2VehicleType==='Trailer Only' ? S.spots : 0;
   return {
-    validCount: S.spots, truckTrailerCount, trailerOnlyCount, unit: order.billedLabel,
-    truckTrailerPrice: truckTrailerCount>0 ? order.lineItemPrice : 0,
-    trailerOnlyPrice: trailerOnlyCount>0 ? order.lineItemPrice : 0,
-    tax: order.tax, total: order.total,
-    spotsReserved: S.spots || 0,
+    validCount: S.spots, spotsReserved: S.spots || 0,
+    lineItems: order.lineItems, note: order.note, tax: order.tax, total: order.total,
   };
 }
 // past-order view (Orders -> View) must NOT depend on live booking-flow state (S.selectedLotId,
@@ -1621,8 +1637,9 @@ function screenPayment(context){
             <div class="info-row"><span class="k">Check-out</span><span>${formatDateWeekday(order.checkOutDate)} · ${order.checkOutTime}</span></div>
             <div class="info-row"><span class="k">Billed</span><span>${order.billedLabel}</span></div>
           </div>
-          <div class="orderline"><span><b>${order.vtype} parking</b></span><span><b class="tabular">$${order.lineItemPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</b></span></div>
-          <div class="orderline-detail">${order.lineItemDetail}</div>
+          ${order.lineItems.map(li=>`<div class="orderline"><span><b>${li.label}</b></span><span><b class="tabular">$${li.price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</b></span></div>
+          <div class="orderline-detail">${li.detail}</div>`).join('')}
+          ${order.note ? `<div class="orderline-note">${ic.info}${order.note}</div>` : ''}
           <div class="orderline"><span>Tax</span><span class="tabular">$${order.tax.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
           <div class="orderline total"><span>Total</span><span class="tabular">$${order.total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
           <button class="btn btn-primary btn-lg" style="width:100%;margin-top:12px" id="payBtn">${ic.lock}&nbsp;Pay $${order.total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</button>
@@ -1768,8 +1785,8 @@ function screenBatchConfirm(){
       </div>
       <div class="card-body">
         <div class="section-label" style="color:var(--ink);margin:0 0 8px">Charges</div>
-        ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} × billed ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
-        ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} × billed ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
+        ${batchOrder.lineItems.map(li=>`<div class="info-row"><span class="k">${li.label} (${li.detail})</span><span>$${li.price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`).join('')}
+        ${batchOrder.note ? `<div class="orderline-note">${ic.info}${batchOrder.note}</div>` : ''}
         <div class="info-row"><span class="k">Tax</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</b></span></div>
         <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
