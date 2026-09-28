@@ -283,6 +283,8 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .orderdetail-top-row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:16px}
 .orderdetail-top-row>.confirm-banner,.orderdetail-top-row>.orderdetail-banner{flex:2 1 320px;margin-bottom:0}
 .orderdetail-top-row>.qrcard{flex:1 1 260px;margin-bottom:0}
+.location-summary-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px}
+.orderdetail-top-row>.location-summary-card{flex:1 1 280px;margin-bottom:0}
 
 /* ---- batch flow specific ---- */
 .batch-title{font-size:19px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em}
@@ -1572,11 +1574,23 @@ function gateCodeCard(code, caption){
     </div>` : ''}
   </div>`;
 }
+// standalone Location card — lives in the top row alongside the confirm/order banner and gate
+// code card, instead of buried inside the Booking Details box; opts.dates and opts.spots are
+// optional since the single-spot confirmation doesn't show a spot count
+function locationSummaryCard(l, opts){
+  return `<div class="location-summary-card">
+    <div class="section-label" style="color:var(--ink);margin:0">Location</div>
+    <div style="font-weight:700;font-size:15px;margin:6px 0 8px">${l.name.split(' at ').pop()}</div>
+    <div style="padding:7px 0;font-size:13px;border-bottom:1px solid #f0f0ee"><div class="k" style="color:var(--ink-soft);margin-bottom:2px">Address</div><div>${opts.address} <button class="copy-btn" data-copy="${opts.address}">Copy</button></div></div>
+    ${opts.dates ? `<div class="info-row"><span class="k">Reservation Dates</span><span>${opts.dates}</span></div>` : ''}
+    <div class="info-row"><span class="k">Booking Type</span><span>${opts.bookingType}</span></div>
+    ${opts.spots!=null ? `<div class="info-row"><span class="k">Spots Reserved</span><span>${opts.spots}</span></div>` : ''}
+    ${locationDetailsToggleHtml(l)}
+  </div>`;
+}
 // shared body for the single-spot "just booked" screen and its My Orders detail view —
 // they show the same booking, just under a different banner and back-button destination
 function singleOrderDetailBody(){
-  const l = LOTS.eloy;
-  const shortName = l.name.split(' at ').pop();
   const singleOrder = singleSpotOrder();
   const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
   const orderRecord = S.ordersHistory.find(o=>o.id==='RP-88214-JX');
@@ -1594,16 +1608,15 @@ function singleOrderDetailBody(){
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${singleOrder.total.toFixed(2)}</b></span></div>
         <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
         <div class="info-row"><span class="k">Paid on</span><span>${orderRecord.paidOn}</span></div>
-        <div class="poi-head-divider" style="margin:16px 0"></div>
-        <div class="section-label" style="color:var(--ink);margin:0 0 4px">Location</div>
-        <div style="font-weight:700;font-size:16px">${shortName}</div>
-        <div class="poi-head-divider" style="margin:12px 0"></div>
-        <div class="info-row"><span class="k">Address</span><span>3100 S Barrett Rd, Eloy, AZ 85131 <button class="copy-btn" data-copy="3100 S Barrett Rd, Eloy, AZ 85131">Copy</button></span></div>
-        <div class="info-row"><span class="k">Reservation Dates</span><span>Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM</span></div>
-        <div class="info-row"><span class="k">Booking Type</span><span>Weekly</span></div>
-        ${locationDetailsToggleHtml(l)}
       </div>
     </div>`;
+}
+function singleOrderLocationCard(){
+  return locationSummaryCard(LOTS.eloy, {
+    address: '3100 S Barrett Rd, Eloy, AZ 85131',
+    dates: 'Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM',
+    bookingType: 'Weekly',
+  });
 }
 function screenBookStep5Confirm(){
   const phone = S.vehicleForms[0] && S.vehicleForms[0].driverPhone;
@@ -1615,6 +1628,7 @@ function screenBookStep5Confirm(){
         <div class="confirm-ic">${ic.checkW}</div>
         <div><div style="font-weight:700;font-size:16px">You're booked — RP-88214-JX</div><div style="color:var(--green-deep);font-size:13px">Confirmation sent to ${phone ? phone : 'your phone'}. Show your check-in code at the gate.</div></div>
       </div>
+      ${singleOrderLocationCard()}
       ${gateCodeCard('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.')}
     </div>
     ${singleOrderDetailBody()}
@@ -1632,7 +1646,6 @@ function screenBatchConfirm(){
   let rows = S.vehicleForms;
   if(q) rows = rows.filter(vf => (vf.truckCompany+' '+vf.truckPlate+' '+vf.driverPhone).toLowerCase().includes(q));
   const l = LOTS[S.selectedLotId];
-  const shortName = l.name.split(' at ').pop();
   const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
   return `
   ${topNav('orders')}
@@ -1642,6 +1655,7 @@ function screenBatchConfirm(){
         <div class="confirm-ic">${ic.checkW}</div>
         <div><div style="font-weight:700;font-size:16px">Booking confirmed — FP-20260708-4417</div><div style="color:var(--green-deep);font-size:13px">Parking instructions generated for ${batchOrder.validCount} driver${batchOrder.validCount===1?'':'s'}. A receipt was sent to dispatch@navprodispatch.com.</div></div>
       </div>
+      ${locationSummaryCard(l, { address: l.address, bookingType: S.batch.bookingType, spots: batchOrder.validCount })}
       ${gateCodeCard('1199#', 'Same gate code for every driver on this order.')}
     </div>
     <div class="card">
@@ -1658,14 +1672,6 @@ function screenBatchConfirm(){
         <div class="info-row"><span class="k">Tax (${(TAX_RATE*100).toFixed(1)}%)</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</b></span></div>
         <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
-        <div class="poi-head-divider" style="margin:16px 0"></div>
-        <div class="section-label" style="color:var(--ink);margin:0 0 4px">Location</div>
-        <div style="font-weight:700;font-size:16px">${shortName}</div>
-        <div class="poi-head-divider" style="margin:12px 0"></div>
-        <div class="info-row"><span class="k">Address</span><span>${l.address} <button class="copy-btn" data-copy="${l.address}">Copy</button></span></div>
-        <div class="info-row"><span class="k">Booking Type</span><span>${S.batch.bookingType}</span></div>
-        <div class="info-row"><span class="k">Spots Reserved</span><span>${batchOrder.validCount}</span></div>
-        ${locationDetailsToggleHtml(l)}
       </div>
     </div>
     <div class="card" style="margin-top:16px">
@@ -1797,6 +1803,7 @@ function screenOrderDetailSingle(){
         <div class="orderdetail-ic">${ic.checkW}</div>
         <h2 class="card-title" style="margin:0;font-size:18px">Order details — RP-88214-JX</h2>
       </div>
+      ${singleOrderLocationCard()}
       ${gateCodeCard('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.')}
     </div>
     ${singleOrderDetailBody()}
@@ -1814,7 +1821,6 @@ function screenOrderDetailBatch(){
   const l = LOTS[order.lotId] || LOTS.eloy;
   const batchOrder = computeOrderCharges(l);
   const { start: ciDate, end: coDate } = orderDateBounds(order);
-  const shortName = l.name.split(' at ').pop();
   const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
   return `
   ${topNav('orders')}
@@ -1824,6 +1830,7 @@ function screenOrderDetailBatch(){
         <div class="orderdetail-ic">${ic.checkW}</div>
         <h2 class="card-title" style="margin:0;font-size:18px">Order details — ${order.id}</h2>
       </div>
+      ${locationSummaryCard(l, { address: l.address, dates: order.dates, bookingType: 'Daily', spots: batchOrder.validCount })}
       ${gateCodeCard('1199#', 'Same gate code for every driver on this order.')}
     </div>
     <div class="card">
@@ -1841,15 +1848,6 @@ function screenOrderDetailBatch(){
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2})}</b></span></div>
         <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
         <div class="info-row"><span class="k">Paid on</span><span>${order.paidOn}</span></div>
-        <div class="poi-head-divider" style="margin:16px 0"></div>
-        <div class="section-label" style="color:var(--ink);margin:0 0 4px">Location</div>
-        <div style="font-weight:700;font-size:16px">${shortName}</div>
-        <div class="poi-head-divider" style="margin:12px 0"></div>
-        <div class="info-row"><span class="k">Address</span><span>${l.address} <button class="copy-btn" data-copy="${l.address}">Copy</button></span></div>
-        <div class="info-row"><span class="k">Reservation Dates</span><span>${order.dates}</span></div>
-        <div class="info-row"><span class="k">Booking Type</span><span>Daily</span></div>
-        <div class="info-row"><span class="k">Spots Reserved</span><span>${batchOrder.validCount}</span></div>
-        ${locationDetailsToggleHtml(l)}
       </div>
     </div>
     <div class="card" style="margin-top:16px">
