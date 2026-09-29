@@ -836,7 +836,7 @@ function go(screen){ S.screen = screen; S.profileOpen = false; render(); window.
 
 function toast(msg){
   const t = document.createElement('div');
-  t.style.cssText = 'position:fixed;bottom:22px;right:22px;background:#0E0F0C;color:#fff;padding:11px 16px;border-radius:8px;font-size:13.5px;font-weight:500;box-shadow:0 20px 48px rgba(0,0,0,.25);z-index:100;max-width:320px;';
+  t.style.cssText = 'position:fixed;top:22px;left:50%;transform:translateX(-50%);background:#0E0F0C;color:#fff;padding:11px 16px;border-radius:8px;font-size:13.5px;font-weight:500;box-shadow:0 20px 48px rgba(0,0,0,.25);z-index:100;max-width:320px;text-align:center;';
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(()=>{ t.style.transition='opacity .3s'; t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 2600);
