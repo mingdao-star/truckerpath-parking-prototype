@@ -222,6 +222,7 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .rate-select-price{flex:1;text-align:right;font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rate-select-chevron{color:var(--ink-soft);flex:none;display:flex}
 .rate-select-native{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;appearance:none;-webkit-appearance:none;border:none}
+.rate-select-native option{font-weight:700;font-size:14px;line-height:20px;color:var(--ink)}
 .stepper-inline.sm button{width:28px;height:44px;font-size:14px}
 .stepper-inline.sm input{width:38px;height:44px;font-size:13.5px}
 .hours-banner{display:flex;align-items:center;gap:8px;background:var(--brand-tint);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px}
@@ -1455,7 +1456,7 @@ function screenBookStep1(){
                 <span class="rate-select-price tabular">$${batchVehicleRate(S.step2VehicleType,S.step2BookingType,l).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</span>
                 <span class="rate-select-chevron">${ic.chevDown}</span>
                 <select id="step2VehicleType" class="rate-select-native">
-                  ${Object.keys(l.vtypeAvail).map(vt=>`<option ${S.step2VehicleType===vt?'selected':''}>${vt}</option>`).join('')}
+                  ${Object.keys(l.vtypeAvail).map(vt=>`<option value="${vt}" ${S.step2VehicleType===vt?'selected':''}>${vt}   $${batchVehicleRate(vt,S.step2BookingType,l).toFixed(2)}/${batchRateUnit(S.step2BookingType)}</option>`).join('')}
                 </select>
               </div>
               <div class="stepper-inline sm">
