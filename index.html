@@ -574,12 +574,14 @@ function poiInfoBlock(l){
     <div class="info-row"><span class="k">Call</span><span><a href="tel:${l.phone.replace(/\D/g,'')}" style="color:var(--brand)">${l.phone}</a></span></div>
     <div class="info-row"><span class="k">Weather</span><span><a href="#" style="color:var(--brand)" data-toast="Opening weather details…">View Details</a></span></div>
     <div class="section-label" style="color:var(--ink);margin-top:12px;text-align:center">Access &amp; Check-in</div>
-    ${l.hasCheckinPhoto===false ? '' : `<div class="instruction-photo" style="background-image:url('${lotPhotoUrl(S.selectedLotId)}');background-position:${lotPhotoPos(S.selectedLotId)}"><span class="instruction-photo-cap">Entrance at this location</span></div>`}
-    <div style="display:flex;gap:10px;align-items:flex-start">
+    <div class="pricing-col-label" style="margin-bottom:6px">Gate Code</div>
+    <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:14px">
       <div class="card-icon-badge" style="flex:none">${ic.qr}</div>
-      <div><div style="font-weight:600;font-size:13px;margin-bottom:2px">Scan QR to enter</div>
-      ${l.instructions ? `<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.5">${l.instructions}</div>` : ''}</div>
+      <div style="font-weight:600;font-size:13px">Scan QR to enter</div>
     </div>
+    <div class="pricing-col-label" style="margin-bottom:6px">Instructions</div>
+    ${l.hasCheckinPhoto===false ? '' : `<div class="instruction-photo" style="background-image:url('${lotPhotoUrl(S.selectedLotId)}');background-position:${lotPhotoPos(S.selectedLotId)}"><span class="instruction-photo-cap">Entrance at this location</span></div>`}
+    ${l.instructions ? `<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.5">${l.instructions}</div>` : ''}
     <div class="section-label" style="color:var(--ink);margin-top:12px">Amenities</div>
     <div class="amenities-grid">
       ${primary.map(a=>`<div class="amenity ${a.on?'':'off'}">
@@ -1674,8 +1676,12 @@ const screenBatchPayment = () => screenPayment('batch');
 ============================================================ */
 // standalone Gate Code / QR card — lives outside the Booking Details box so it doesn't compete
 // with the receipt for space, and shows a bigger, friendlier layout once revealed
-function gateCodeCard(code, caption){
+// l (optional): the order's own lot object, so drivers see the actual entrance photo/instructions
+// under the gate code instead of a generic caption only — dispatcher-booked drivers never see the
+// live POI Detail panel, so this is the one place in Order Detail they'll ever see this info.
+function gateCodeCard(code, caption, l){
   const revealed = S.checkinCodeRevealed;
+  const lotId = l ? Object.keys(LOTS).find(k=>LOTS[k]===l) : null;
   return `<div class="qrcard">
     <div class="qrcard-top">
       <div class="qrcard-icon">${ic.qr}</div>
@@ -1694,6 +1700,13 @@ function gateCodeCard(code, caption){
         <div class="qrcard-code tabular">${code}</div>
       </div>
       <div class="qrcard-caption">${caption}</div>
+      ${l ? `<div class="section-label" style="color:var(--ink);margin-top:12px">Parking Instructions</div>
+      ${l.hasCheckinPhoto===false ? '' : `<div class="instruction-photo" style="background-image:url('${lotPhotoUrl(lotId)}');background-position:${lotPhotoPos(lotId)}"><span class="instruction-photo-cap">Entrance at this location</span></div>`}
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <div class="card-icon-badge" style="flex:none">${ic.qr}</div>
+        <div><div style="font-weight:600;font-size:13px;margin-bottom:2px">Scan QR to enter</div>
+        ${l.instructions ? `<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.5">${l.instructions}</div>` : ''}</div>
+      </div>` : ''}
     </div>` : ''}
   </div>`;
 }
@@ -1789,7 +1802,7 @@ function screenBookStep5Confirm(){
         <div><div style="font-weight:700;font-size:16px">You're booked — RP-88214-JX</div><div style="color:var(--green-deep);font-size:13px">Confirmation sent to ${phone ? phone : 'your phone'}. Show your check-in code at the gate.</div></div>
       </div>
       ${singleOrderLocationCard()}
-      ${gateCodeCard('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.')}
+      ${gateCodeCard('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.', LOTS.eloy)}
     </div>
     ${singleOrderDetailBody()}
     <button class="btn btn-primary" id="backHomeBtn">Back to My Orders</button>
@@ -1816,7 +1829,7 @@ function screenBatchConfirm(){
         <div style="font-weight:700;font-size:16px">Booking confirmed — FP-20260708-4417</div>
       </div>
       ${locationSummaryCard(l, { address: l.address, bookingType: S.batch.bookingType, spots: batchOrder.validCount })}
-      ${gateCodeCard('1199#', 'Same gate code for every driver on this order.')}
+      ${gateCodeCard('1199#', 'Same gate code for every driver on this order.', l)}
     </div>
     <div class="card">
       <div class="card-head">
@@ -1962,7 +1975,7 @@ function screenOrderDetailSingle(){
         <h2 class="card-title" style="margin:0;font-size:18px">Order details — RP-88214-JX</h2>
       </div>
       ${singleOrderLocationCard()}
-      ${gateCodeCard('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.')}
+      ${gateCodeCard('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.', LOTS.eloy)}
     </div>
     ${singleOrderDetailBody()}
     <button class="btn btn-outline" style="margin-top:16px" id="backToOrders">← Back to Orders</button>
@@ -1989,7 +2002,7 @@ function screenOrderDetailBatch(){
         <h2 class="card-title" style="margin:0;font-size:18px">Order details — ${order.id}</h2>
       </div>
       ${locationSummaryCard(l, { address: l.address, dates: order.dates, bookingType: 'Daily', spots: batchOrder.validCount })}
-      ${gateCodeCard('1199#', 'Same gate code for every driver on this order.')}
+      ${gateCodeCard('1199#', 'Same gate code for every driver on this order.', l)}
     </div>
     <div class="card">
       <div class="card-head">
