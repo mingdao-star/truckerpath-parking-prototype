@@ -97,6 +97,9 @@ svg{display:block;flex:none}
 .control{height:38px;width:100%;border:1px solid var(--border-input);border-radius:var(--r-md);background:#fff;padding:0 12px;box-shadow:var(--shadow-sm)}
 .control::placeholder{color:var(--ink-muted)}
 .control:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint)}
+.control:disabled{background:var(--paper-dim);color:var(--ink-soft);cursor:not-allowed}
+.field-note{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-soft);margin-top:6px}
+.field-note svg{flex:none}
 select.control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23676F67' stroke-width='1.7'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px}
 
 /* stepper (5-dot, batch flow only) */
@@ -946,8 +949,12 @@ function computeStayBreakdown(){
   const vtype = S.step2VehicleType;
   const spots = S.spots;
   const rate = batchVehicleRate(vtype, bookingType, l);
+  // Daily/Weekly bill in whole days/weeks, so check-out time is locked to check-in time —
+  // computed here rather than trusted from S.search.checkOutTime so the math and every
+  // downstream display (Payment, Confirm) agree even if that field is stale.
+  const effectiveCheckOutTime = bookingType==='Monthly' ? S.search.checkOutTime : S.search.checkInTime;
   const ciDT = new Date(`${S.search.checkIn}T${S.search.checkInTime}`);
-  const coDT = new Date(`${S.search.checkOut}T${S.search.checkOutTime}`);
+  const coDT = new Date(`${S.search.checkOut}T${effectiveCheckOutTime}`);
   const totalDays = Math.max(1, Math.ceil(Math.max(1, coDT-ciDT) / 3600000 / 24));
   const plural = (n,w) => `${n} ${w}${n===1?'':'s'}`;
 
@@ -1007,7 +1014,7 @@ function computeStayBreakdown(){
   return {
     bookingType, vtype, spots,
     checkInDate: S.search.checkIn, checkInTime: S.search.checkInTime,
-    checkOutDate: S.search.checkOut, checkOutTime: S.search.checkOutTime,
+    checkOutDate: S.search.checkOut, checkOutTime: effectiveCheckOutTime,
     billedLabel, lineItems, lineItemPrice, note, tax, total,
   };
 }
@@ -1434,7 +1441,11 @@ function screenBookStep1(){
           </div>
           <div class="grid-2" style="margin-top:10px">
             <div class="field" style="margin-top:0"><label>Check-out date</label><input type="date" class="control" id="step2CheckOut" value="${S.search.checkOut}" ${S.step2BookingType==='Weekly' ? `min="${addDays(S.search.checkIn,7)}"` : ''}></div>
-            <div class="field" style="margin-top:0"><label>Check-out time</label><input type="time" class="control" id="step2CheckOutTime" value="${S.search.checkOutTime}"></div>
+            <div class="field" style="margin-top:0">
+              <label>Check-out time</label>
+              <input type="time" class="control" id="step2CheckOutTime" value="${S.search.checkInTime}" disabled>
+              <div class="field-note">${ic.info}Matches check-in time — ${S.step2BookingType==='Weekly'?'Weekly':'Daily'} bills in full ${S.step2BookingType==='Weekly'?'weeks':'days'}</div>
+            </div>
           </div>
           `}
           <div class="book1-cta-section">
@@ -2150,7 +2161,7 @@ function wireScreen(root){
       if(S.search.checkOut < minCheckOut) S.search.checkOut = minCheckOut;
     }
   }, {rerender:true});
-  bindText(root,'step2CheckInTime', v=>S.search.checkInTime=v);
+  bindText(root,'step2CheckInTime', v=>S.search.checkInTime=v, {rerender:true});
   bindText(root,'step2CheckOut', v=>{
     S.search.checkOut = v;
     if(S.step2BookingType==='Weekly'){
@@ -2158,7 +2169,6 @@ function wireScreen(root){
       if(S.search.checkOut < minCheckOut) S.search.checkOut = minCheckOut;
     }
   }, {rerender:true});
-  bindText(root,'step2CheckOutTime', v=>S.search.checkOutTime=v);
   const step2VT = root.querySelector('#step2VehicleType');
   if(step2VT) step2VT.addEventListener('change',()=>{
     S.step2VehicleType = step2VT.value;
