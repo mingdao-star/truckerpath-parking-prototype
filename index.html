@@ -2062,7 +2062,12 @@ function render(){
 function bindText(root, id, setter, opts){
   const el = root.querySelector('#'+id);
   if(!el) return;
-  el.addEventListener('input', ()=>{
+  // date/time inputs fire 'input' on every partial keystroke/segment edit — rerendering there
+  // destroys and recreates the element mid-interaction, kicking the user out of the native
+  // picker. Only rerender on 'change' (a committed value) for those; plain text inputs still
+  // rerender on every keystroke since that's what live-filtering search boxes need.
+  const evt = (opts && opts.rerender && (el.type==='date' || el.type==='time')) ? 'change' : 'input';
+  el.addEventListener(evt, ()=>{
     setter(el.value);
     if(opts && opts.rerender) rerenderKeepFocus(); else if(opts && opts.silentTouch) opts.silentTouch();
   });
