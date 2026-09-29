@@ -100,13 +100,6 @@ svg{display:block;flex:none}
 .control:disabled{background:var(--paper-dim);color:var(--ink-soft);cursor:not-allowed}
 .field-note{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-soft);margin-top:6px}
 .field-note svg{flex:none}
-.dt-select-row{position:relative;min-height:44px;display:flex;align-items:center;gap:8px;background:var(--paper-dim);border-radius:var(--r-md);padding:0 10px}
-.dt-select-value{flex:1;font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dt-select-icon{color:var(--ink-soft);flex:none;display:flex}
-.dt-select-native{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;appearance:none;-webkit-appearance:none;border:none}
-.dt-select-row.is-disabled{cursor:not-allowed}
-.dt-select-row.is-disabled .dt-select-value,.dt-select-row.is-disabled .dt-select-icon{color:var(--ink-soft)}
-.dt-select-row.is-disabled .dt-select-native{cursor:not-allowed}
 select.control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23676F67' stroke-width='1.7'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px}
 
 /* stepper (5-dot, batch flow only) */
@@ -393,7 +386,6 @@ const ic = {
   pin:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 12Z" fill="#b45309"/><circle cx="12" cy="9" r="2.4" fill="white"/></svg>',
   pinW:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg>',
   clock:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg>',
-  calendar:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>',
   search:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>',
   x:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
   parkP:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M10 16V8h3.2a2.4 2.4 0 0 1 0 4.8H10"/></svg>',
@@ -946,14 +938,6 @@ function addDays(dateStr, n){
   d.setDate(d.getDate()+n);
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
-// 'HH:MM' (24h input value) -> '8:00 AM' for the Step 1 date/time pills
-function formatTime12h(timeStr){
-  if(!timeStr) return '';
-  const [h,m] = timeStr.split(':').map(Number);
-  const period = h < 12 ? 'AM' : 'PM';
-  const h12 = h % 12 === 0 ? 12 : h % 12;
-  return `${h12}:${String(m).padStart(2,'0')} ${period}`;
-}
 // real check-in/checkout-based pricing for the Payment screen's Order Summary (single- and
 // fleet-spot bookings alike, now that Step 1 collects real dates for every booking regardless of
 // spot count). Weekly bookings bill in whole weeks, then any leftover (<7) days at the daily
@@ -1449,45 +1433,17 @@ function screenBookStep1(){
             ${rateOptions.map(v=>`<option ${S.step2BookingType===v?'selected':''}>${v}</option>`).join('')}
           </select></div>
           ${S.step2BookingType==='Monthly' ? `
-          <div class="field" style="margin-top:10px"><label>Start date</label>
-            <div class="dt-select-row">
-              <span class="dt-select-icon">${ic.calendar}</span>
-              <span class="dt-select-value">${formatDateWeekday(S.search.checkIn)}</span>
-              <input type="date" class="dt-select-native" id="step2CheckIn" value="${S.search.checkIn}">
-            </div>
-          </div>
+          <div class="field" style="margin-top:10px"><label>Start date</label><input type="date" class="control" id="step2CheckIn" value="${S.search.checkIn}"></div>
           ` : `
           <div class="grid-2" style="margin-top:10px">
-            <div class="field" style="margin-top:0"><label>Check-in date</label>
-              <div class="dt-select-row">
-                <span class="dt-select-icon">${ic.calendar}</span>
-                <span class="dt-select-value">${formatDateWeekday(S.search.checkIn)}</span>
-                <input type="date" class="dt-select-native" id="step2CheckIn" value="${S.search.checkIn}">
-              </div>
-            </div>
-            <div class="field" style="margin-top:0"><label>Check-in time</label>
-              <div class="dt-select-row">
-                <span class="dt-select-icon">${ic.clock}</span>
-                <span class="dt-select-value">${formatTime12h(S.search.checkInTime)}</span>
-                <input type="time" class="dt-select-native" id="step2CheckInTime" value="${S.search.checkInTime}">
-              </div>
-            </div>
+            <div class="field" style="margin-top:0"><label>Check-in date</label><input type="date" class="control" id="step2CheckIn" value="${S.search.checkIn}"></div>
+            <div class="field" style="margin-top:0"><label>Check-in time</label><input type="time" class="control" id="step2CheckInTime" value="${S.search.checkInTime}"></div>
           </div>
           <div class="grid-2" style="margin-top:10px">
-            <div class="field" style="margin-top:0"><label>Check-out date</label>
-              <div class="dt-select-row">
-                <span class="dt-select-icon">${ic.calendar}</span>
-                <span class="dt-select-value">${formatDateWeekday(S.search.checkOut)}</span>
-                <input type="date" class="dt-select-native" id="step2CheckOut" value="${S.search.checkOut}" ${S.step2BookingType==='Weekly' ? `min="${addDays(S.search.checkIn,7)}"` : ''}>
-              </div>
-            </div>
+            <div class="field" style="margin-top:0"><label>Check-out date</label><input type="date" class="control" id="step2CheckOut" value="${S.search.checkOut}" ${S.step2BookingType==='Weekly' ? `min="${addDays(S.search.checkIn,7)}"` : ''}></div>
             <div class="field" style="margin-top:0">
               <label>Check-out time</label>
-              <div class="dt-select-row is-disabled">
-                <span class="dt-select-icon">${ic.clock}</span>
-                <span class="dt-select-value">${formatTime12h(S.search.checkInTime)}</span>
-                <input type="time" class="dt-select-native" id="step2CheckOutTime" value="${S.search.checkInTime}" disabled>
-              </div>
+              <input type="time" class="control" id="step2CheckOutTime" value="${S.search.checkInTime}" disabled>
               <div class="field-note">${ic.info}Matches check-in time — ${S.step2BookingType==='Weekly'?'Weekly':'Daily'} bills in full ${S.step2BookingType==='Weekly'?'weeks':'days'}</div>
             </div>
           </div>
