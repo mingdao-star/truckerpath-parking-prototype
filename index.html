@@ -171,6 +171,8 @@ select.control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg x
 .login-tab{flex:1;text-align:center;padding:8px;border-radius:6px;font-size:13px;font-weight:600;color:var(--ink-soft)}
 .login-tab.on{background:#fff;color:var(--ink);box-shadow:var(--shadow-sm)}
 .field-err{font-size:11.5px;color:var(--red);margin-top:4px}
+.control.has-err{border-color:var(--red)}
+.control.has-err:focus{box-shadow:0 0 0 3px var(--red-tint)}
 
 /* ---- search results (book step1) ---- */
 .results-row{display:flex;gap:20px;align-items:flex-start;margin-top:16px;position:relative}
@@ -448,6 +450,7 @@ const S = {
   vehicleFormsExpanded: [true],
   vehicleMoreExpanded: [false],
   vehicleUploadModal: null,
+  vehicleErrors: {},
   vehiclePage: 1,
 
   payment: { context:'single', selectedCardId:'card_visa' },
@@ -1523,7 +1526,24 @@ function screenBookStep1(){
    that fills the same sections from a (simulated) file instead of typing each one manually.
 ============================================================ */
 function vfInput(i, key, label, placeholder, optional){
-  return `<div class="field"><label>${label}${optional?' <span style="text-transform:none;font-weight:400">(optional)</span>':''}</label><input class="control" id="vf_${i}_${key}" data-vf="${key}" data-vfrow="${i}" placeholder="${placeholder}" value="${S.vehicleForms[i][key]}"></div>`;
+  const err = S.vehicleErrors[i] && S.vehicleErrors[i][key];
+  return `<div class="field"><label>${label}${optional?' <span style="text-transform:none;font-weight:400">(optional)</span>':''}</label><input class="control${err?' has-err':''}" id="vf_${i}_${key}" data-vf="${key}" data-vfrow="${i}" placeholder="${placeholder}" value="${S.vehicleForms[i][key]}">${err?`<div class="field-err">${err}</div>`:''}</div>`;
+}
+const VEHICLE_PAGE_SIZE = 5;
+// every field shown up front on a vehicle section is required; "Add more details" fields are optional
+function vehicleRequiredKeys(){
+  return ['driverPhone','driverEmail', ...(S.step2VehicleType==='Truck + Trailer' ? ['truckNum','truckPlate','truckDot'] : []), 'trailerNum','trailerPlate'];
+}
+// { vehicleIndex: { fieldKey: message } } for every vehicle with a missing/invalid required field
+function validateVehicleForms(){
+  const errs = {};
+  S.vehicleForms.forEach((vf,i)=>{
+    const e = {};
+    vehicleRequiredKeys().forEach(k=>{ if(!String(vf[k]||'').trim()) e[k] = 'Required'; });
+    if(!e.driverEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(vf.driverEmail.trim())) e.driverEmail = 'Enter a valid email, e.g. name@example.com';
+    if(Object.keys(e).length) errs[i] = e;
+  });
+  return errs;
 }
 // a fresh, empty per-vehicle form — shared by the initial page-enter reset and the batch-upload
 // modal's "Re-upload" action, so both always agree on the full field set
@@ -1568,7 +1588,6 @@ function vehicleUploadModalHtml(){
     </div>`;
 }
 function screenBookStep3Vehicle(){
-  const VEHICLE_PAGE_SIZE = 5;
   const totalVehicles = S.vehicleForms.length;
   const vehiclePages = Math.max(1, Math.ceil(totalVehicles/VEHICLE_PAGE_SIZE));
   const vehiclePage = Math.min(S.vehiclePage||1, vehiclePages);
@@ -1607,23 +1626,23 @@ function screenBookStep3Vehicle(){
               ${expanded?ic.chevDown:ic.chevRight}
               <h3 class="card-title" style="margin:0;font-size:15px">Vehicle ${i+1}</h3>
             </button>
-            ${!expanded ? `<span style="font-size:12px;color:var(--ink-soft)">${summary}</span>` : ''}
+            ${!expanded ? (S.vehicleErrors[i] ? `<span style="font-size:12px;color:var(--red);font-weight:600">Missing required info</span>` : `<span style="font-size:12px;color:var(--ink-soft)">${summary}</span>`) : ''}
           </div>
           ${expanded ? `<div class="card-body">
+            <div class="section-label">Driver</div>
+            <div class="grid-2" style="margin-bottom:16px">${vfInput(i,'driverPhone','Driver phone number','(555) 555-0123')}${vfInput(i,'driverEmail','Driver email','name@example.com')}</div>
             ${showTruck ? `
             <div class="section-label">Truck</div>
             <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'truckNum','Truck #','Type here…')}${vfInput(i,'truckPlate','Truck plate #','Type here…')}</div>
-            <div class="grid-2" style="margin-bottom:16px">${vfInput(i,'truckDot','Truck DOT #','Type here…')}${vfInput(i,'driverPhone','Driver phone number','(555) 555-0123')}</div>
-            ` : `
-            <div class="section-label">Driver</div>
-            <div style="margin-bottom:16px">${vfInput(i,'driverPhone','Driver phone number','(555) 555-0123')}</div>
-            `}
+            <div class="grid-2" style="margin-bottom:16px">${vfInput(i,'truckDot','Truck DOT #','Type here…')}</div>
+            ` : ''}
             <div class="section-label">Trailer</div>
             <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'trailerNum','Trailer #','Type here…')}${vfInput(i,'trailerPlate','Trailer plate #','Type here…')}</div>
             <button class="btn-text vf-more-toggle" data-togglemore="${i}">${moreExpanded?'Hide more details':'Add more details'}${moreExpanded?ic.chevDown:ic.chevRight}</button>
             ${moreExpanded ? `
-            <div class="grid-2" style="margin-top:12px">${vfInput(i,'driverEmail','Driver email','name@example.com',true)}${showTruck ? vfInput(i,'truckMake','Truck make','Type here…',true) : ''}</div>
-            <div class="grid-2" style="margin-top:12px">${vfInput(i,'trailerType','Trailer type','Ex: 53 dry van',true)}${vfInput(i,'trailerCompany','Trailer company name','Type here…',true)}</div>
+            ${showTruck ? `<div class="grid-2" style="margin-top:12px">${vfInput(i,'truckMake','Truck make','Type here…',true)}${vfInput(i,'trailerType','Trailer type','Ex: 53 dry van',true)}</div>
+            <div class="grid-2" style="margin-top:12px">${vfInput(i,'trailerCompany','Trailer company name','Type here…',true)}</div>`
+            : `<div class="grid-2" style="margin-top:12px">${vfInput(i,'trailerType','Trailer type','Ex: 53 dry van',true)}${vfInput(i,'trailerCompany','Trailer company name','Type here…',true)}</div>`}
             ` : ''}
           </div>` : ''}
         </div>`;
@@ -2194,6 +2213,7 @@ function wireScreen(root){
     S.vehicleForms = Array.from({length: S.spots}, blankVehicleForm);
     S.vehicleFormsExpanded = Array.from({length: S.spots}, ()=>true);
     S.vehicleMoreExpanded = Array.from({length: S.spots}, ()=>false);
+    S.vehicleErrors = {};
     S.vehiclePage = 1;
     go('book3');
   });
@@ -2202,7 +2222,14 @@ function wireScreen(root){
   const step3Back = root.querySelector('#step3Back'); if(step3Back) step3Back.addEventListener('click',()=>go('book1'));
   root.querySelectorAll('[data-vf]').forEach(inp=>{
     inp.addEventListener('input',()=>{
-      S.vehicleForms[parseInt(inp.dataset.vfrow,10)][inp.dataset.vf] = inp.value;
+      const row = parseInt(inp.dataset.vfrow,10), key = inp.dataset.vf;
+      S.vehicleForms[row][key] = inp.value;
+      if(S.vehicleErrors[row] && S.vehicleErrors[row][key]){
+        delete S.vehicleErrors[row][key];
+        if(!Object.keys(S.vehicleErrors[row]).length) delete S.vehicleErrors[row];
+        inp.classList.remove('has-err');
+        const msg = inp.nextElementSibling; if(msg && msg.classList.contains('field-err')) msg.remove();
+      }
       const badge = root.querySelector('#autosaved');
       if(badge){ badge.classList.add('show'); clearTimeout(window.__autosaveTimer); window.__autosaveTimer=setTimeout(()=>badge.classList.remove('show'),1200); }
     });
@@ -2230,16 +2257,28 @@ function wireScreen(root){
     // a file silently overwrote every vehicle section — that needs an explicit acknowledgment,
     // not a toast that can be missed
     S.vehicleUploadModal = { n, fileRowCount };
+    S.vehicleErrors = {};
     render();
   });
   const vehicleUploadGotIt = root.querySelector('#vehicleUploadGotIt'); if(vehicleUploadGotIt) vehicleUploadGotIt.addEventListener('click',()=>{ S.vehicleUploadModal=null; render(); });
   const vehicleUploadReupload = root.querySelector('#vehicleUploadReupload'); if(vehicleUploadReupload) vehicleUploadReupload.addEventListener('click',()=>{
     S.vehicleForms = Array.from({length: S.vehicleForms.length}, blankVehicleForm);
     S.vehicleUploadModal = null;
+    S.vehicleErrors = {};
     render();
   });
   const vehicleUploadOverlay = root.querySelector('#vehicleUploadOverlay'); if(vehicleUploadOverlay) vehicleUploadOverlay.addEventListener('click',(e)=>{ if(e.target===vehicleUploadOverlay){ S.vehicleUploadModal=null; render(); } });
   const step3Continue = root.querySelector('#step3Continue'); if(step3Continue) step3Continue.addEventListener('click',()=>{
+    const errs = validateVehicleForms();
+    const bad = Object.keys(errs).map(Number);
+    if(bad.length){
+      S.vehicleErrors = errs;
+      bad.forEach(i=>{ S.vehicleFormsExpanded[i] = true; });
+      S.vehiclePage = Math.floor(bad[0]/VEHICLE_PAGE_SIZE)+1;
+      render();
+      toast(`Fill in the required fields for ${bad.length} vehicle${bad.length===1?'':'s'}`);
+      return;
+    }
     const dest = S.spots<=1 ? 'book4' : 'batchPayment';
     if(!S.loggedIn){ S.postLoginGoto=dest; toast('Please sign in to continue to payment'); go('login'); return; }
     go(dest);
