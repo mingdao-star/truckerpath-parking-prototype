@@ -284,6 +284,18 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .qrcard-download svg{width:12px;height:12px}
 .qrcard-code{font-size:30px;font-weight:800;letter-spacing:4px;color:var(--ink);text-align:center}
 .qrcard-caption{font-size:11.5px;color:var(--ink-soft);margin-top:12px}
+.gate-hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);overflow:hidden;margin-bottom:16px}
+.gate-hero-code-side{padding:22px 24px;background:var(--brand-tint);display:flex;flex-direction:column;gap:16px}
+.gate-hero-instr{padding:22px 24px;border-left:1px solid var(--line)}
+.gate-hero-label{font-size:11.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em}
+.gate-hero-main{display:flex;align-items:center;gap:20px}
+.gate-hero-qr{width:104px;height:104px;border-radius:var(--r-md);background:#fff;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink);flex:none}
+.gate-hero-qr svg{width:60px;height:60px}
+.gate-hero-code{font-size:44px;font-weight:800;letter-spacing:6px;color:var(--ink);line-height:1.05}
+.gate-hero-caption{font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.45}
+.gate-hero-actions{display:flex;gap:8px;flex-wrap:wrap}
+.gate-hero-instr .instruction-photo{height:120px;margin:10px 0 12px}
+@media (max-width:760px){.gate-hero{grid-template-columns:1fr}.gate-hero-instr{border-left:none;border-top:1px solid var(--line)}}
 .orderdetail-top-row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:16px}
 .orderdetail-top-row>.confirm-banner{flex:2 1 320px;margin-bottom:0}
 .orderdetail-top-row>.qrcard{flex:1 1 260px;margin-bottom:0}
@@ -475,15 +487,14 @@ const S = {
   walletNewCard: { name:'', number:'', exp:'', cvc:'', zip:'' },
   wallet: { selectedCardId:null, showAddModal:false },
 
-  // spots/total below are derived from the same fixed VALID_ROSTER (22 drivers) and each
-  // order's own lotId — kept in sync with computeOrderCharges() so the Orders list and the
-  // Order Detail screen never disagree about how many drivers/dollars a given order represents
+  // no stored totals — the Orders list and Order Detail both price each order via orderTotal() /
+  // computeOrderCharges() from its own lot + dates, so they can never disagree
   ordersHistory: [
-    {id:'FP-20260708-4417', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 14 – Jul 17, 2026', spots:22, total:'$1,036.48', paidOn:'Jul 7, 2026, 9:03 AM', status:'Paid', type:'batch'},
-    {id:'FP-20260622-3108', loc:'Maricopa, AZ — N White Rd Truck & Trailer Yard', lotId:'maricopa', dates:'Jun 22 – Jun 25, 2026', spots:22, total:'$1,036.48', paidOn:'Jun 15, 2026, 11:20 AM', status:'Paid', type:'batch'},
-    {id:'FP-20260530-2984', loc:'Glendale, AZ — PHX1 Logistics Plus', lotId:'glendale1', dates:'May 30 – Jun 2, 2026', spots:22, total:'$1,036.48', paidOn:'May 24, 2026, 3:47 PM', status:'Refunded', type:'batch', refundedOn:'May 26, 2026, 9:12 AM', refundAmount:'$1,036.48'},
-    {id:'RP-88214-JX', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 31 – Aug 7, 2026', spots:1, total:'$166.65', paidOn:'Jul 24, 2026, 2:15 PM', status:'Paid', type:'single'},
-    {id:'FP-20260801-4602', loc:'Glendale, AZ — PHX2 Logistics Plus', lotId:'glendale2', dates:'Aug 10 – Aug 13, 2026', spots:22, total:'$368.53', paidOn:'Aug 3, 2026, 10:15 AM', status:'Draft', type:'batch'},
+    {id:'tp2026125', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 14 – Jul 17, 2026', spots:22, paidOn:'Jul 7, 2026, 9:03 AM', status:'Paid', type:'batch'},
+    {id:'tp2026118', loc:'Maricopa, AZ — N White Rd Truck & Trailer Yard', lotId:'maricopa', dates:'Jun 22 – Jun 25, 2026', spots:22, paidOn:'Jun 15, 2026, 11:20 AM', status:'Paid', type:'batch'},
+    {id:'tp2026109', loc:'Glendale, AZ — PHX1 Logistics Plus', lotId:'glendale1', dates:'May 30 – Jun 2, 2026', spots:22, paidOn:'May 24, 2026, 3:47 PM', status:'Refunded', type:'batch', refundedOn:'May 26, 2026, 9:12 AM'},
+    {id:'tp2026127', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 31 – Aug 7, 2026', spots:1, paidOn:'Jul 24, 2026, 2:15 PM', status:'Paid', type:'single'},
+    {id:'tp2026131', loc:'Glendale, AZ — PHX2 Logistics Plus', lotId:'glendale2', dates:'Aug 10 – Aug 13, 2026', spots:22, paidOn:'Aug 3, 2026, 10:15 AM', status:'Draft', type:'batch'},
   ],
 };
 
@@ -1049,24 +1060,36 @@ function computeBatchOrder(){
 // an order placed earlier, and using it caused the order detail screen to show whatever lot/
 // roster the user happened to be browsing elsewhere. This always prices the fixed 22-driver
 // VALID_ROSTER against the order's own lot at the standard Daily rate.
-function computeOrderCharges(l){
+// bills every day of the stay, and total = the lines actually shown (subtotal + tax) — no hidden
+// adjustments, so the Charges breakdown always adds up to "Total Paid"
+function computeOrderCharges(l, days){
   const truckTrailerCount = VALID_ROSTER.filter(d=>d.vtype==='Truck + Trailer').length;
   const trailerOnlyCount = VALID_ROSTER.filter(d=>d.vtype==='Trailer Only').length;
   const unit = batchRateUnit('Daily');
-  const truckTrailerRate = batchVehicleRate('Truck + Trailer', 'Daily', l);
-  const trailerOnlyRate = batchVehicleRate('Trailer Only', 'Daily', l);
-  const truckTrailerPrice = truckTrailerRate * truckTrailerCount;
-  const trailerOnlyPrice = trailerOnlyRate * trailerOnlyCount;
+  const truckTrailerPrice = batchVehicleRate('Truck + Trailer', 'Daily', l) * truckTrailerCount * days;
+  const trailerOnlyPrice = batchVehicleRate('Trailer Only', 'Daily', l) * trailerOnlyCount * days;
   const subtotal = truckTrailerPrice + trailerOnlyPrice;
-  const discount = subtotal * 0.05;
-  const serviceFee = subtotal * 0.02;
-  const tax = (subtotal - discount) * TAX_RATE;
-  const total = subtotal - discount + serviceFee + tax;
+  const tax = subtotal * TAX_RATE;
+  const total = subtotal + tax;
   return {
-    validCount: VALID_ROSTER.length, truckTrailerCount, trailerOnlyCount, unit,
-    truckTrailerPrice, trailerOnlyPrice, subtotal, discount, serviceFee, tax, total,
+    validCount: VALID_ROSTER.length, truckTrailerCount, trailerOnlyCount, unit, days,
+    truckTrailerPrice, trailerOnlyPrice, subtotal, tax, total,
   };
 }
+// "Jul 14 – Jul 17, 2026" -> 3 (nights between check-in and check-out day)
+function orderStayDays(order){
+  const [startRaw, endRaw] = order.dates.split(' – ');
+  const year = +endRaw.match(/\d{4}$/)[0];
+  const end = new Date(endRaw.replace(',', ''));
+  const start = new Date(`${startRaw} ${year}`);
+  if(start > end) start.setFullYear(year - 1);
+  return Math.max(1, Math.round((end - start) / 86400000));
+}
+function orderTotal(order){
+  if(order.type === 'single') return singleSpotOrder().total;
+  return computeOrderCharges(LOTS[order.lotId] || LOTS.eloy, orderStayDays(order)).total;
+}
+function fmtUSD(n){ return '$' + n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 // order.dates is always "MMM D – MMM D, YYYY" — split it so the driver table's check-in/out
 // columns can show the actual dates for whichever order is being viewed, instead of a date
 // baked into the demo roster that only matched one specific order
@@ -1759,6 +1782,34 @@ function gateCodeCard(code, caption, l){
     </div>` : ''}
   </div>`;
 }
+// Order Detail's lead card. The gate code is what a dispatcher actually needs to hand to drivers,
+// so here it's open and large (no "Tap to reveal"), with the lot's check-in instructions beside it.
+function gateCodeHero(code, caption, l){
+  const lotId = Object.keys(LOTS).find(k=>LOTS[k]===l);
+  return `<div class="card gate-hero">
+    <div class="gate-hero-code-side">
+      <div class="gate-hero-label">Gate Code</div>
+      <div class="gate-hero-main">
+        <div class="gate-hero-qr">${ic.qr}</div>
+        <div style="min-width:0">
+          <div class="gate-hero-code tabular">${code}</div>
+          <div class="gate-hero-caption">${caption}</div>
+        </div>
+      </div>
+      <div class="gate-hero-actions">
+        <button class="btn btn-primary" data-copy="${code}">Copy code</button>
+        <button class="btn btn-outline" data-toast="QR code image downloaded">${ic.download}&nbsp;Download QR</button>
+      </div>
+    </div>
+    <div class="gate-hero-instr">
+      <div class="gate-hero-label">Parking Instructions</div>
+      ${l.hasCheckinPhoto===false ? '' : `<div class="instruction-photo" style="background-image:url('${lotPhotoUrl(lotId)}');background-position:${lotPhotoPos(lotId)}"><span class="instruction-photo-cap">Entrance at this location</span></div>`}
+      <div style="font-weight:700;font-size:14px;color:var(--ink);margin-top:${l.hasCheckinPhoto===false?'10px':'0'}">QR Checkin</div>
+      <div style="font-weight:600;font-size:12.5px;color:var(--ink-soft);margin-top:2px">Scan QR at the location</div>
+      ${l.instructions ? `<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin-top:6px">${l.instructions}</div>` : ''}
+    </div>
+  </div>`;
+}
 // standalone Location card — lives in the top row alongside the confirm/order banner and gate
 // code card, instead of buried inside the Booking Details box. Reuses the exact qrcard-top
 // layout (icon + title/subtitle + right-aligned toggle) so its collapsed height matches its
@@ -1797,7 +1848,7 @@ function locationSummaryCard(l, opts){
 function singleOrderDetailBody(asOrderDetail){
   const singleOrder = singleSpotOrder();
   const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
-  const orderRecord = S.ordersHistory.find(o=>o.id==='RP-88214-JX');
+  const orderRecord = S.ordersHistory.find(o=>o.id==='tp2026127');
   const vf = buildVehicleFormRow(4);
   return `
     <div class="card">
@@ -1808,6 +1859,7 @@ function singleOrderDetailBody(asOrderDetail){
       <div class="card-body">
         ${asOrderDetail ? `
         <div class="info-row"><span class="k">Reservation Dates</span><span>Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM</span></div>
+        <div class="info-row"><span class="k">Duration</span><span>1 week (7 days)</span></div>
         <div class="info-row"><span class="k">Booking Type</span><span>Weekly</span></div>
         <div class="info-row"><span class="k">Spots Reserved</span><span>1</span></div>
         ` : ''}
@@ -1855,7 +1907,7 @@ function screenBookStep5Confirm(){
     <div class="orderdetail-top-row">
       <div class="confirm-banner">
         <div class="confirm-ic">${ic.checkW}</div>
-        <div><div style="font-weight:700;font-size:16px">You're booked — RP-88214-JX</div><div style="color:var(--green-deep);font-size:13px">Confirmation sent to ${phone ? phone : 'your phone'}. Show your check-in code at the gate.</div></div>
+        <div><div style="font-weight:700;font-size:16px">You're booked — tp2026127</div><div style="color:var(--green-deep);font-size:13px">Confirmation sent to ${phone ? phone : 'your phone'}. Show your check-in code at the gate.</div></div>
       </div>
       ${singleOrderLocationCard()}
       ${gateCodeCard('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.', LOTS.eloy)}
@@ -1882,7 +1934,7 @@ function screenBatchConfirm(){
     <div class="orderdetail-top-row">
       <div class="confirm-banner">
         <div class="confirm-ic">${ic.checkW}</div>
-        <div style="font-weight:700;font-size:16px">Booking confirmed — FP-20260708-4417</div>
+        <div style="font-weight:700;font-size:16px">Booking confirmed — tp2026132</div>
       </div>
       ${locationSummaryCard(l, { address: l.address, bookingType: S.batch.bookingType, spots: batchOrder.validCount })}
       ${gateCodeCard('1199#', 'Same gate code for every driver on this order.', l)}
@@ -1937,7 +1989,7 @@ function screenOrders(){
     <div class="card"><div style="overflow-x:auto"><table class="orders">
       <thead><tr><th>Order</th><th>Location</th><th>Dates</th><th>Spots</th><th>Total</th><th>Status</th><th></th></tr></thead>
       <tbody>${S.ordersHistory.map(o=>`
-        <tr><td><b>${o.id}</b></td><td>${o.loc}</td><td>${o.dates}</td><td>${o.spots}</td><td class="tabular">${o.total}</td>
+        <tr><td><b>${o.id}</b></td><td>${o.loc}</td><td>${o.dates}</td><td>${o.spots}</td><td class="tabular">${fmtUSD(orderTotal(o))}</td>
         <td><span class="status-pill ${statusClass[o.status]}">${o.status}</span></td>
         <td><button class="btn-text" data-view="${o.id}">View →</button></td></tr>`).join('')}
       </tbody>
@@ -2025,9 +2077,7 @@ function screenOrderDetailSingle(){
   return `
   ${topNav('orders')}
   <div class="page">
-    <div class="orderdetail-top-row">
-      ${gateCodeCard('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.', LOTS.eloy)}
-    </div>
+    ${gateCodeHero('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.', LOTS.eloy)}
     ${singleOrderDetailBody(true)}
     <button class="btn btn-outline" style="margin-top:16px" id="backToOrders">← Back to Orders</button>
   </div>`;
@@ -2041,15 +2091,15 @@ function screenOrderDetailBatch(){
   // tied to this specific order's own lot and its own dates — never to live booking-flow state —
   // so the numbers on screen stay correct no matter what the user was doing elsewhere in the app
   const l = LOTS[order.lotId] || LOTS.eloy;
-  const batchOrder = computeOrderCharges(l);
+  const days = orderStayDays(order);
+  const batchOrder = computeOrderCharges(l, days);
+  const dayLabel = `${days} day${days===1?'':'s'}`;
   const { start: ciDate, end: coDate } = orderDateBounds(order);
   const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
   return `
   ${topNav('orders')}
   <div class="page">
-    <div class="orderdetail-top-row">
-      ${gateCodeCard('1199#', 'Same gate code for every driver on this order.', l)}
-    </div>
+    ${gateCodeHero('1199#', `Same gate code for all ${batchOrder.validCount} drivers on this order.`, l)}
     <div class="card">
       <div class="card-head">
         <h2 class="card-title">${order.id}</h2>
@@ -2057,18 +2107,19 @@ function screenOrderDetailBatch(){
       </div>
       <div class="card-body">
         <div class="info-row"><span class="k">Reservation Dates</span><span>${order.dates}</span></div>
+        <div class="info-row"><span class="k">Duration</span><span>${dayLabel}</span></div>
         <div class="info-row"><span class="k">Booking Type</span><span>Daily</span></div>
         <div class="info-row"><span class="k">Spots Reserved</span><span>${batchOrder.validCount}</span></div>
         <div class="section-label" style="color:var(--ink);margin:12px 0 8px">Charges</div>
-        ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} spot${batchOrder.trailerOnlyCount===1?'':'s'} × 1 ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
-        ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} spot${batchOrder.truckTrailerCount===1?'':'s'} × 1 ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
+        ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} spot${batchOrder.trailerOnlyCount===1?'':'s'} × ${dayLabel})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
+        ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} spot${batchOrder.truckTrailerCount===1?'':'s'} × ${dayLabel})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
         <div class="info-row"><span class="k">Tax</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</b></span></div>
         <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
         <div class="info-row"><span class="k">Paid on</span><span>${order.paidOn}</span></div>
         ${order.status==='Refunded' ? `
         <div class="info-row"><span class="k">Refunded on</span><span>${order.refundedOn}</span></div>
-        <div class="info-row"><span class="k"><b style="color:var(--ink)">Refund amount</b></span><span><b>-${order.refundAmount}</b></span></div>
+        <div class="info-row"><span class="k"><b style="color:var(--ink)">Refund amount</b></span><span><b>-${fmtUSD(batchOrder.total)}</b></span></div>
         ` : ''}
       </div>
     </div>
