@@ -1543,7 +1543,7 @@ function vfInput(i, key, label, placeholder, optional){
 const VEHICLE_PAGE_SIZE = 5;
 // every field shown up front on a vehicle section is required; "Add more details" fields are optional
 function vehicleRequiredKeys(){
-  return ['driverPhone','driverEmail', ...(S.step2VehicleType==='Truck + Trailer' ? ['truckNum','truckPlate','truckDot'] : []), 'trailerNum','trailerPlate'];
+  return ['driverPhone','driverEmail', ...(S.step2VehicleType==='Truck + Trailer' ? ['truckNum','truckPlate','truckDot'] : []), 'trailerType','trailerPlate'];
 }
 // { vehicleIndex: { fieldKey: message } } for every vehicle with a missing/invalid required field
 function validateVehicleForms(){
@@ -1648,12 +1648,12 @@ function screenBookStep3Vehicle(){
             <div class="grid-2" style="margin-bottom:16px">${vfInput(i,'truckDot','Truck DOT #','Type here…')}</div>
             ` : ''}
             <div class="section-label">Trailer</div>
-            <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'trailerNum','Trailer #','Type here…')}${vfInput(i,'trailerPlate','Trailer plate #','Type here…')}</div>
+            <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'trailerType','Trailer type','Ex: 53 dry van')}${vfInput(i,'trailerPlate','Trailer plate #','Type here…')}</div>
             <button class="btn-text vf-more-toggle" data-togglemore="${i}">${moreExpanded?'Hide more details':'Add more details'}${moreExpanded?ic.chevDown:ic.chevRight}</button>
             ${moreExpanded ? `
-            ${showTruck ? `<div class="grid-2" style="margin-top:12px">${vfInput(i,'truckMake','Truck make','Type here…',true)}${vfInput(i,'trailerType','Trailer type','Ex: 53 dry van',true)}</div>
+            ${showTruck ? `<div class="grid-2" style="margin-top:12px">${vfInput(i,'truckMake','Truck make','Type here…',true)}${vfInput(i,'trailerNum','Trailer #','Type here…',true)}</div>
             <div class="grid-2" style="margin-top:12px">${vfInput(i,'trailerCompany','Trailer company name','Type here…',true)}</div>`
-            : `<div class="grid-2" style="margin-top:12px">${vfInput(i,'trailerType','Trailer type','Ex: 53 dry van',true)}${vfInput(i,'trailerCompany','Trailer company name','Type here…',true)}</div>`}
+            : `<div class="grid-2" style="margin-top:12px">${vfInput(i,'trailerNum','Trailer #','Type here…',true)}${vfInput(i,'trailerCompany','Trailer company name','Type here…',true)}</div>`}
             ` : ''}
           </div>` : ''}
         </div>`;
@@ -2019,8 +2019,8 @@ function orderVehiclesSection(d){
     ${S.driversSectionExpanded ? `<div class="card-body">
       <div class="search-box">${ic.search}<input id="odSearchInput" placeholder="Search plate, phone, email, or truck/trailer #" value="${S.confirmSearch}"></div>
       <div class="dtable-scroll"><table class="dtable">
-        <thead><tr><th>Vehicle</th>${showTruck?'<th>Truck #</th><th>Truck Plate</th><th>Truck DOT #</th>':''}<th>Driver Phone</th><th>Email</th><th>Trailer #</th><th>Trailer Plate</th><th></th></tr></thead>
-        <tbody>${rows.length ? rows.map(({vf,i})=>`<tr><td>Vehicle ${i+1}</td>${showTruck?`<td>${v(vf.truckNum)}</td><td>${v(vf.truckPlate)}</td><td>${v(vf.truckDot)}</td>`:''}<td>${v(vf.driverPhone)}</td><td>${v(vf.driverEmail)}</td><td>${v(vf.trailerNum)}</td><td>${v(vf.trailerPlate)}</td><td><button class="icon-btn" data-pdfrow="Vehicle ${i+1}" title="Download this driver's parking pass">${ic.download}</button></td></tr>`).join('') : `<tr><td colspan="${cols}" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>`}</tbody>
+        <thead><tr><th>Vehicle</th>${showTruck?'<th>Truck #</th><th>Truck Plate</th><th>Truck DOT #</th>':''}<th>Driver Phone</th><th>Email</th><th>Trailer Type</th><th>Trailer Plate</th><th></th></tr></thead>
+        <tbody>${rows.length ? rows.map(({vf,i})=>`<tr><td>Vehicle ${i+1}</td>${showTruck?`<td>${v(vf.truckNum)}</td><td>${v(vf.truckPlate)}</td><td>${v(vf.truckDot)}</td>`:''}<td>${v(vf.driverPhone)}</td><td>${v(vf.driverEmail)}</td><td>${v(vf.trailerType)}</td><td>${v(vf.trailerPlate)}</td><td><button class="icon-btn" data-pdfrow="Vehicle ${i+1}" title="Download this driver's parking pass">${ic.download}</button></td></tr>`).join('') : `<tr><td colspan="${cols}" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>`}</tbody>
       </table></div>
       <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${d.vehicles.length} drivers on this order.</div>
     </div>` : ''}
