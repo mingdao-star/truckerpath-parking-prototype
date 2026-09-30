@@ -9,6 +9,7 @@
 <!-- Real map: Leaflet + OpenStreetMap (free, no API key). Requires internet access when opened locally. -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Reddit+Sans:wght@700&display=swap" rel="stylesheet">
@@ -285,7 +286,8 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .orderdetail-grid>.card + .card{margin-top:0}
 @media (max-width:900px){.orderdetail-grid{grid-template-columns:1fr}.gate-panel .instruction-photo{flex:none;height:130px}}
 .gate-panel-main{display:flex;align-items:center;gap:16px}
-.gate-panel-qr{width:72px;height:72px;border-radius:var(--r-md);border:1px solid var(--line);background:#fff;flex:none;image-rendering:pixelated}
+.gate-panel-qr{width:116px;height:116px;padding:6px;border-radius:var(--r-md);border:1px solid var(--line);background:#fff;flex:none}
+.gate-panel-qr svg{width:100%;height:100%;display:block}
 .gate-panel-code{font-size:30px;font-weight:800;letter-spacing:5px;color:var(--ink);line-height:1}
 .gate-panel-caption{font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.45}
 .gate-panel-copy{width:32px;height:32px;border-radius:var(--r-md);display:grid;place-items:center;color:var(--ink-soft);flex:none;margin-left:-6px}
@@ -492,13 +494,13 @@ const LOTS = {
     reports:[{cls:'some',label:'SOME',time:'12m ago'},{cls:'many',label:'MANY',time:'25m ago'},{cls:'paid',label:'PAID ONLY',time:'2h ago'}],
     freeSpots:9, wifi:true, scales:false, atmCount:0, vtypeAvail:{'Truck + Trailer':6,'Trailer Only':3},
     amenities:{access247:true, gated:true, electronicAccess:true, wifi:true, restroom:true},
-    instructions:'Enter via the main gate on Sunland Gin Rd. Show your check-in code to the attendant or scan the QR code posted at the gate.'},
+    instructions:'Enter via the main gate on Sunland Gin Rd. Hold your check-in QR up to the scanner at the gate.', accessType:'qr'},
   maricopa:{name:'Maricopa, AZ Truck & Trailer Parking on N White Rd', city:'Maricopa, AZ', avail:12, totalSpots:15, day:18, week:85, month:320, lat:33.0581, lng:-112.0476,
     rating:4.4, address:'41215 N White Rd, Maricopa, AZ 85138', highway:'AZ-347, Exit 12', phone:'1(520) 568-4420',
     reports:[{cls:'some',label:'SOME',time:'6m ago'},{cls:'many',label:'MANY',time:'18m ago'},{cls:'paid',label:'PAID ONLY',time:'45m ago'}],
     freeSpots:4, wifi:true, scales:true, atmCount:1, vtypeAvail:{'Truck + Trailer':7,'Trailer Only':5},
     amenities:{assignedParking:true, access247:true, gated:true, cctv:true, onSiteStaff:true, lighting:true, showers:true, wifi:true, publicScale:true, restroom:true, fenced:true, pavedSurface:true},
-    instructions:'Check in at the site office before 9pm. After hours, use the drop-box for your paperwork.'},
+    instructions:'Enter your gate code at the keypad by the site office. Check in there before 9pm; after hours, use the drop-box for your paperwork.', accessType:'gateCode'},
   glendale1:{name:'Glendale-Litchfield Park, AZ at PHX1 Logistics Plus', city:'Glendale, AZ', avail:50, totalSpots:60, day:14, week:65, month:250, lat:33.5387, lng:-112.3576,
     rating:4.6, address:'6900 N 43rd Ave, Glendale, AZ 85301', highway:'I-17, Exit 205', phone:'1(623) 847-1190',
     reports:[{cls:'some',label:'SOME',time:'3m ago'},{cls:'many',label:'MANY',time:'15m ago'},{cls:'paid',label:'PAID ONLY',time:'1h ago'}],
@@ -506,7 +508,7 @@ const LOTS = {
     amenities:{assignedParking:true, wideLanes:true, access247:true, gated:true, cctv:true, onSiteStaff:true, lighting:true, showers:true, publicScale:true, fuel:true, restroom:true, food:true, fenced:true, pavedSurface:true, truckRepair:true},
     // this partner has done even less setup than glendale2 — no entrance photo AND no written
     // instructions either, just the bare QR icon + title
-    hasCheckinPhoto:false, instructions:''},
+    hasCheckinPhoto:false, instructions:'', accessType:'qr'},
   glendale2:{name:'Glendale, AZ Truck and Trailer Parking at PHX2 Logistics Plus', city:'Glendale, AZ', avail:50, totalSpots:65, day:16, week:74, month:270, lat:33.5722, lng:-112.1943,
     rating:4.3, address:'8747 N 91st Ave, Glendale, AZ 85305', highway:'I-17, Exit 208', phone:'1(623) 435-2280',
     // this is the one lot in the demo with a shared inventory pool — Truck + Trailer and Trailer
@@ -518,7 +520,7 @@ const LOTS = {
     // this partner hasn't uploaded an entrance photo yet — Access & Check-in should fall back to
     // just the QR icon + text instructions, with no image section
     hasCheckinPhoto:false,
-    instructions:'Enter via the south gate on 91st Ave. A gate code is texted 1 hour before arrival.'},
+    instructions:'Enter via the south gate on 91st Ave. A gate code is texted 1 hour before arrival.', accessType:'gateCode'},
 };
 
 function starsHtml(rating){
@@ -587,10 +589,10 @@ function poiInfoBlock(l){
     <div class="section-label" style="color:var(--ink);margin-top:12px;text-align:center">Access &amp; Check-in</div>
     ${l.hasCheckinPhoto===false ? '' : `<div class="instruction-photo" style="background-image:url('${lotPhotoUrl(S.selectedLotId)}');background-position:${lotPhotoPos(S.selectedLotId)}"><span class="instruction-photo-cap">Entrance at this location</span></div>`}
     <div style="display:flex;gap:10px;align-items:flex-start">
-      <div class="card-icon-badge" style="flex:none">${ic.qr}</div>
+      <div class="card-icon-badge" style="flex:none">${l.accessType==='qr' ? ic.qr : ic.lock}</div>
       <div>
-        <div style="font-weight:700;font-size:14px;color:var(--ink)">QR Checkin</div>
-        <div style="font-weight:600;font-size:12.5px;color:var(--ink-soft);margin-top:2px">Scan QR at the location</div>
+        <div style="font-weight:700;font-size:14px;color:var(--ink)">${accessCopy(l).title}</div>
+        <div style="font-weight:600;font-size:12.5px;color:var(--ink-soft);margin-top:2px">${accessCopy(l).subtitle}</div>
         ${l.instructions ? `<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin-top:6px">${l.instructions}</div>` : ''}
       </div>
     </div>
@@ -1741,26 +1743,48 @@ const screenBookStep4Payment = () => screenPayment('single');
 const screenBatchPayment = () => screenPayment('batch');
 
 /* ============================================================
-   Book Step 5 — Confirmation
+   Order Detail — access (QR / gate code) + location cards
 ============================================================ */
-// Order Detail's side column, next to Booking Details. The gate code is what a dispatcher hands to
-// drivers, so it's shown open (no "Tap to reveal"), with the lot's check-in instructions below it.
-function gateCodePanel(code, caption, l){
+// every lot uses exactly one entry method: a check-in QR held up to a scanner, or a gate code typed on a keypad
+function accessCopy(l){
+  return l.accessType==='qr'
+    ? { title:'QR Checkin', subtitle:'Scan QR at the location' }
+    : { title:'Gate Code Checkin', subtitle:'Enter the gate code at the location' };
+}
+function accessCaption(l, spots, dates){
+  const qr = l.accessType==='qr';
+  if(spots > 1) return qr ? `Same check-in QR for all ${spots} drivers on this order.` : `Same gate code for all ${spots} drivers on this order.`;
+  return `${qr ? 'QR' : 'Code'} activates at check-in time. Valid ${dates}.`;
+}
+// one QR per order (qrcode-generator from cdnjs); empty if the library couldn't load
+function qrSvg(text){
+  if(typeof qrcode === 'undefined') return '';
+  const q = qrcode(0, 'M'); q.addData(text); q.make();
+  return q.createSvgTag({ cellSize:4, margin:0, scalable:true });
+}
+// Order Detail's side column, next to Booking Details: the lot's one entry method — the order's check-in
+// QR, or its gate code — shown open (no "Tap to reveal"), with the lot's check-in instructions below it.
+function gateCodePanel(code, caption, l, orderId){
   const lotId = Object.keys(LOTS).find(k=>LOTS[k]===l);
+  const qr = l.accessType === 'qr';
   return `<div class="card gate-panel${l.hasCheckinPhoto===false ? ' no-photo' : ''}">
-    <div class="card-head"><h2 class="card-title">Gate Code</h2></div>
+    <div class="card-head"><h2 class="card-title">${qr ? 'Check-in QR' : 'Gate Code'}</h2></div>
     <div class="card-body">
+      ${qr ? `
       <div class="gate-panel-main">
-        <img class="gate-panel-qr" src="images/gate-qr-${code.replace(/\D/g,'')}.png" alt="QR code for gate code ${code}">
+        <div class="gate-panel-qr">${qrSvg(`TPPARK:${orderId}`)}</div>
+        <div class="gate-panel-caption" style="margin-top:0">${caption}</div>
+      </div>` : `
+      <div class="gate-panel-main">
         <div class="gate-panel-code tabular">${code}</div>
         <button class="gate-panel-copy" data-copy="${code}" title="Copy gate code" aria-label="Copy gate code">${ic.copy}</button>
       </div>
-      <div class="gate-panel-caption">${caption}</div>
+      <div class="gate-panel-caption">${caption}</div>`}
       <div class="poi-head-divider" style="margin:14px 0 12px"></div>
       <div class="section-label" style="color:var(--ink);margin:0 0 6px">Parking Instructions</div>
       ${l.hasCheckinPhoto===false ? '' : `<div class="instruction-photo" style="background-image:url('${lotPhotoUrl(lotId)}');background-position:${lotPhotoPos(lotId)}"><span class="instruction-photo-cap">Entrance at this location</span></div>`}
-      <div style="font-weight:700;font-size:14px;color:var(--ink)">QR Checkin</div>
-      <div style="font-weight:600;font-size:12.5px;color:var(--ink-soft);margin-top:2px">Scan QR at the location</div>
+      <div style="font-weight:700;font-size:14px;color:var(--ink)">${accessCopy(l).title}</div>
+      <div style="font-weight:600;font-size:12.5px;color:var(--ink-soft);margin-top:2px">${accessCopy(l).subtitle}</div>
       ${l.instructions ? `<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin-top:6px">${l.instructions}</div>` : ''}
     </div>
   </div>`;
@@ -1916,7 +1940,7 @@ function detailFromHistoricalBatch(order){
     ].filter(Boolean),
     note: '', tax: c.tax, total: c.total, paidOn: order.paidOn,
     refundedOn: order.status==='Refunded' ? order.refundedOn : null,
-    gateCode: '1199#', gateCaption: `Same gate code for all ${c.validCount} drivers on this order.`,
+    gateCode: '1199#', gateCaption: accessCaption(l, c.validCount, order.dates),
     vtype: 'Truck + Trailer',
     vehicles: Array.from({length: c.validCount}, (_,i)=>buildVehicleFormRow(i)),
   };
@@ -1929,7 +1953,7 @@ function detailFromHistoricalSingle(order){
     id: order.id, lot: LOTS.eloy, reservationDates: dates, duration: '1 week (7 days)', bookingType: 'Weekly', spots: 1,
     chargeRows: [{ label: 'Weekly rate', price: so.weeklyRate }],
     note: '', tax: so.tax, total: so.total, paidOn: order.paidOn, refundedOn: null,
-    gateCode: '1234', gateCaption: `Code activates at check-in time. Valid ${dates}.`,
+    gateCode: '1234', gateCaption: accessCaption(LOTS.eloy, 1, dates),
     vtype: 'Truck + Trailer',
     vehicles: [buildVehicleFormRow(4)],
   };
@@ -1948,7 +1972,7 @@ function detailFromLiveBooking(id, paidAt){
     chargeRows: b.lineItems.map(li=>({ label: `${li.label} (${li.detail})`, price: li.price })),
     note: b.note, tax: b.tax, total: b.total, paidOn: fmtPaidOn(paidAt), refundedOn: null,
     gateCode: multi ? '1199#' : '1234',
-    gateCaption: multi ? `Same gate code for all ${b.spots} drivers on this order.` : `Code activates at check-in time. Valid ${dates}.`,
+    gateCaption: accessCaption(l, b.spots, dates),
     vtype: b.vtype,
     vehicles: S.vehicleForms.map(vf=>({...vf})),
     listDates: `${new Date(b.checkInDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${fmtLongDate(endDate)}`,
@@ -2031,7 +2055,7 @@ function orderDetailPage(d){
           <div class="info-row"><span class="k"><b style="color:var(--ink)">Refund amount</b></span><span><b>-${fmtUSD(d.total)}</b></span></div>` : ''}
         </div>
       </div>
-      ${gateCodePanel(d.gateCode, d.gateCaption, d.lot)}
+      ${gateCodePanel(d.gateCode, d.gateCaption, d.lot, d.id)}
     </div>
     ${orderVehiclesSection(d)}
     <div style="margin-top:16px">${locationSummaryCard(d.lot, { address: d.lot.address })}</div>
