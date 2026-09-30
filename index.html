@@ -398,7 +398,6 @@ const ic = {
   trash:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m-8 0 1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13"/></svg>',
   orders:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>',
   wallet:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="13" rx="2.2"/><path d="M3 10h18"/><rect x="15.5" y="13.5" width="3" height="2" rx="0.5" fill="currentColor" stroke="none"/></svg>',
-  settings:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M19 12a7 7 0 0 0-.2-1.6l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2.7-1.6L13.4 2h-3l-.4 2.9a7 7 0 0 0-2.7 1.6l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .5.1 1.1.2 1.6l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2.7 1.6l.4 2.9h3l.4-2.9a7 7 0 0 0 2.7-1.6l2.3 1 2-3.4-2-1.5c.1-.5.2-1 .2-1.6Z"/></svg>',
   help:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.3a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 1-1 1.7v.3"/><circle cx="12" cy="17" r=".9" fill="currentColor" stroke="none"/></svg>',
   signout:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>',
   chevRight:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>',
@@ -456,9 +455,10 @@ const S = {
 
   // one plain vehicle/trailer form per spot — resized to match S.spots when entering the
   // Vehicle & Trailer Details page (see go())
-  vehicleForms: [{ truckCompany:'', truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' }],
+  vehicleForms: [{ truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' }],
   vehicleFormsExpanded: [true],
   vehicleMoreExpanded: [false],
+  vehicleUploadModal: null,
   vehiclePage: 1,
 
   payment: { context:'single', selectedCardId:'card_visa' },
@@ -481,7 +481,7 @@ const S = {
   ordersHistory: [
     {id:'FP-20260708-4417', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 14 – Jul 17, 2026', spots:22, total:'$1,036.48', paidOn:'Jul 7, 2026, 9:03 AM', status:'Paid', type:'batch'},
     {id:'FP-20260622-3108', loc:'Maricopa, AZ — N White Rd Truck & Trailer Yard', lotId:'maricopa', dates:'Jun 22 – Jun 25, 2026', spots:22, total:'$1,036.48', paidOn:'Jun 15, 2026, 11:20 AM', status:'Paid', type:'batch'},
-    {id:'FP-20260530-2984', loc:'Glendale, AZ — PHX1 Logistics Plus', lotId:'glendale1', dates:'May 30 – Jun 2, 2026', spots:22, total:'$1,036.48', paidOn:'May 24, 2026, 3:47 PM', status:'Refunded', type:'batch'},
+    {id:'FP-20260530-2984', loc:'Glendale, AZ — PHX1 Logistics Plus', lotId:'glendale1', dates:'May 30 – Jun 2, 2026', spots:22, total:'$1,036.48', paidOn:'May 24, 2026, 3:47 PM', status:'Refunded', type:'batch', refundedOn:'May 26, 2026, 9:12 AM', refundAmount:'$1,036.48'},
     {id:'RP-88214-JX', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 31 – Aug 7, 2026', spots:1, total:'$166.65', paidOn:'Jul 24, 2026, 2:15 PM', status:'Paid', type:'single'},
     {id:'FP-20260801-4602', loc:'Glendale, AZ — PHX2 Logistics Plus', lotId:'glendale2', dates:'Aug 10 – Aug 13, 2026', spots:22, total:'$368.53', paidOn:'Aug 3, 2026, 10:15 AM', status:'Draft', type:'batch'},
   ],
@@ -1166,7 +1166,6 @@ function topNav(active){
         <div class="pm-header"><span class="avatar">MD</span><div><div class="pm-name">Ming Dao</div><div class="pm-email">ming.dao@truckerpath.com</div></div></div>
         <div class="pm-divider"></div>
         <button class="pm-row" data-go="wallet">${ic.wallet} My Wallet</button>
-        <button class="pm-row" id="pmSettings">${ic.settings} Account Settings</button>
         <div class="pm-divider"></div>
         <button class="pm-row destructive" id="signOutBtn">${ic.signout} Sign out</button>
       </div>
@@ -1193,7 +1192,6 @@ function wireNav(root){
   if(trigger) trigger.addEventListener('click',(e)=>{ e.stopPropagation(); S.profileOpen=!S.profileOpen; render(); });
   const signOut = root.querySelector('#signOutBtn');
   if(signOut) signOut.addEventListener('click',()=>{ S.loggedIn=false; go('homepage'); toast('Signed out'); });
-  const pmSettings = root.querySelector('#pmSettings'); if(pmSettings) pmSettings.addEventListener('click',()=>{ S.profileOpen=false; render(); toast('Account Settings — coming soon'); });
 }
 
 /* ============================================================
@@ -1538,17 +1536,46 @@ function screenBookStep1(){
 function vfInput(i, key, label, placeholder, optional){
   return `<div class="field"><label>${label}${optional?' <span style="text-transform:none;font-weight:400">(optional)</span>':''}</label><input class="control" id="vf_${i}_${key}" data-vf="${key}" data-vfrow="${i}" placeholder="${placeholder}" value="${S.vehicleForms[i][key]}"></div>`;
 }
+// a fresh, empty per-vehicle form — shared by the initial page-enter reset and the batch-upload
+// modal's "Re-upload" action, so both always agree on the full field set
+function blankVehicleForm(){
+  return { truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' };
+}
 // fake data for the batch-upload modal's simulated file — no vehicle-type column, since one
-// booking now always books a single vehicle type (set back in Step 1), not a per-row mix
+// booking now always books a single vehicle type (set back in Step 1), not a per-row mix.
+// No truck company either — that's account-level fleet info, not something a per-driver upload
+// would carry, and the live form dropped that field for the same reason (see vfInput calls below).
 function buildVehicleFormRow(i){
   const name = FIRST[i%FIRST.length]+' '+LAST[i%LAST.length];
   const plate = String.fromCharCode(65+((i*7)%26))+String.fromCharCode(65+((i*11)%26))+String.fromCharCode(65+((i*13)%26))+'-'+(1000+i*37)%9000;
   const trailerPlate = String.fromCharCode(65+((i*17)%26))+String.fromCharCode(65+((i*19)%26))+String.fromCharCode(65+((i*23)%26))+'-'+(1000+i*53)%9000;
   return {
-    truckCompany: name+' Trucking', truckNum: String(2000+i), truckMake: ['Freightliner','Kenworth','Peterbilt','Volvo'][i%4],
+    truckNum: String(2000+i), truckMake: ['Freightliner','Kenworth','Peterbilt','Volvo'][i%4],
     truckPlate: plate, truckDot: String(1500000+i*271), driverPhone: `(555) ${String(200+i).padStart(3,'0')}-${String(1000+(i*37)%9000).padStart(4,'0')}`,
     trailerType: '53 dry van', trailerNum: String(9000+i), trailerCompany: name+' Trucking', trailerPlate: trailerPlate,
   };
+}
+// requires an explicit "Got it" — the fields are already filled in by the time this shows, so a
+// dismissable toast isn't enough acknowledgment for something that just overwrote every section
+function vehicleUploadModalHtml(){
+  if(!S.vehicleUploadModal) return '';
+  const { n, fileRowCount } = S.vehicleUploadModal;
+  const truncated = fileRowCount > n;
+  return `
+    <div class="modal-overlay" id="vehicleUploadOverlay">
+      <div class="modal-box">
+        <div style="font-weight:700;font-size:15px;margin-bottom:12px">File uploaded</div>
+        <div style="font-size:13.5px;color:var(--ink);line-height:1.5;margin-bottom:20px">
+          ${truncated
+            ? `We've filled in the first ${n} vehicle section${n===1?'':'s'} from your file. ${fileRowCount-n} additional row${fileRowCount-n===1?'':'s'} in the file weren't included, since this booking only reserved ${n} spot${n===1?'':'s'}.`
+            : `All ${n} vehicle section${n===1?'':'s'} have been filled in from your file.`}
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-outline" style="flex:1" id="vehicleUploadReupload">Re-upload</button>
+          <button class="btn btn-primary" style="flex:1" id="vehicleUploadGotIt">Got it</button>
+        </div>
+      </div>
+    </div>`;
 }
 function screenBookStep3Vehicle(){
   const VEHICLE_PAGE_SIZE = 5;
@@ -1605,7 +1632,7 @@ function screenBookStep3Vehicle(){
             <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'trailerNum','Trailer #','Type here…')}${vfInput(i,'trailerPlate','Trailer plate #','Type here…')}</div>
             <button class="btn-text vf-more-toggle" data-togglemore="${i}">${moreExpanded?'Hide more details':'Add more details'}${moreExpanded?ic.chevDown:ic.chevRight}</button>
             ${moreExpanded ? `
-            ${showTruck ? `<div class="grid-2" style="margin-top:12px">${vfInput(i,'truckCompany','Truck company name','Type here…',true)}${vfInput(i,'truckMake','Truck make','Type here…',true)}</div>` : ''}
+            ${showTruck ? `<div style="margin-top:12px">${vfInput(i,'truckMake','Truck make','Type here…',true)}</div>` : ''}
             <div class="grid-2" style="margin-top:12px">${vfInput(i,'trailerType','Trailer type','Ex: 53 dry van',true)}${vfInput(i,'trailerCompany','Trailer company name','Type here…',true)}</div>
             ` : ''}
           </div>` : ''}
@@ -1634,7 +1661,8 @@ function screenBookStep3Vehicle(){
         </div>
       </div>
     </div>
-  </div>`;
+  </div>
+  ${vehicleUploadModalHtml()}`;
 }
 
 /* ============================================================
@@ -1791,12 +1819,11 @@ function singleOrderDetailBody(){
       </div>
       <div class="card-body">
         <div class="grid-2">
-          <div class="info-row"><span class="k">Truck company</span><span>${vf.truckCompany}</span></div>
           <div class="info-row"><span class="k">Truck #</span><span>${vf.truckNum}</span></div>
-          <div class="info-row"><span class="k">Truck make</span><span>${vf.truckMake}</span></div>
           <div class="info-row"><span class="k">Truck plate #</span><span>${vf.truckPlate}</span></div>
           <div class="info-row"><span class="k">Truck DOT #</span><span>${vf.truckDot}</span></div>
           <div class="info-row"><span class="k">Driver phone</span><span>${vf.driverPhone}</span></div>
+          <div class="info-row"><span class="k">Truck make</span><span>${vf.truckMake}</span></div>
           <div class="info-row"><span class="k">Trailer type</span><span>${vf.trailerType}</span></div>
           <div class="info-row"><span class="k">Trailer #</span><span>${vf.trailerNum}</span></div>
           <div class="info-row"><span class="k">Trailer company</span><span>${vf.trailerCompany}</span></div>
@@ -1838,7 +1865,7 @@ function screenBatchConfirm(){
   const batchOrder = computeBatchOrder();
   const q = S.confirmSearch.trim().toLowerCase();
   let rows = S.vehicleForms;
-  if(q) rows = rows.filter(vf => (vf.truckCompany+' '+vf.truckPlate+' '+vf.driverPhone).toLowerCase().includes(q));
+  if(q) rows = rows.filter(vf => (vf.truckPlate+' '+vf.trailerPlate+' '+vf.driverPhone).toLowerCase().includes(q));
   const l = LOTS[S.selectedLotId];
   const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
   return `
@@ -1878,10 +1905,10 @@ function screenBatchConfirm(){
         </div>
       </div>
       ${S.driversSectionExpanded ? `<div class="card-body">
-        <div class="search-box">${ic.search}<input id="confirmSearchInput" placeholder="Search truck company, plate, or phone" value="${S.confirmSearch}"></div>
+        <div class="search-box">${ic.search}<input id="confirmSearchInput" placeholder="Search plate or phone" value="${S.confirmSearch}"></div>
         <div class="dtable-scroll"><table class="dtable">
-          <thead><tr><th>Vehicle</th><th>Truck Company</th><th>Truck #</th><th>Truck Plate</th><th>Driver Phone</th><th>Trailer #</th><th>Trailer Plate</th></tr></thead>
-          <tbody>${rows.length ? rows.map((vf,i)=>`<tr><td>Vehicle ${S.vehicleForms.indexOf(vf)+1}</td><td>${vf.truckCompany||'—'}</td><td>${vf.truckNum||'—'}</td><td>${vf.truckPlate||'—'}</td><td>${vf.driverPhone||'—'}</td><td>${vf.trailerNum||'—'}</td><td>${vf.trailerPlate||'—'}</td></tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--ink-soft);padding:16px">No vehicles match your search.</td></tr>'}</tbody>
+          <thead><tr><th>Vehicle</th><th>Truck #</th><th>Truck Plate</th><th>Driver Phone</th><th>Trailer #</th><th>Trailer Plate</th></tr></thead>
+          <tbody>${rows.length ? rows.map((vf,i)=>`<tr><td>Vehicle ${S.vehicleForms.indexOf(vf)+1}</td><td>${vf.truckNum||'—'}</td><td>${vf.truckPlate||'—'}</td><td>${vf.driverPhone||'—'}</td><td>${vf.trailerNum||'—'}</td><td>${vf.trailerPlate||'—'}</td></tr>`).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:16px">No vehicles match your search.</td></tr>'}</tbody>
         </table></div>
         <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${batchOrder.validCount} vehicles on this order.</div>
       </div>` : ''}
@@ -2032,12 +2059,16 @@ function screenOrderDetailBatch(){
       </div>
       <div class="card-body">
         <div class="section-label" style="color:var(--ink);margin:0 0 8px">Charges</div>
-        ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} × ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
-        ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} × ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
+        ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} spot${batchOrder.trailerOnlyCount===1?'':'s'} × 1 ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
+        ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} spot${batchOrder.truckTrailerCount===1?'':'s'} × 1 ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
         <div class="info-row"><span class="k">Tax</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</b></span></div>
         <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
         <div class="info-row"><span class="k">Paid on</span><span>${order.paidOn}</span></div>
+        ${order.status==='Refunded' ? `
+        <div class="info-row"><span class="k">Refunded on</span><span>${order.refundedOn}</span></div>
+        <div class="info-row"><span class="k"><b style="color:var(--ink)">Refund amount</b></span><span><b>-${order.refundAmount}</b></span></div>
+        ` : ''}
       </div>
     </div>
     <div class="card" style="margin-top:16px">
@@ -2232,7 +2263,7 @@ function wireScreen(root){
   if(step2Continue && !step2Continue.disabled) step2Continue.addEventListener('click',()=>{
     // single-spot vs. fleet booking share the same Vehicle & Trailer Details page now —
     // the distinction only matters later, at payment, for pricing/copy
-    S.vehicleForms = Array.from({length: S.spots}, ()=>({ truckCompany:'', truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' }));
+    S.vehicleForms = Array.from({length: S.spots}, blankVehicleForm);
     S.vehicleFormsExpanded = Array.from({length: S.spots}, ()=>true);
     S.vehicleMoreExpanded = Array.from({length: S.spots}, ()=>false);
     S.vehiclePage = 1;
@@ -2268,10 +2299,18 @@ function wireScreen(root){
     const fileRowCount = Math.max(n + 3, Math.round(n * 1.4) + 2);
     const rows = Array.from({length: fileRowCount}, (_,i)=>buildVehicleFormRow(i));
     S.vehicleForms = rows.slice(0, n);
+    // a file silently overwrote every vehicle section — that needs an explicit acknowledgment,
+    // not a toast that can be missed
+    S.vehicleUploadModal = { n, fileRowCount };
     render();
-    if(fileRowCount > n) toast(`We've only included the first ${n} and filled it out for you — ${fileRowCount-n} additional row(s) were not included.`);
-    else toast('File uploaded — all vehicle sections filled in.');
   });
+  const vehicleUploadGotIt = root.querySelector('#vehicleUploadGotIt'); if(vehicleUploadGotIt) vehicleUploadGotIt.addEventListener('click',()=>{ S.vehicleUploadModal=null; render(); });
+  const vehicleUploadReupload = root.querySelector('#vehicleUploadReupload'); if(vehicleUploadReupload) vehicleUploadReupload.addEventListener('click',()=>{
+    S.vehicleForms = Array.from({length: S.vehicleForms.length}, blankVehicleForm);
+    S.vehicleUploadModal = null;
+    render();
+  });
+  const vehicleUploadOverlay = root.querySelector('#vehicleUploadOverlay'); if(vehicleUploadOverlay) vehicleUploadOverlay.addEventListener('click',(e)=>{ if(e.target===vehicleUploadOverlay){ S.vehicleUploadModal=null; render(); } });
   const step3Continue = root.querySelector('#step3Continue'); if(step3Continue) step3Continue.addEventListener('click',()=>{
     const dest = S.spots<=1 ? 'book4' : 'batchPayment';
     if(!S.loggedIn){ S.postLoginGoto=dest; toast('Please sign in to continue to payment'); go('login'); return; }
