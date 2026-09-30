@@ -264,26 +264,12 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .radio-dot.on{border-color:var(--brand)}
 .radio-dot.on::after{content:"";position:absolute;inset:3px;border-radius:999px;background:var(--brand)}
 
-/* ---- confirmation ---- */
-.confirm-banner{background:var(--green-tint);border:1px solid #bfe0cc;border-radius:var(--r-lg);padding:16px 18px;display:flex;gap:14px;align-items:center;margin-bottom:16px}
-.confirm-ic{width:40px;height:40px;border-radius:999px;background:var(--green);display:grid;place-items:center;flex:none}
-/* ---- order detail (single) ---- */
-.qrcard{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;margin-bottom:16px;position:relative}
+/* ---- order detail: gate code + location cards ---- */
 .qrcard-top{display:flex;align-items:center;gap:12px}
 .qrcard-icon{width:40px;height:40px;border-radius:var(--r-md);background:var(--paper-dim);display:grid;place-items:center;color:var(--brand);flex:none}
 .qrcard-title{font-weight:700;font-size:14px}
 .qrcard-sub{font-size:12px;color:var(--ink-soft)}
 .qrcard-toggle{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--brand);flex:none;background:none;border:none;cursor:pointer}
-/* floats over whatever is below instead of pushing the page down when revealed */
-.qrcard-expand{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:0 14px 32px rgba(20,20,10,.16);padding:16px 18px;z-index:20}
-.qrcard-expand-row{display:flex;align-items:center;justify-content:center;gap:20px}
-.qrcard-visual-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
-.qrcard-visual{width:72px;height:72px;border-radius:var(--r-md);background:var(--paper-dim);display:grid;place-items:center;color:var(--ink);flex:none}
-.qrcard-visual svg{width:36px;height:36px}
-.qrcard-download{display:flex;align-items:center;gap:4px;font-size:11px;background:none;border:none;padding:0;cursor:pointer}
-.qrcard-download svg{width:12px;height:12px}
-.qrcard-code{font-size:30px;font-weight:800;letter-spacing:4px;color:var(--ink);text-align:center}
-.qrcard-caption{font-size:11.5px;color:var(--ink-soft);margin-top:12px}
 /* Order Detail: Booking Details (left) + Gate Code (right column) */
 .orderdetail-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}
 .orderdetail-grid>.card + .card{margin-top:0}
@@ -295,15 +281,8 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .gate-panel-caption{font-size:12.5px;color:var(--ink-soft);margin-top:12px;line-height:1.45}
 .gate-panel-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .gate-panel-actions .btn{flex:1}
-.orderdetail-top-row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:16px}
-.orderdetail-top-row>.confirm-banner{flex:2 1 320px;margin-bottom:0}
-.orderdetail-top-row>.qrcard{flex:1 1 260px;margin-bottom:0}
 .location-summary-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;position:relative}
-.orderdetail-top-row>.location-summary-card{flex:1 1 280px;margin-bottom:0}
-/* floats over whatever is below instead of pushing the page down when expanded, same pattern as .qrcard-expand */
-.location-expand{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:0 14px 32px rgba(20,20,10,.16);padding:16px 18px;z-index:20;max-height:min(70vh,520px);overflow-y:auto}
-/* as a standalone bottom-of-page section there's nothing to float over — expand inline instead */
-.location-section .location-expand{position:static;border:none;box-shadow:none;border-radius:0;padding:14px 0 0;max-height:none;overflow:visible}
+.location-expand{padding:14px 0 0}
 /* lot names/addresses run longer than Gate Code's fixed short strings — truncate to one line so
    this card's collapsed height still matches its qrcard row-mate regardless of content length */
 .location-summary-card .qrcard-top>div:nth-child(2){flex:1;min-width:0}
@@ -326,7 +305,6 @@ table.dtable tbody tr.dir-row{cursor:pointer}
 table.dtable tbody tr:hover td{background:var(--paper-dim)}
 .dtable-scroll{max-height:420px;overflow-y:auto;overflow-x:auto;border:1px solid var(--line);border-radius:8px}
 .dtable-scroll table.dtable th{position:sticky;top:0;background:#fff;z-index:1}
-.pill-ok{background:var(--green-tint);color:var(--green-deep);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
 .search-box{display:flex;align-items:center;gap:8px;border:1px solid var(--border-input);border-radius:var(--r-md);padding:0 12px;color:var(--ink-soft);margin-bottom:10px;max-width:320px;height:36px}
 .search-box input{border:none;flex:1;height:100%;background:transparent}
 .search-box input:focus{outline:none}
@@ -447,7 +425,7 @@ const S = {
   loginForm: { email:'', password:'' },
   loginErr: '',
   postLoginGoto: null,
-  checkinCodeRevealed: false,
+  bookingSeq: 112,
   amenitiesExpanded: false,
   hoursExpanded: false,
   driversSectionExpanded: false,
@@ -1043,17 +1021,6 @@ function computeStayBreakdown(){
   };
 }
 
-// one vehicle type per booking now (chosen in Step 1) — every reserved spot is that same type.
-// Reuses the real check-in/checkout-based pricing from computeStayBreakdown() so the just-booked
-// Confirm screen's total always agrees with what was actually charged on the Payment screen,
-// repackaged into the shape screenBatchConfirm's Charges breakdown already expects.
-function computeBatchOrder(){
-  const order = computeStayBreakdown();
-  return {
-    validCount: S.spots, spotsReserved: S.spots || 0,
-    lineItems: order.lineItems, note: order.note, tax: order.tax, total: order.total,
-  };
-}
 // past-order view (Orders -> View) must NOT depend on live booking-flow state (S.selectedLotId,
 // S.batch.bookingType, S.presenterTool's simulated roster) — that state has nothing to do with
 // an order placed earlier, and using it caused the order detail screen to show whatever lot/
@@ -1085,6 +1052,7 @@ function orderStayDays(order){
   return Math.max(1, Math.round((end - start) / 86400000));
 }
 function orderTotal(order){
+  if(order.snapshot) return order.snapshot.total;
   if(order.type === 'single') return singleSpotOrder().total;
   return computeOrderCharges(LOTS[order.lotId] || LOTS.eloy, orderStayDays(order)).total;
 }
@@ -1746,42 +1714,6 @@ const screenBatchPayment = () => screenPayment('batch');
 /* ============================================================
    Book Step 5 — Confirmation
 ============================================================ */
-// standalone Gate Code / QR card — lives outside the Booking Details box so it doesn't compete
-// with the receipt for space, and shows a bigger, friendlier layout once revealed
-// l (optional): the order's own lot object, so drivers see the actual entrance photo/instructions
-// under the gate code instead of a generic caption only — dispatcher-booked drivers never see the
-// live POI Detail panel, so this is the one place in Order Detail they'll ever see this info.
-function gateCodeCard(code, caption, l){
-  const revealed = S.checkinCodeRevealed;
-  const lotId = l ? Object.keys(LOTS).find(k=>LOTS[k]===l) : null;
-  return `<div class="qrcard">
-    <div class="qrcard-top">
-      <div class="qrcard-icon">${ic.qr}</div>
-      <div>
-        <div class="qrcard-title">Gate Code</div>
-        <div class="qrcard-sub">${revealed?'Active for this reservation':'Tap to reveal'}</div>
-      </div>
-      <button class="qrcard-toggle" id="toggleCheckinCode">${revealed?ic.eyeOff:ic.eye}${revealed?'Hide':'Show'}</button>
-    </div>
-    ${revealed ? `<div class="qrcard-expand">
-      <div class="qrcard-expand-row">
-        <div class="qrcard-visual-wrap">
-          <div class="qrcard-visual">${ic.qr}</div>
-          <button class="qrcard-download" data-toast="QR code image downloaded">${ic.download}Download image</button>
-        </div>
-        <div class="qrcard-code tabular">${code}</div>
-      </div>
-      <div class="qrcard-caption">${caption}</div>
-      ${l ? `<div class="section-label" style="color:var(--ink);margin-top:12px">Parking Instructions</div>
-      ${l.hasCheckinPhoto===false ? '' : `<div class="instruction-photo" style="background-image:url('${lotPhotoUrl(lotId)}');background-position:${lotPhotoPos(lotId)}"><span class="instruction-photo-cap">Entrance at this location</span></div>`}
-      <div style="display:flex;gap:10px;align-items:flex-start">
-        <div class="card-icon-badge" style="flex:none">${ic.qr}</div>
-        <div><div style="font-weight:600;font-size:13px;margin-bottom:2px">Scan QR to enter</div>
-        ${l.instructions ? `<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.5">${l.instructions}</div>` : ''}</div>
-      </div>` : ''}
-    </div>` : ''}
-  </div>`;
-}
 // Order Detail's side column, next to Booking Details. The gate code is what a dispatcher hands to
 // drivers, so it's shown open (no "Tap to reveal"), with the lot's check-in instructions below it.
 function gateCodePanel(code, caption, l){
@@ -1807,14 +1739,8 @@ function gateCodePanel(code, caption, l){
     </div>
   </div>`;
 }
-// standalone Location card — lives in the top row alongside the confirm/order banner and gate
-// code card, instead of buried inside the Booking Details box. Reuses the exact qrcard-top
-// layout (icon + title/subtitle + right-aligned toggle) so its collapsed height matches its
-// row-mates pixel-for-pixel. Everything else (dates, booking type, spots, coordinates,
-// amenities...) lives behind the toggle in a floating overlay, same pattern as the Gate Code
-// card's expand panel — it overlays instead of pushing the page down. The address is shown once,
-// in the collapsed header, so the expanded panel doesn't repeat it. opts.dates and opts.spots
-// are optional since the single-spot confirmation doesn't show a spot count.
+// Location section at the bottom of Order Detail: name + address with a toggle that expands
+// coordinates / highway / gate hours / call inline. opts.dates/bookingType/spots are optional.
 function locationSummaryCard(l, opts){
   const expanded = S.locationDetailsExpanded;
   return `<div class="location-summary-card">
@@ -1835,147 +1761,6 @@ function locationSummaryCard(l, opts){
     </div>` : ''}
   </div>`;
 }
-// shared body for the single-spot "just booked" screen and its My Orders detail view —
-// they show the same booking, just under a different banner and back-button destination
-// fixed vehicle record for this historical order — a pure function of a fixed index, never
-// live S.vehicleForms, so this screen (Orders -> View) shows the same driver info no matter
-// what the user is doing elsewhere in the live booking flow
-// asOrderDetail: the Orders -> View layout (order ID as the card title, reservation summary rows,
-// Location as its own section at the bottom). The just-booked confirm screen keeps the old layout.
-function singleOrderDetailBody(asOrderDetail){
-  const singleOrder = singleSpotOrder();
-  const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
-  const orderRecord = S.ordersHistory.find(o=>o.id==='tp202607241415121');
-  const vf = buildVehicleFormRow(4);
-  return `
-    ${asOrderDetail ? '<div class="orderdetail-grid">' : ''}
-    <div class="card">
-      <div class="card-head">
-        <h2 class="card-title">Booking Details${asOrderDetail ? ` - ${orderRecord.id}` : ''}</h2>
-        <button class="btn btn-outline" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
-      </div>
-      <div class="card-body">
-        ${asOrderDetail ? `
-        <div class="info-row"><span class="k">Reservation Dates</span><span>Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM</span></div>
-        <div class="info-row"><span class="k">Duration</span><span>1 week (7 days)</span></div>
-        <div class="info-row"><span class="k">Booking Type</span><span>Weekly</span></div>
-        <div class="info-row"><span class="k">Spots Reserved</span><span>1</span></div>
-        ` : ''}
-        <div class="section-label" style="color:var(--ink);margin:${asOrderDetail?'12px':'0'} 0 8px">Charges</div>
-        <div class="info-row"><span class="k">Weekly rate</span><span>$${singleOrder.weeklyRate.toFixed(2)}</span></div>
-        <div class="info-row"><span class="k">Tax</span><span>$${singleOrder.tax.toFixed(2)}</span></div>
-        <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${singleOrder.total.toFixed(2)}</b></span></div>
-        <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
-        <div class="info-row"><span class="k">Paid on</span><span>${orderRecord.paidOn}</span></div>
-      </div>
-    </div>
-    ${asOrderDetail ? `${gateCodePanel('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.', LOTS.eloy)}
-    </div>` : ''}
-    <div class="card" style="margin-top:16px">
-      <div class="card-head">
-        <h2 class="card-title">Driver & Vehicle</h2>
-      </div>
-      <div class="card-body">
-        <div class="grid-2">
-          <div class="info-row"><span class="k">Truck #</span><span>${vf.truckNum}</span></div>
-          <div class="info-row"><span class="k">Truck plate #</span><span>${vf.truckPlate}</span></div>
-          <div class="info-row"><span class="k">Truck DOT #</span><span>${vf.truckDot}</span></div>
-          <div class="info-row"><span class="k">Driver phone</span><span>${vf.driverPhone}</span></div>
-          <div class="info-row"><span class="k">Truck make</span><span>${vf.truckMake}</span></div>
-          <div class="info-row"><span class="k">Trailer type</span><span>${vf.trailerType}</span></div>
-          <div class="info-row"><span class="k">Trailer #</span><span>${vf.trailerNum}</span></div>
-          <div class="info-row"><span class="k">Trailer company</span><span>${vf.trailerCompany}</span></div>
-          <div class="info-row"><span class="k">Trailer plate #</span><span>${vf.trailerPlate}</span></div>
-        </div>
-      </div>
-    </div>
-    ${asOrderDetail ? `<div class="location-section" style="margin-top:16px">${locationSummaryCard(LOTS.eloy, { address: '3100 S Barrett Rd, Eloy, AZ 85131' })}</div>` : ''}`;
-}
-function singleOrderLocationCard(){
-  return locationSummaryCard(LOTS.eloy, {
-    address: '3100 S Barrett Rd, Eloy, AZ 85131',
-    dates: 'Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM',
-    bookingType: 'Weekly',
-  });
-}
-function screenBookStep5Confirm(){
-  const phone = S.vehicleForms[0] && S.vehicleForms[0].driverPhone;
-  return `
-  ${topNav('orders')}
-  <div class="page">
-    <div class="orderdetail-top-row">
-      <div class="confirm-banner">
-        <div class="confirm-ic">${ic.checkW}</div>
-        <div><div style="font-weight:700;font-size:16px">You're booked — tp202607241415121</div><div style="color:var(--green-deep);font-size:13px">Confirmation sent to ${phone ? phone : 'your phone'}. Show your check-in code at the gate.</div></div>
-      </div>
-      ${singleOrderLocationCard()}
-      ${gateCodeCard('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.', LOTS.eloy)}
-    </div>
-    ${singleOrderDetailBody()}
-    <button class="btn btn-primary" id="backHomeBtn">Back to My Orders</button>
-  </div>`;
-}
-
-// mirrors the Order Detail layout (order-detail-top-row with gate code, Booking Details card
-// with Charges + Location, collapsible Drivers card) so a just-completed booking looks exactly
-// like viewing that same order later would — this screen uses LIVE booking-flow state, which is
-// correct here (unlike the historical Order Detail view, this IS that state, right now)
-function screenBatchConfirm(){
-  const batchOrder = computeBatchOrder();
-  const q = S.confirmSearch.trim().toLowerCase();
-  let rows = S.vehicleForms;
-  if(q) rows = rows.filter(vf => (vf.truckPlate+' '+vf.trailerPlate+' '+vf.driverPhone).toLowerCase().includes(q));
-  const l = LOTS[S.selectedLotId];
-  const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
-  return `
-  ${topNav('orders')}
-  <div class="page">
-    <div class="orderdetail-top-row">
-      <div class="confirm-banner">
-        <div class="confirm-ic">${ic.checkW}</div>
-        <div style="font-weight:700;font-size:16px">Booking confirmed — tp202609302212112</div>
-      </div>
-      ${locationSummaryCard(l, { address: l.address, bookingType: S.batch.bookingType, spots: batchOrder.validCount })}
-      ${gateCodeCard('1199#', 'Same gate code for every driver on this order.', l)}
-    </div>
-    <div class="card">
-      <div class="card-head">
-        <h2 class="card-title">Booking Details</h2>
-        <button class="btn btn-outline" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
-      </div>
-      <div class="card-body">
-        <div class="section-label" style="color:var(--ink);margin:0 0 8px">Charges</div>
-        ${batchOrder.lineItems.map(li=>`<div class="info-row"><span class="k">${li.label} (${li.detail})</span><span>$${li.price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`).join('')}
-        ${batchOrder.note ? `<div class="orderline-note">${ic.info}${batchOrder.note}</div>` : ''}
-        <div class="info-row"><span class="k">Tax</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
-        <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</b></span></div>
-        <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
-      </div>
-    </div>
-    <div class="card" style="margin-top:16px">
-      <div class="card-head">
-        <button class="drivers-toggle" id="toggleDriversSection">
-          ${S.driversSectionExpanded?ic.chevDown:ic.chevRight}
-          <h2 class="card-title" style="margin:0">Vehicles (${batchOrder.validCount})</h2>
-        </button>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-outline" data-toast="CSV exported (${batchOrder.validCount} rows)">${ic.download}&nbsp;Export CSV</button>
-          <button class="btn btn-primary" data-toast="Email queued to ${batchOrder.validCount} drivers">${ic.mail}&nbsp;Send email to all drivers</button>
-        </div>
-      </div>
-      ${S.driversSectionExpanded ? `<div class="card-body">
-        <div class="search-box">${ic.search}<input id="confirmSearchInput" placeholder="Search plate or phone" value="${S.confirmSearch}"></div>
-        <div class="dtable-scroll"><table class="dtable">
-          <thead><tr><th>Vehicle</th><th>Truck #</th><th>Truck Plate</th><th>Driver Phone</th><th>Trailer #</th><th>Trailer Plate</th></tr></thead>
-          <tbody>${rows.length ? rows.map((vf,i)=>`<tr><td>Vehicle ${S.vehicleForms.indexOf(vf)+1}</td><td>${vf.truckNum||'—'}</td><td>${vf.truckPlate||'—'}</td><td>${vf.driverPhone||'—'}</td><td>${vf.trailerNum||'—'}</td><td>${vf.trailerPlate||'—'}</td></tr>`).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:16px">No vehicles match your search.</td></tr>'}</tbody>
-        </table></div>
-        <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${batchOrder.validCount} vehicles on this order.</div>
-      </div>` : ''}
-    </div>
-    <button class="btn btn-primary" style="margin-top:16px" id="backToOrdersConfirm">Back to My Orders</button>
-  </div>`;
-}
-
 /* ============================================================
    Orders, Wallet, Order Detail
 ============================================================ */
@@ -2072,80 +1857,167 @@ function screenWallet(){
   ${addCardModal}`;
 }
 
-function screenOrderDetailSingle(){
-  return `
-  ${topNav('orders')}
-  <div class="page">
-    ${singleOrderDetailBody(true)}
-    <button class="btn btn-outline" style="margin-top:16px" id="backToOrders">← Back to Orders</button>
+// ---- Order Detail: one renderer for My Orders -> View AND the screen right after payment, so the
+// two can never drift apart. Each order is turned into the same plain "detail" object first.
+function fmtLongDate(dateStr){
+  return new Date(dateStr+'T00:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+function fmtTime12(timeStr){
+  const [h,m] = timeStr.split(':').map(Number);
+  return `${h%12===0?12:h%12}:${String(m).padStart(2,'0')} ${h<12?'AM':'PM'}`;
+}
+function addMonths(dateStr, n){
+  const d = new Date(dateStr+'T00:00:00');
+  d.setMonth(d.getMonth()+n);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function fmtPaidOn(d){
+  return `${d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}, ${d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;
+}
+function defaultCard(){ return S.walletCards.find(c=>c.default) || S.walletCards[0]; }
+
+function detailFromHistoricalBatch(order){
+  const l = LOTS[order.lotId] || LOTS.eloy;
+  const days = orderStayDays(order);
+  const c = computeOrderCharges(l, days);
+  const dayLabel = `${days} day${days===1?'':'s'}`;
+  const spotsTxt = n => `${n} spot${n===1?'':'s'}`;
+  return {
+    id: order.id, lot: l, reservationDates: order.dates, duration: dayLabel, bookingType: 'Daily', spots: c.validCount,
+    chargeRows: [
+      c.trailerOnlyCount>0 && { label: `Trailer Only parking (${spotsTxt(c.trailerOnlyCount)} × ${dayLabel})`, price: c.trailerOnlyPrice },
+      c.truckTrailerCount>0 && { label: `Truck + Trailer parking (${spotsTxt(c.truckTrailerCount)} × ${dayLabel})`, price: c.truckTrailerPrice },
+    ].filter(Boolean),
+    note: '', tax: c.tax, total: c.total, paidOn: order.paidOn,
+    refundedOn: order.status==='Refunded' ? order.refundedOn : null,
+    gateCode: '1199#', gateCaption: `Same gate code for all ${c.validCount} drivers on this order.`,
+    vtype: 'Truck + Trailer',
+    vehicles: Array.from({length: c.validCount}, (_,i)=>buildVehicleFormRow(i)),
+  };
+}
+// the one fixed historical single-spot demo order (weekly rate at Eloy)
+function detailFromHistoricalSingle(order){
+  const so = singleSpotOrder();
+  const dates = 'Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM';
+  return {
+    id: order.id, lot: LOTS.eloy, reservationDates: dates, duration: '1 week (7 days)', bookingType: 'Weekly', spots: 1,
+    chargeRows: [{ label: 'Weekly rate', price: so.weeklyRate }],
+    note: '', tax: so.tax, total: so.total, paidOn: order.paidOn, refundedOn: null,
+    gateCode: '1234', gateCaption: `Code activates at check-in time. Valid ${dates}.`,
+    vtype: 'Truck + Trailer',
+    vehicles: [buildVehicleFormRow(4)],
+  };
+}
+// snapshot of what was just entered and charged — frozen at payment time, so later edits to the
+// live booking flow never change an order that's already been paid
+function detailFromLiveBooking(id, paidAt){
+  const b = computeStayBreakdown();
+  const l = LOTS[S.selectedLotId];
+  const endDate = b.bookingType==='Monthly' ? addMonths(b.checkInDate, parseInt(b.billedLabel,10)) : b.checkOutDate;
+  const endTime = b.bookingType==='Monthly' ? b.checkInTime : b.checkOutTime;
+  const dates = `${fmtLongDate(b.checkInDate)}, ${fmtTime12(b.checkInTime)} – ${fmtLongDate(endDate)}, ${fmtTime12(endTime)}`;
+  const multi = b.spots > 1;
+  return {
+    id, lot: l, reservationDates: dates, duration: b.billedLabel, bookingType: b.bookingType, spots: b.spots,
+    chargeRows: b.lineItems.map(li=>({ label: `${li.label} (${li.detail})`, price: li.price })),
+    note: b.note, tax: b.tax, total: b.total, paidOn: fmtPaidOn(paidAt), refundedOn: null,
+    gateCode: multi ? '1199#' : '1234',
+    gateCaption: multi ? `Same gate code for all ${b.spots} drivers on this order.` : `Code activates at check-in time. Valid ${dates}.`,
+    vtype: b.vtype,
+    vehicles: S.vehicleForms.map(vf=>({...vf})),
+    listDates: `${new Date(b.checkInDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${fmtLongDate(endDate)}`,
+  };
+}
+
+function orderVehiclesSection(d){
+  const showTruck = d.vtype === 'Truck + Trailer';
+  const v = x => x || '—';
+  if(d.vehicles.length === 1){
+    const vf = d.vehicles[0];
+    return `<div class="card" style="margin-top:16px">
+      <div class="card-head"><h2 class="card-title">Driver & Vehicle</h2></div>
+      <div class="card-body"><div class="grid-2">
+        ${showTruck ? `
+        <div class="info-row"><span class="k">Truck #</span><span>${v(vf.truckNum)}</span></div>
+        <div class="info-row"><span class="k">Truck plate #</span><span>${v(vf.truckPlate)}</span></div>
+        <div class="info-row"><span class="k">Truck DOT #</span><span>${v(vf.truckDot)}</span></div>` : ''}
+        <div class="info-row"><span class="k">Driver phone</span><span>${v(vf.driverPhone)}</span></div>
+        ${showTruck ? `<div class="info-row"><span class="k">Truck make</span><span>${v(vf.truckMake)}</span></div>` : ''}
+        <div class="info-row"><span class="k">Trailer #</span><span>${v(vf.trailerNum)}</span></div>
+        <div class="info-row"><span class="k">Trailer plate #</span><span>${v(vf.trailerPlate)}</span></div>
+        <div class="info-row"><span class="k">Trailer type</span><span>${v(vf.trailerType)}</span></div>
+        <div class="info-row"><span class="k">Trailer company</span><span>${v(vf.trailerCompany)}</span></div>
+      </div></div>
+    </div>`;
+  }
+  const q = S.confirmSearch.trim().toLowerCase();
+  const rows = d.vehicles.map((vf,i)=>({vf,i})).filter(({vf}) => !q || [vf.truckPlate, vf.trailerPlate, vf.driverPhone, vf.truckNum, vf.trailerNum].join(' ').toLowerCase().includes(q));
+  const cols = showTruck ? 8 : 5;
+  return `<div class="card" style="margin-top:16px">
+    <div class="card-head">
+      <button class="drivers-toggle" id="toggleDriversSection">
+        ${S.driversSectionExpanded?ic.chevDown:ic.chevRight}
+        <h2 class="card-title" style="margin:0">Drivers (${d.vehicles.length})</h2>
+      </button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline" data-toast="CSV exported (${d.vehicles.length} rows)">${ic.download}&nbsp;Export CSV</button>
+        <button class="btn btn-primary" data-toast="Email queued to ${d.vehicles.length} drivers">${ic.mail}&nbsp;Send email to all drivers</button>
+      </div>
+    </div>
+    ${S.driversSectionExpanded ? `<div class="card-body">
+      <div class="search-box">${ic.search}<input id="odSearchInput" placeholder="Search plate, phone, or truck/trailer #" value="${S.confirmSearch}"></div>
+      <div class="dtable-scroll"><table class="dtable">
+        <thead><tr><th>Vehicle</th>${showTruck?'<th>Truck #</th><th>Truck Plate</th><th>Truck DOT #</th>':''}<th>Driver Phone</th><th>Trailer #</th><th>Trailer Plate</th><th></th></tr></thead>
+        <tbody>${rows.length ? rows.map(({vf,i})=>`<tr><td>Vehicle ${i+1}</td>${showTruck?`<td>${v(vf.truckNum)}</td><td>${v(vf.truckPlate)}</td><td>${v(vf.truckDot)}</td>`:''}<td>${v(vf.driverPhone)}</td><td>${v(vf.trailerNum)}</td><td>${v(vf.trailerPlate)}</td><td><button class="icon-btn" data-pdfrow="Vehicle ${i+1}" title="Download this driver's parking pass">${ic.download}</button></td></tr>`).join('') : `<tr><td colspan="${cols}" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>`}</tbody>
+      </table></div>
+      <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${d.vehicles.length} drivers on this order.</div>
+    </div>` : ''}
   </div>`;
 }
 
-function screenOrderDetailBatch(){
-  const order = S.ordersHistory.find(o=>o.id===S.selectedOrderId && o.type==='batch') || S.ordersHistory.find(o=>o.type==='batch');
-  const q = S.confirmSearch.trim().toLowerCase();
-  let rows = VALID_ROSTER;
-  if(q) rows = rows.filter(d => (d.name+' '+d.id+' '+d.plate).toLowerCase().includes(q));
-  // tied to this specific order's own lot and its own dates — never to live booking-flow state —
-  // so the numbers on screen stay correct no matter what the user was doing elsewhere in the app
-  const l = LOTS[order.lotId] || LOTS.eloy;
-  const days = orderStayDays(order);
-  const batchOrder = computeOrderCharges(l, days);
-  const dayLabel = `${days} day${days===1?'':'s'}`;
-  const { start: ciDate, end: coDate } = orderDateBounds(order);
-  const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
+function orderDetailPage(d){
+  const card = defaultCard();
   return `
   ${topNav('orders')}
   <div class="page">
     <div class="orderdetail-grid">
-    <div class="card">
-      <div class="card-head">
-        <h2 class="card-title">Booking Details - ${order.id}</h2>
-        <button class="btn btn-outline" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><span class="k">Reservation Dates</span><span>${order.dates}</span></div>
-        <div class="info-row"><span class="k">Duration</span><span>${dayLabel}</span></div>
-        <div class="info-row"><span class="k">Booking Type</span><span>Daily</span></div>
-        <div class="info-row"><span class="k">Spots Reserved</span><span>${batchOrder.validCount}</span></div>
-        <div class="section-label" style="color:var(--ink);margin:12px 0 8px">Charges</div>
-        ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} spot${batchOrder.trailerOnlyCount===1?'':'s'} × ${dayLabel})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
-        ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} spot${batchOrder.truckTrailerCount===1?'':'s'} × ${dayLabel})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
-        <div class="info-row"><span class="k">Tax</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
-        <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${batchOrder.total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</b></span></div>
-        <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
-        <div class="info-row"><span class="k">Paid on</span><span>${order.paidOn}</span></div>
-        ${order.status==='Refunded' ? `
-        <div class="info-row"><span class="k">Refunded on</span><span>${order.refundedOn}</span></div>
-        <div class="info-row"><span class="k"><b style="color:var(--ink)">Refund amount</b></span><span><b>-${fmtUSD(batchOrder.total)}</b></span></div>
-        ` : ''}
-      </div>
-    </div>
-    ${gateCodePanel('1199#', `Same gate code for all ${batchOrder.validCount} drivers on this order.`, l)}
-    </div>
-    <div class="card" style="margin-top:16px">
-      <div class="card-head">
-        <button class="drivers-toggle" id="toggleDriversSection">
-          ${S.driversSectionExpanded?ic.chevDown:ic.chevRight}
-          <h2 class="card-title" style="margin:0">Drivers (${VALID_ROSTER.length})</h2>
-        </button>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-outline" data-toast="CSV exported">${ic.download}&nbsp;Export CSV</button>
-          <button class="btn btn-primary" data-toast="Email queued to all drivers">${ic.mail}&nbsp;Send email to all drivers</button>
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">Booking Details - ${d.id}</h2>
+          <button class="btn btn-outline" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
+        </div>
+        <div class="card-body">
+          <div class="info-row"><span class="k">Reservation Dates</span><span>${d.reservationDates}</span></div>
+          <div class="info-row"><span class="k">Duration</span><span>${d.duration}</span></div>
+          <div class="info-row"><span class="k">Booking Type</span><span>${d.bookingType}</span></div>
+          <div class="info-row"><span class="k">Spots Reserved</span><span>${d.spots}</span></div>
+          <div class="section-label" style="color:var(--ink);margin:12px 0 8px">Charges</div>
+          ${d.chargeRows.map(r=>`<div class="info-row"><span class="k">${r.label}</span><span>${fmtUSD(r.price)}</span></div>`).join('')}
+          ${d.note ? `<div class="orderline-note">${ic.info}${d.note}</div>` : ''}
+          <div class="info-row"><span class="k">Tax</span><span>${fmtUSD(d.tax)}</span></div>
+          <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>${fmtUSD(d.total)}</b></span></div>
+          <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
+          <div class="info-row"><span class="k">Paid on</span><span>${d.paidOn}</span></div>
+          ${d.refundedOn ? `
+          <div class="info-row"><span class="k">Refunded on</span><span>${d.refundedOn}</span></div>
+          <div class="info-row"><span class="k"><b style="color:var(--ink)">Refund amount</b></span><span><b>-${fmtUSD(d.total)}</b></span></div>` : ''}
         </div>
       </div>
-      ${S.driversSectionExpanded ? `<div class="card-body">
-        <div class="search-box">${ic.search}<input id="odSearchInput" placeholder="Search driver, ID, plate, or spot" value="${S.confirmSearch}"></div>
-        <div class="dtable-scroll"><table class="dtable">
-          <thead><tr><th>Driver</th><th>Driver ID</th><th>Plate</th><th>Vehicle Type</th><th>Gate Code</th><th>Access PIN</th><th>Check-in</th><th>Check-out</th><th>Status</th><th></th></tr></thead>
-          <tbody>${rows.length ? rows.map(d=>`<tr><td>${d.name}</td><td>${d.id}</td><td>${d.plate}</td><td>${d.vtype}</td><td class="tabular">${d.gate}</td><td class="tabular">${d.pin}</td><td>${ciDate}, ${16+((d.row-1)%6)}:00</td><td>${coDate}, 0${5+((d.row-1)%3)}:30</td><td><span class="pill-ok">Assigned</span></td><td><button class="icon-btn" data-pdfrow="${d.name}" title="Download this driver's PDF">${ic.download}</button></td></tr>`).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>'}</tbody>
-        </table></div>
-        <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${VALID_ROSTER.length} drivers assigned to this order.</div>
-      </div>` : ''}
+      ${gateCodePanel(d.gateCode, d.gateCaption, d.lot)}
     </div>
-    <div class="location-section" style="margin-top:16px">${locationSummaryCard(l, { address: l.address })}</div>
-    <button class="btn btn-outline" style="margin-top:16px" id="backToOrders2">← Back to Orders</button>
+    ${orderVehiclesSection(d)}
+    <div style="margin-top:16px">${locationSummaryCard(d.lot, { address: d.lot.address })}</div>
+    <button class="btn btn-outline" style="margin-top:16px" id="backToOrders">← Back to Orders</button>
   </div>`;
+}
+function orderDetailFor(order){
+  if(order.snapshot) return order.snapshot;
+  return order.type==='single' ? detailFromHistoricalSingle(order) : detailFromHistoricalBatch(order);
+}
+// My Orders -> View, and the screen right after payment (which is just that new order's detail)
+function screenOrderDetail(){
+  const order = S.ordersHistory.find(o=>o.id===S.selectedOrderId) || S.ordersHistory[0];
+  return orderDetailPage(orderDetailFor(order));
 }
 
 /* ============================================================
@@ -2153,10 +2025,10 @@ function screenOrderDetailBatch(){
 ============================================================ */
 const SCREENS = {
   homepage: screenHomepage, login: screenLogin,
-  book1: screenBookStep1, allListings: screenAllListings, book3: screenBookStep3Vehicle, book4: screenBookStep4Payment, book5: screenBookStep5Confirm,
-  batchPayment: screenBatchPayment, batchConfirm: screenBatchConfirm,
+  book1: screenBookStep1, allListings: screenAllListings, book3: screenBookStep3Vehicle, book4: screenBookStep4Payment,
+  batchPayment: screenBatchPayment,
   orders: screenOrders, wallet: screenWallet,
-  orderDetailSingle: screenOrderDetailSingle, orderDetailBatch: screenOrderDetailBatch,
+  orderDetail: screenOrderDetail,
 };
 
 let outsideClickBound = false;
@@ -2374,25 +2246,31 @@ function wireScreen(root){
   root.querySelectorAll('.saved-card[data-card]').forEach(c=>c.addEventListener('click',()=>{ S.payment.selectedCardId=c.dataset.card; render(); }));
   const payBtn = root.querySelector('#payBtn');
   if(payBtn) payBtn.addEventListener('click',()=>{
-    const isBatch = S.payment.context==='batch';
-    const total = '$' + computeStayBreakdown().total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
     payBtn.textContent='Processing…'; payBtn.disabled=true;
-    setTimeout(()=>{ toast('Payment confirmed — '+total); go(isBatch?'batchConfirm':'book5'); },800);
+    setTimeout(()=>{
+      // the booking becomes a real order in My Orders, and the post-payment screen is just its detail
+      const paidAt = new Date();
+      const stamp = `${paidAt.getFullYear()}${String(paidAt.getMonth()+1).padStart(2,'0')}${String(paidAt.getDate()).padStart(2,'0')}${String(paidAt.getHours()).padStart(2,'0')}${String(paidAt.getMinutes()).padStart(2,'0')}`;
+      const id = `tp${stamp}${String(S.bookingSeq++).padStart(3,'0')}`;
+      const snapshot = detailFromLiveBooking(id, paidAt);
+      const l = LOTS[S.selectedLotId];
+      S.ordersHistory.unshift({ id, loc:`${l.city} — ${l.name.split(' at ').pop()}`, lotId:S.selectedLotId, dates:snapshot.listDates,
+        spots:snapshot.spots, paidOn:snapshot.paidOn, status:'Paid', type: snapshot.spots>1 ? 'batch' : 'single', snapshot });
+      S.selectedOrderId = id;
+      S.confirmSearch = '';
+      go('orderDetail');
+      toast('Payment successful — booking confirmed');
+    },800);
   });
 
-  /* ---- book5 / batchConfirm shared actions ---- */
-  const toggleCheckinCode = root.querySelector('#toggleCheckinCode'); if(toggleCheckinCode) toggleCheckinCode.addEventListener('click',()=>{ S.checkinCodeRevealed=!S.checkinCodeRevealed; render(); });
+  /* ---- order detail ---- */
   const amenitiesToggle = root.querySelector('#amenitiesToggle'); if(amenitiesToggle) amenitiesToggle.addEventListener('click',()=>{ S.amenitiesExpanded=!S.amenitiesExpanded; render(); });
   const hoursToggle = root.querySelector('#hoursToggle'); if(hoursToggle) hoursToggle.addEventListener('click',()=>{ S.hoursExpanded=!S.hoursExpanded; render(); });
   const toggleDriversSection = root.querySelector('#toggleDriversSection'); if(toggleDriversSection) toggleDriversSection.addEventListener('click',()=>{ S.driversSectionExpanded=!S.driversSectionExpanded; render(); });
   const toggleLocationDetails = root.querySelector('#toggleLocationDetails'); if(toggleLocationDetails) toggleLocationDetails.addEventListener('click',()=>{ S.locationDetailsExpanded=!S.locationDetailsExpanded; render(); });
-  const backHome = root.querySelector('#backHomeBtn'); if(backHome) backHome.addEventListener('click',()=>go('orders'));
-  const backToOrdersConfirm = root.querySelector('#backToOrdersConfirm'); if(backToOrdersConfirm) backToOrdersConfirm.addEventListener('click',()=>go('orders'));
   root.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>copyText(b.dataset.copy)));
   root.querySelectorAll('[data-toast]').forEach(b=>b.addEventListener('click',()=>toast(b.dataset.toast)));
 
-  const confirmSearchInput = root.querySelector('#confirmSearchInput');
-  if(confirmSearchInput) confirmSearchInput.addEventListener('input',()=>{ S.confirmSearch=confirmSearchInput.value; rerenderKeepFocus(); });
   const odSearchInput = root.querySelector('#odSearchInput');
   if(odSearchInput) odSearchInput.addEventListener('input',()=>{ S.confirmSearch=odSearchInput.value; rerenderKeepFocus(); });
   root.querySelectorAll('[data-pdfrow]').forEach(b=>b.addEventListener('click',()=>toast(`Downloading PDF for ${b.dataset.pdfrow}`)));
@@ -2402,10 +2280,9 @@ function wireScreen(root){
     const order = S.ordersHistory.find(o=>o.id===b.dataset.view);
     S.confirmSearch='';
     S.selectedOrderId = order.id;
-    go(order.type==='single' ? 'orderDetailSingle' : 'orderDetailBatch');
+    go('orderDetail');
   }));
   const backToOrders = root.querySelector('#backToOrders'); if(backToOrders) backToOrders.addEventListener('click',()=>go('orders'));
-  const backToOrders2 = root.querySelector('#backToOrders2'); if(backToOrders2) backToOrders2.addEventListener('click',()=>go('orders'));
 
   /* ---- wallet ---- */
   root.querySelectorAll('[data-selectcard]').forEach(row=>row.addEventListener('click',()=>{ S.wallet.selectedCardId=row.dataset.selectcard; render(); }));
