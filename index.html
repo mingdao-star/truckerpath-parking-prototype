@@ -280,6 +280,8 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .gate-panel{display:flex;flex-direction:column;overflow:hidden}
 .gate-panel>.card-body{flex:1;display:flex;flex-direction:column}
 .gate-panel .instruction-photo{flex:1 1 0;min-height:72px;height:auto;margin:0 0 10px}
+/* no photo to absorb extra height, so size to content instead of stretching into empty space */
+.gate-panel.no-photo{align-self:start}
 .orderdetail-grid>.card + .card{margin-top:0}
 @media (max-width:900px){.orderdetail-grid{grid-template-columns:1fr}.gate-panel .instruction-photo{flex:none;height:130px}}
 .gate-panel-main{display:flex;align-items:center;gap:16px}
@@ -1746,7 +1748,7 @@ const screenBatchPayment = () => screenPayment('batch');
 // drivers, so it's shown open (no "Tap to reveal"), with the lot's check-in instructions below it.
 function gateCodePanel(code, caption, l){
   const lotId = Object.keys(LOTS).find(k=>LOTS[k]===l);
-  return `<div class="card gate-panel">
+  return `<div class="card gate-panel${l.hasCheckinPhoto===false ? ' no-photo' : ''}">
     <div class="card-head"><h2 class="card-title">Gate Code</h2></div>
     <div class="card-body">
       <div class="gate-panel-main">
