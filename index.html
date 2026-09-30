@@ -268,8 +268,6 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .confirm-banner{background:var(--green-tint);border:1px solid #bfe0cc;border-radius:var(--r-lg);padding:16px 18px;display:flex;gap:14px;align-items:center;margin-bottom:16px}
 .confirm-ic{width:40px;height:40px;border-radius:999px;background:var(--green);display:grid;place-items:center;flex:none}
 /* ---- order detail (single) ---- */
-.orderdetail-banner{background:var(--paper-dim);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;display:flex;gap:14px;align-items:center;margin-bottom:16px}
-.orderdetail-ic{width:44px;height:44px;border-radius:999px;background:var(--brand);display:grid;place-items:center;flex:none}
 .qrcard{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;margin-bottom:16px;position:relative}
 .qrcard-top{display:flex;align-items:center;gap:12px}
 .qrcard-icon{width:40px;height:40px;border-radius:var(--r-md);background:var(--paper-dim);display:grid;place-items:center;color:var(--brand);flex:none}
@@ -287,12 +285,14 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .qrcard-code{font-size:30px;font-weight:800;letter-spacing:4px;color:var(--ink);text-align:center}
 .qrcard-caption{font-size:11.5px;color:var(--ink-soft);margin-top:12px}
 .orderdetail-top-row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:16px}
-.orderdetail-top-row>.confirm-banner,.orderdetail-top-row>.orderdetail-banner{flex:2 1 320px;margin-bottom:0}
+.orderdetail-top-row>.confirm-banner{flex:2 1 320px;margin-bottom:0}
 .orderdetail-top-row>.qrcard{flex:1 1 260px;margin-bottom:0}
 .location-summary-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;position:relative}
 .orderdetail-top-row>.location-summary-card{flex:1 1 280px;margin-bottom:0}
 /* floats over whatever is below instead of pushing the page down when expanded, same pattern as .qrcard-expand */
 .location-expand{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:0 14px 32px rgba(20,20,10,.16);padding:16px 18px;z-index:20;max-height:min(70vh,520px);overflow-y:auto}
+/* as a standalone bottom-of-page section there's nothing to float over — expand inline instead */
+.location-section .location-expand{position:static;border:none;box-shadow:none;border-radius:0;padding:14px 0 0;max-height:none;overflow:visible}
 /* lot names/addresses run longer than Gate Code's fixed short strings — truncate to one line so
    this card's collapsed height still matches its qrcard row-mate regardless of content length */
 .location-summary-card .qrcard-top>div:nth-child(2){flex:1;min-width:0}
@@ -1780,9 +1780,9 @@ function locationSummaryCard(l, opts){
     </div>
     ${expanded ? `<div class="location-expand">
       ${opts.dates ? `<div class="info-row"><span class="k">Reservation Dates</span><span>${opts.dates}</span></div>` : ''}
-      <div class="info-row"><span class="k">Booking Type</span><span>${opts.bookingType}</span></div>
+      ${opts.bookingType ? `<div class="info-row"><span class="k">Booking Type</span><span>${opts.bookingType}</span></div>` : ''}
       ${opts.spots!=null ? `<div class="info-row"><span class="k">Spots Reserved</span><span>${opts.spots}</span></div>` : ''}
-      <div class="poi-head-divider" style="margin:12px 0"></div>
+      ${(opts.dates || opts.bookingType || opts.spots!=null) ? '<div class="poi-head-divider" style="margin:12px 0"></div>' : ''}
       ${locationDetailsHtml(l)}
     </div>` : ''}
   </div>`;
@@ -1792,7 +1792,9 @@ function locationSummaryCard(l, opts){
 // fixed vehicle record for this historical order — a pure function of a fixed index, never
 // live S.vehicleForms, so this screen (Orders -> View) shows the same driver info no matter
 // what the user is doing elsewhere in the live booking flow
-function singleOrderDetailBody(){
+// asOrderDetail: the Orders -> View layout (order ID as the card title, reservation summary rows,
+// Location as its own section at the bottom). The just-booked confirm screen keeps the old layout.
+function singleOrderDetailBody(asOrderDetail){
   const singleOrder = singleSpotOrder();
   const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
   const orderRecord = S.ordersHistory.find(o=>o.id==='RP-88214-JX');
@@ -1800,11 +1802,16 @@ function singleOrderDetailBody(){
   return `
     <div class="card">
       <div class="card-head">
-        <h2 class="card-title">Booking Details</h2>
+        <h2 class="card-title">${asOrderDetail ? orderRecord.id : 'Booking Details'}</h2>
         <button class="btn btn-primary" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
       </div>
       <div class="card-body">
-        <div class="section-label" style="color:var(--ink);margin:0 0 8px">Charges</div>
+        ${asOrderDetail ? `
+        <div class="info-row"><span class="k">Reservation Dates</span><span>Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM</span></div>
+        <div class="info-row"><span class="k">Booking Type</span><span>Weekly</span></div>
+        <div class="info-row"><span class="k">Spots Reserved</span><span>1</span></div>
+        ` : ''}
+        <div class="section-label" style="color:var(--ink);margin:${asOrderDetail?'12px':'0'} 0 8px">Charges</div>
         <div class="info-row"><span class="k">Weekly rate</span><span>$${singleOrder.weeklyRate.toFixed(2)}</span></div>
         <div class="info-row"><span class="k">Service fee</span><span>$${singleOrder.serviceFee.toFixed(2)}</span></div>
         <div class="info-row"><span class="k">Tax</span><span>$${singleOrder.tax.toFixed(2)}</span></div>
@@ -1830,7 +1837,8 @@ function singleOrderDetailBody(){
           <div class="info-row"><span class="k">Trailer plate #</span><span>${vf.trailerPlate}</span></div>
         </div>
       </div>
-    </div>`;
+    </div>
+    ${asOrderDetail ? `<div class="location-section" style="margin-top:16px">${locationSummaryCard(LOTS.eloy, { address: '3100 S Barrett Rd, Eloy, AZ 85131' })}</div>` : ''}`;
 }
 function singleOrderLocationCard(){
   return locationSummaryCard(LOTS.eloy, {
@@ -2018,14 +2026,9 @@ function screenOrderDetailSingle(){
   ${topNav('orders')}
   <div class="page">
     <div class="orderdetail-top-row">
-      <div class="orderdetail-banner">
-        <div class="orderdetail-ic">${ic.checkW}</div>
-        <h2 class="card-title" style="margin:0;font-size:18px">Order details — RP-88214-JX</h2>
-      </div>
-      ${singleOrderLocationCard()}
       ${gateCodeCard('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.', LOTS.eloy)}
     </div>
-    ${singleOrderDetailBody()}
+    ${singleOrderDetailBody(true)}
     <button class="btn btn-outline" style="margin-top:16px" id="backToOrders">← Back to Orders</button>
   </div>`;
 }
@@ -2045,20 +2048,18 @@ function screenOrderDetailBatch(){
   ${topNav('orders')}
   <div class="page">
     <div class="orderdetail-top-row">
-      <div class="orderdetail-banner">
-        <div class="orderdetail-ic">${ic.checkW}</div>
-        <h2 class="card-title" style="margin:0;font-size:18px">Order details — ${order.id}</h2>
-      </div>
-      ${locationSummaryCard(l, { address: l.address, dates: order.dates, bookingType: 'Daily', spots: batchOrder.validCount })}
       ${gateCodeCard('1199#', 'Same gate code for every driver on this order.', l)}
     </div>
     <div class="card">
       <div class="card-head">
-        <h2 class="card-title">Booking Details</h2>
+        <h2 class="card-title">${order.id}</h2>
         <button class="btn btn-outline" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
       </div>
       <div class="card-body">
-        <div class="section-label" style="color:var(--ink);margin:0 0 8px">Charges</div>
+        <div class="info-row"><span class="k">Reservation Dates</span><span>${order.dates}</span></div>
+        <div class="info-row"><span class="k">Booking Type</span><span>Daily</span></div>
+        <div class="info-row"><span class="k">Spots Reserved</span><span>${batchOrder.validCount}</span></div>
+        <div class="section-label" style="color:var(--ink);margin:12px 0 8px">Charges</div>
         ${batchOrder.trailerOnlyCount>0 ? `<div class="info-row"><span class="k">Trailer Only parking (${batchOrder.trailerOnlyCount} spot${batchOrder.trailerOnlyCount===1?'':'s'} × 1 ${batchOrder.unit})</span><span>$${batchOrder.trailerOnlyPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
         ${batchOrder.truckTrailerCount>0 ? `<div class="info-row"><span class="k">Truck + Trailer parking (${batchOrder.truckTrailerCount} spot${batchOrder.truckTrailerCount===1?'':'s'} × 1 ${batchOrder.unit})</span><span>$${batchOrder.truckTrailerPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>` : ''}
         <div class="info-row"><span class="k">Tax</span><span>$${batchOrder.tax.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
@@ -2091,6 +2092,7 @@ function screenOrderDetailBatch(){
         <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${VALID_ROSTER.length} drivers assigned to this order.</div>
       </div>` : ''}
     </div>
+    <div class="location-section" style="margin-top:16px">${locationSummaryCard(l, { address: l.address })}</div>
     <button class="btn btn-outline" style="margin-top:16px" id="backToOrders2">← Back to Orders</button>
   </div>`;
 }
