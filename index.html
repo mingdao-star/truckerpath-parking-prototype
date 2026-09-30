@@ -1668,9 +1668,9 @@ function screenBookStep3Vehicle(){
             <button class="page-btn" data-vp="${vehiclePage+1}" ${vehiclePage>=vehiclePages?'disabled':''}>›</button>
           </div>
         </div>` : ''}
-        <button class="btn btn-primary btn-lg" style="width:100%;margin-top:16px" id="step3Continue">Continue to payment</button>
       </div>
-      <div class="rail card">
+      <div class="rail">
+      <div class="card">
         <div class="card-body">
           <h3 class="card-title" style="font-size:14px;margin-bottom:12px">Batch upload file</h3>
           <button class="btn btn-outline" style="width:100%;margin-bottom:12px" data-toast="Template downloaded">${ic.download}&nbsp;Download template</button>
@@ -1680,6 +1680,8 @@ function screenBookStep3Vehicle(){
             <div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px">CSV or XLSX · up to 2,000 rows · 10MB max</div>
           </div>
         </div>
+      </div>
+      <button class="btn btn-primary btn-lg" style="width:100%;margin-top:16px" id="step3Continue">Continue to payment</button>
       </div>
     </div>
   </div>
