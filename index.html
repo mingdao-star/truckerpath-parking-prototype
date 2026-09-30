@@ -284,18 +284,17 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .qrcard-download svg{width:12px;height:12px}
 .qrcard-code{font-size:30px;font-weight:800;letter-spacing:4px;color:var(--ink);text-align:center}
 .qrcard-caption{font-size:11.5px;color:var(--ink-soft);margin-top:12px}
-.gate-hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);overflow:hidden;margin-bottom:16px}
-.gate-hero-code-side{padding:22px 24px;background:var(--brand-tint);display:flex;flex-direction:column;gap:16px}
-.gate-hero-instr{padding:22px 24px;border-left:1px solid var(--line)}
-.gate-hero-label{font-size:11.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em}
-.gate-hero-main{display:flex;align-items:center;gap:20px}
-.gate-hero-qr{width:104px;height:104px;border-radius:var(--r-md);background:#fff;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink);flex:none}
-.gate-hero-qr svg{width:60px;height:60px}
-.gate-hero-code{font-size:44px;font-weight:800;letter-spacing:6px;color:var(--ink);line-height:1.05}
-.gate-hero-caption{font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.45}
-.gate-hero-actions{display:flex;gap:8px;flex-wrap:wrap}
-.gate-hero-instr .instruction-photo{height:120px;margin:10px 0 12px}
-@media (max-width:760px){.gate-hero{grid-template-columns:1fr}.gate-hero-instr{border-left:none;border-top:1px solid var(--line)}}
+/* Order Detail: Booking Details (left) + Gate Code (right column) */
+.orderdetail-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}
+.orderdetail-grid>.card + .card{margin-top:0}
+@media (max-width:900px){.orderdetail-grid{grid-template-columns:1fr}}
+.gate-panel-main{display:flex;align-items:center;gap:16px}
+.gate-panel-qr{width:76px;height:76px;border-radius:var(--r-md);background:var(--paper-dim);display:grid;place-items:center;color:var(--ink);flex:none}
+.gate-panel-qr svg{width:42px;height:42px}
+.gate-panel-code{font-size:34px;font-weight:800;letter-spacing:5px;color:var(--ink);line-height:1}
+.gate-panel-caption{font-size:12.5px;color:var(--ink-soft);margin-top:12px;line-height:1.45}
+.gate-panel-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.gate-panel-actions .btn{flex:1}
 .orderdetail-top-row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:16px}
 .orderdetail-top-row>.confirm-banner{flex:2 1 320px;margin-bottom:0}
 .orderdetail-top-row>.qrcard{flex:1 1 260px;margin-bottom:0}
@@ -490,11 +489,11 @@ const S = {
   // no stored totals — the Orders list and Order Detail both price each order via orderTotal() /
   // computeOrderCharges() from its own lot + dates, so they can never disagree
   ordersHistory: [
-    {id:'tp2026125', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 14 – Jul 17, 2026', spots:22, paidOn:'Jul 7, 2026, 9:03 AM', status:'Paid', type:'batch'},
-    {id:'tp2026118', loc:'Maricopa, AZ — N White Rd Truck & Trailer Yard', lotId:'maricopa', dates:'Jun 22 – Jun 25, 2026', spots:22, paidOn:'Jun 15, 2026, 11:20 AM', status:'Paid', type:'batch'},
-    {id:'tp2026109', loc:'Glendale, AZ — PHX1 Logistics Plus', lotId:'glendale1', dates:'May 30 – Jun 2, 2026', spots:22, paidOn:'May 24, 2026, 3:47 PM', status:'Refunded', type:'batch', refundedOn:'May 26, 2026, 9:12 AM'},
-    {id:'tp2026127', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 31 – Aug 7, 2026', spots:1, paidOn:'Jul 24, 2026, 2:15 PM', status:'Paid', type:'single'},
-    {id:'tp2026131', loc:'Glendale, AZ — PHX2 Logistics Plus', lotId:'glendale2', dates:'Aug 10 – Aug 13, 2026', spots:22, paidOn:'Aug 3, 2026, 10:15 AM', status:'Draft', type:'batch'},
+    {id:'tp202607070903104', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 14 – Jul 17, 2026', spots:22, paidOn:'Jul 7, 2026, 9:03 AM', status:'Paid', type:'batch'},
+    {id:'tp202606151120087', loc:'Maricopa, AZ — N White Rd Truck & Trailer Yard', lotId:'maricopa', dates:'Jun 22 – Jun 25, 2026', spots:22, paidOn:'Jun 15, 2026, 11:20 AM', status:'Paid', type:'batch'},
+    {id:'tp202605241547063', loc:'Glendale, AZ — PHX1 Logistics Plus', lotId:'glendale1', dates:'May 30 – Jun 2, 2026', spots:22, paidOn:'May 24, 2026, 3:47 PM', status:'Refunded', type:'batch', refundedOn:'May 26, 2026, 9:12 AM'},
+    {id:'tp202607241415121', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 31 – Aug 7, 2026', spots:1, paidOn:'Jul 24, 2026, 2:15 PM', status:'Paid', type:'single'},
+    {id:'tp202608031015139', loc:'Glendale, AZ — PHX2 Logistics Plus', lotId:'glendale2', dates:'Aug 10 – Aug 13, 2026', spots:22, paidOn:'Aug 3, 2026, 10:15 AM', status:'Draft', type:'batch'},
   ],
 };
 
@@ -1101,10 +1100,9 @@ function orderDateBounds(order){
 // line stays consistent everywhere this total is shown (payment, confirmation, order detail, orders list)
 function singleSpotOrder(){
   const weeklyRate = 150.00;
-  const serviceFee = 4.50;
   const tax = +(weeklyRate * TAX_RATE).toFixed(2);
-  const total = +(weeklyRate + serviceFee + tax).toFixed(2);
-  return { weeklyRate, serviceFee, tax, total };
+  const total = +(weeklyRate + tax).toFixed(2);
+  return { weeklyRate, tax, total };
 }
 function computeStep2Total(){
   const l = LOTS[S.selectedLotId];
@@ -1782,29 +1780,26 @@ function gateCodeCard(code, caption, l){
     </div>` : ''}
   </div>`;
 }
-// Order Detail's lead card. The gate code is what a dispatcher actually needs to hand to drivers,
-// so here it's open and large (no "Tap to reveal"), with the lot's check-in instructions beside it.
-function gateCodeHero(code, caption, l){
+// Order Detail's side column, next to Booking Details. The gate code is what a dispatcher hands to
+// drivers, so it's shown open (no "Tap to reveal"), with the lot's check-in instructions below it.
+function gateCodePanel(code, caption, l){
   const lotId = Object.keys(LOTS).find(k=>LOTS[k]===l);
-  return `<div class="card gate-hero">
-    <div class="gate-hero-code-side">
-      <div class="gate-hero-label">Gate Code</div>
-      <div class="gate-hero-main">
-        <div class="gate-hero-qr">${ic.qr}</div>
-        <div style="min-width:0">
-          <div class="gate-hero-code tabular">${code}</div>
-          <div class="gate-hero-caption">${caption}</div>
-        </div>
+  return `<div class="card gate-panel">
+    <div class="card-head"><h2 class="card-title">Gate Code</h2></div>
+    <div class="card-body">
+      <div class="gate-panel-main">
+        <div class="gate-panel-qr">${ic.qr}</div>
+        <div class="gate-panel-code tabular">${code}</div>
       </div>
-      <div class="gate-hero-actions">
+      <div class="gate-panel-caption">${caption}</div>
+      <div class="gate-panel-actions">
         <button class="btn btn-primary" data-copy="${code}">Copy code</button>
         <button class="btn btn-outline" data-toast="QR code image downloaded">${ic.download}&nbsp;Download QR</button>
       </div>
-    </div>
-    <div class="gate-hero-instr">
-      <div class="gate-hero-label">Parking Instructions</div>
+      <div class="poi-head-divider" style="margin:18px 0 14px"></div>
+      <div class="section-label" style="color:var(--ink);margin:0 0 8px">Parking Instructions</div>
       ${l.hasCheckinPhoto===false ? '' : `<div class="instruction-photo" style="background-image:url('${lotPhotoUrl(lotId)}');background-position:${lotPhotoPos(lotId)}"><span class="instruction-photo-cap">Entrance at this location</span></div>`}
-      <div style="font-weight:700;font-size:14px;color:var(--ink);margin-top:${l.hasCheckinPhoto===false?'10px':'0'}">QR Checkin</div>
+      <div style="font-weight:700;font-size:14px;color:var(--ink)">QR Checkin</div>
       <div style="font-weight:600;font-size:12.5px;color:var(--ink-soft);margin-top:2px">Scan QR at the location</div>
       ${l.instructions ? `<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin-top:6px">${l.instructions}</div>` : ''}
     </div>
@@ -1848,13 +1843,14 @@ function locationSummaryCard(l, opts){
 function singleOrderDetailBody(asOrderDetail){
   const singleOrder = singleSpotOrder();
   const card = S.walletCards.find(c=>c.default) || S.walletCards[0];
-  const orderRecord = S.ordersHistory.find(o=>o.id==='tp2026127');
+  const orderRecord = S.ordersHistory.find(o=>o.id==='tp202607241415121');
   const vf = buildVehicleFormRow(4);
   return `
+    ${asOrderDetail ? '<div class="orderdetail-grid">' : ''}
     <div class="card">
       <div class="card-head">
-        <h2 class="card-title">${asOrderDetail ? orderRecord.id : 'Booking Details'}</h2>
-        <button class="btn btn-primary" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
+        <h2 class="card-title">Booking Details${asOrderDetail ? ` - ${orderRecord.id}` : ''}</h2>
+        <button class="btn btn-outline" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
       </div>
       <div class="card-body">
         ${asOrderDetail ? `
@@ -1865,13 +1861,14 @@ function singleOrderDetailBody(asOrderDetail){
         ` : ''}
         <div class="section-label" style="color:var(--ink);margin:${asOrderDetail?'12px':'0'} 0 8px">Charges</div>
         <div class="info-row"><span class="k">Weekly rate</span><span>$${singleOrder.weeklyRate.toFixed(2)}</span></div>
-        <div class="info-row"><span class="k">Service fee</span><span>$${singleOrder.serviceFee.toFixed(2)}</span></div>
         <div class="info-row"><span class="k">Tax</span><span>$${singleOrder.tax.toFixed(2)}</span></div>
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Total Paid</b></span><span><b>$${singleOrder.total.toFixed(2)}</b></span></div>
         <div class="info-row"><span class="k">Paid via</span><span>${card.brand} •••• ${card.last4}</span></div>
         <div class="info-row"><span class="k">Paid on</span><span>${orderRecord.paidOn}</span></div>
       </div>
     </div>
+    ${asOrderDetail ? `${gateCodePanel('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.', LOTS.eloy)}
+    </div>` : ''}
     <div class="card" style="margin-top:16px">
       <div class="card-head">
         <h2 class="card-title">Driver & Vehicle</h2>
@@ -1907,7 +1904,7 @@ function screenBookStep5Confirm(){
     <div class="orderdetail-top-row">
       <div class="confirm-banner">
         <div class="confirm-ic">${ic.checkW}</div>
-        <div><div style="font-weight:700;font-size:16px">You're booked — tp2026127</div><div style="color:var(--green-deep);font-size:13px">Confirmation sent to ${phone ? phone : 'your phone'}. Show your check-in code at the gate.</div></div>
+        <div><div style="font-weight:700;font-size:16px">You're booked — tp202607241415121</div><div style="color:var(--green-deep);font-size:13px">Confirmation sent to ${phone ? phone : 'your phone'}. Show your check-in code at the gate.</div></div>
       </div>
       ${singleOrderLocationCard()}
       ${gateCodeCard('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.', LOTS.eloy)}
@@ -1934,7 +1931,7 @@ function screenBatchConfirm(){
     <div class="orderdetail-top-row">
       <div class="confirm-banner">
         <div class="confirm-ic">${ic.checkW}</div>
-        <div style="font-weight:700;font-size:16px">Booking confirmed — tp2026132</div>
+        <div style="font-weight:700;font-size:16px">Booking confirmed — tp202609302212112</div>
       </div>
       ${locationSummaryCard(l, { address: l.address, bookingType: S.batch.bookingType, spots: batchOrder.validCount })}
       ${gateCodeCard('1199#', 'Same gate code for every driver on this order.', l)}
@@ -2077,7 +2074,6 @@ function screenOrderDetailSingle(){
   return `
   ${topNav('orders')}
   <div class="page">
-    ${gateCodeHero('1234', 'Code activates at check-in time. Valid Jul 31, 2026, 12:00 PM – Aug 7, 2026, 12:00 PM.', LOTS.eloy)}
     ${singleOrderDetailBody(true)}
     <button class="btn btn-outline" style="margin-top:16px" id="backToOrders">← Back to Orders</button>
   </div>`;
@@ -2099,10 +2095,10 @@ function screenOrderDetailBatch(){
   return `
   ${topNav('orders')}
   <div class="page">
-    ${gateCodeHero('1199#', `Same gate code for all ${batchOrder.validCount} drivers on this order.`, l)}
+    <div class="orderdetail-grid">
     <div class="card">
       <div class="card-head">
-        <h2 class="card-title">${order.id}</h2>
+        <h2 class="card-title">Booking Details - ${order.id}</h2>
         <button class="btn btn-outline" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
       </div>
       <div class="card-body">
@@ -2122,6 +2118,8 @@ function screenOrderDetailBatch(){
         <div class="info-row"><span class="k"><b style="color:var(--ink)">Refund amount</b></span><span><b>-${fmtUSD(batchOrder.total)}</b></span></div>
         ` : ''}
       </div>
+    </div>
+    ${gateCodePanel('1199#', `Same gate code for all ${batchOrder.validCount} drivers on this order.`, l)}
     </div>
     <div class="card" style="margin-top:16px">
       <div class="card-head">
