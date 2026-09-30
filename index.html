@@ -444,7 +444,7 @@ const S = {
 
   // one plain vehicle/trailer form per spot — resized to match S.spots when entering the
   // Vehicle & Trailer Details page (see go())
-  vehicleForms: [{ truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' }],
+  vehicleForms: [{ truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', driverEmail:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' }],
   vehicleFormsExpanded: [true],
   vehicleMoreExpanded: [false],
   vehicleUploadModal: null,
@@ -1528,7 +1528,7 @@ function vfInput(i, key, label, placeholder, optional){
 // a fresh, empty per-vehicle form — shared by the initial page-enter reset and the batch-upload
 // modal's "Re-upload" action, so both always agree on the full field set
 function blankVehicleForm(){
-  return { truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' };
+  return { truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', driverEmail:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' };
 }
 // fake data for the batch-upload modal's simulated file — no vehicle-type column, since one
 // booking now always books a single vehicle type (set back in Step 1), not a per-row mix.
@@ -1541,6 +1541,7 @@ function buildVehicleFormRow(i){
   return {
     truckNum: String(2000+i), truckMake: ['Freightliner','Kenworth','Peterbilt','Volvo'][i%4],
     truckPlate: plate, truckDot: String(1500000+i*271), driverPhone: `(555) ${String(200+i).padStart(3,'0')}-${String(1000+(i*37)%9000).padStart(4,'0')}`,
+    driverEmail: `${name.toLowerCase().replace(' ','.')}@drivermail.com`,
     trailerType: '53 dry van', trailerNum: String(9000+i), trailerCompany: name+' Trucking', trailerPlate: trailerPlate,
   };
 }
@@ -1621,7 +1622,7 @@ function screenBookStep3Vehicle(){
             <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'trailerNum','Trailer #','Type here…')}${vfInput(i,'trailerPlate','Trailer plate #','Type here…')}</div>
             <button class="btn-text vf-more-toggle" data-togglemore="${i}">${moreExpanded?'Hide more details':'Add more details'}${moreExpanded?ic.chevDown:ic.chevRight}</button>
             ${moreExpanded ? `
-            ${showTruck ? `<div style="margin-top:12px">${vfInput(i,'truckMake','Truck make','Type here…',true)}</div>` : ''}
+            <div class="grid-2" style="margin-top:12px">${vfInput(i,'driverEmail','Driver email','name@example.com',true)}${showTruck ? vfInput(i,'truckMake','Truck make','Type here…',true) : ''}</div>
             <div class="grid-2" style="margin-top:12px">${vfInput(i,'trailerType','Trailer type','Ex: 53 dry van',true)}${vfInput(i,'trailerCompany','Trailer company name','Type here…',true)}</div>
             ` : ''}
           </div>` : ''}
@@ -1938,21 +1939,23 @@ function orderVehiclesSection(d){
       <div class="card-head"><h2 class="card-title">Driver & Vehicle</h2></div>
       <div class="card-body"><div class="grid-2">
         ${showTruck ? `
-        <div class="info-row"><span class="k">Truck #</span><span>${v(vf.truckNum)}</span></div>
         <div class="info-row"><span class="k">Truck plate #</span><span>${v(vf.truckPlate)}</span></div>
         <div class="info-row"><span class="k">Truck DOT #</span><span>${v(vf.truckDot)}</span></div>` : ''}
         <div class="info-row"><span class="k">Driver phone</span><span>${v(vf.driverPhone)}</span></div>
-        ${showTruck ? `<div class="info-row"><span class="k">Truck make</span><span>${v(vf.truckMake)}</span></div>` : ''}
-        <div class="info-row"><span class="k">Trailer #</span><span>${v(vf.trailerNum)}</span></div>
-        <div class="info-row"><span class="k">Trailer plate #</span><span>${v(vf.trailerPlate)}</span></div>
+        <div class="info-row"><span class="k">Email</span><span>${v(vf.driverEmail)}</span></div>
         <div class="info-row"><span class="k">Trailer type</span><span>${v(vf.trailerType)}</span></div>
+        <div class="info-row"><span class="k">Trailer #</span><span>${v(vf.trailerNum)}</span></div>
         <div class="info-row"><span class="k">Trailer company</span><span>${v(vf.trailerCompany)}</span></div>
+        <div class="info-row"><span class="k">Trailer plate #</span><span>${v(vf.trailerPlate)}</span></div>
+        ${showTruck ? `
+        <div class="info-row"><span class="k">Truck make</span><span>${v(vf.truckMake)}</span></div>
+        <div class="info-row"><span class="k">Truck #</span><span>${v(vf.truckNum)}</span></div>` : ''}
       </div></div>
     </div>`;
   }
   const q = S.confirmSearch.trim().toLowerCase();
-  const rows = d.vehicles.map((vf,i)=>({vf,i})).filter(({vf}) => !q || [vf.truckPlate, vf.trailerPlate, vf.driverPhone, vf.truckNum, vf.trailerNum].join(' ').toLowerCase().includes(q));
-  const cols = showTruck ? 8 : 5;
+  const rows = d.vehicles.map((vf,i)=>({vf,i})).filter(({vf}) => !q || [vf.truckPlate, vf.trailerPlate, vf.driverPhone, vf.driverEmail, vf.truckNum, vf.trailerNum].join(' ').toLowerCase().includes(q));
+  const cols = showTruck ? 9 : 6;
   return `<div class="card" style="margin-top:16px">
     <div class="card-head">
       <button class="drivers-toggle" id="toggleDriversSection">
@@ -1965,10 +1968,10 @@ function orderVehiclesSection(d){
       </div>
     </div>
     ${S.driversSectionExpanded ? `<div class="card-body">
-      <div class="search-box">${ic.search}<input id="odSearchInput" placeholder="Search plate, phone, or truck/trailer #" value="${S.confirmSearch}"></div>
+      <div class="search-box">${ic.search}<input id="odSearchInput" placeholder="Search plate, phone, email, or truck/trailer #" value="${S.confirmSearch}"></div>
       <div class="dtable-scroll"><table class="dtable">
-        <thead><tr><th>Vehicle</th>${showTruck?'<th>Truck #</th><th>Truck Plate</th><th>Truck DOT #</th>':''}<th>Driver Phone</th><th>Trailer #</th><th>Trailer Plate</th><th></th></tr></thead>
-        <tbody>${rows.length ? rows.map(({vf,i})=>`<tr><td>Vehicle ${i+1}</td>${showTruck?`<td>${v(vf.truckNum)}</td><td>${v(vf.truckPlate)}</td><td>${v(vf.truckDot)}</td>`:''}<td>${v(vf.driverPhone)}</td><td>${v(vf.trailerNum)}</td><td>${v(vf.trailerPlate)}</td><td><button class="icon-btn" data-pdfrow="Vehicle ${i+1}" title="Download this driver's parking pass">${ic.download}</button></td></tr>`).join('') : `<tr><td colspan="${cols}" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>`}</tbody>
+        <thead><tr><th>Vehicle</th>${showTruck?'<th>Truck #</th><th>Truck Plate</th><th>Truck DOT #</th>':''}<th>Driver Phone</th><th>Email</th><th>Trailer #</th><th>Trailer Plate</th><th></th></tr></thead>
+        <tbody>${rows.length ? rows.map(({vf,i})=>`<tr><td>Vehicle ${i+1}</td>${showTruck?`<td>${v(vf.truckNum)}</td><td>${v(vf.truckPlate)}</td><td>${v(vf.truckDot)}</td>`:''}<td>${v(vf.driverPhone)}</td><td>${v(vf.driverEmail)}</td><td>${v(vf.trailerNum)}</td><td>${v(vf.trailerPlate)}</td><td><button class="icon-btn" data-pdfrow="Vehicle ${i+1}" title="Download this driver's parking pass">${ic.download}</button></td></tr>`).join('') : `<tr><td colspan="${cols}" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>`}</tbody>
       </table></div>
       <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${d.vehicles.length} drivers on this order.</div>
     </div>` : ''}
