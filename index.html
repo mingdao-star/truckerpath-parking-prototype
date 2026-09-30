@@ -273,15 +273,21 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .qrcard-sub{font-size:12px;color:var(--ink-soft)}
 .qrcard-toggle{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--brand);flex:none;background:none;border:none;cursor:pointer}
 /* Order Detail: Booking Details (left) + Gate Code (right column) */
-.orderdetail-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}
+.orderdetail-grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:stretch}
+/* both cards stretch to the taller of the two; the entrance photo only counts its min-height toward the Gate
+   Code card's size and then grows to fill any extra, so the cards always end on the same line with no gap
+   and nothing clipped */
+.gate-panel{display:flex;flex-direction:column;overflow:hidden}
+.gate-panel>.card-body{flex:1;display:flex;flex-direction:column}
+.gate-panel .instruction-photo{flex:1 1 0;min-height:72px;height:auto;margin:0 0 10px}
 .orderdetail-grid>.card + .card{margin-top:0}
-@media (max-width:900px){.orderdetail-grid{grid-template-columns:1fr}}
+@media (max-width:900px){.orderdetail-grid{grid-template-columns:1fr}.gate-panel .instruction-photo{flex:none;height:130px}}
 .gate-panel-main{display:flex;align-items:center;gap:16px}
-.gate-panel-qr{width:76px;height:76px;border-radius:var(--r-md);background:var(--paper-dim);display:grid;place-items:center;color:var(--ink);flex:none}
-.gate-panel-qr svg{width:42px;height:42px}
-.gate-panel-code{font-size:34px;font-weight:800;letter-spacing:5px;color:var(--ink);line-height:1}
-.gate-panel-caption{font-size:12.5px;color:var(--ink-soft);margin-top:12px;line-height:1.45}
-.gate-panel-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.gate-panel-qr{width:60px;height:60px;border-radius:var(--r-md);background:var(--paper-dim);display:grid;place-items:center;color:var(--ink);flex:none}
+.gate-panel-qr svg{width:34px;height:34px}
+.gate-panel-code{font-size:30px;font-weight:800;letter-spacing:5px;color:var(--ink);line-height:1}
+.gate-panel-caption{font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.45}
+.gate-panel-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .gate-panel-actions .btn{flex:1}
 .location-summary-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;position:relative}
 .location-expand{padding:14px 0 0}
@@ -1751,8 +1757,8 @@ function gateCodePanel(code, caption, l){
         <button class="btn btn-primary" data-copy="${code}">Copy code</button>
         <button class="btn btn-outline" data-toast="QR code image downloaded">${ic.download}&nbsp;Download QR</button>
       </div>
-      <div class="poi-head-divider" style="margin:18px 0 14px"></div>
-      <div class="section-label" style="color:var(--ink);margin:0 0 8px">Parking Instructions</div>
+      <div class="poi-head-divider" style="margin:14px 0 12px"></div>
+      <div class="section-label" style="color:var(--ink);margin:0 0 6px">Parking Instructions</div>
       ${l.hasCheckinPhoto===false ? '' : `<div class="instruction-photo" style="background-image:url('${lotPhotoUrl(lotId)}');background-position:${lotPhotoPos(lotId)}"><span class="instruction-photo-cap">Entrance at this location</span></div>`}
       <div style="font-weight:700;font-size:14px;color:var(--ink)">QR Checkin</div>
       <div style="font-weight:600;font-size:12.5px;color:var(--ink-soft);margin-top:2px">Scan QR at the location</div>
