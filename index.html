@@ -230,6 +230,7 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .stepper-inline.sm input{width:38px;height:44px;font-size:13.5px}
 .hours-status-pill{display:inline-flex;align-items:center;gap:5px;background:var(--green-tint);color:var(--green-deep);font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;text-transform:uppercase;letter-spacing:.03em}
 .hours-toggle{display:flex;align-items:center;gap:5px;font-size:12.5px}
+.vf-more-toggle{display:flex;align-items:center;gap:5px;font-size:12.5px;margin-top:2px}
 .hours-toggle svg{transition:transform .15s}
 .total-row{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 .total-row b{font-size:16px;font-family:var(--font-display)}
@@ -457,6 +458,7 @@ const S = {
   // Vehicle & Trailer Details page (see go())
   vehicleForms: [{ truckCompany:'', truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' }],
   vehicleFormsExpanded: [true],
+  vehicleMoreExpanded: [false],
   vehiclePage: 1,
 
   payment: { context:'single', selectedCardId:'card_visa' },
@@ -1578,7 +1580,9 @@ function screenBookStep3Vehicle(){
         ${pageIndices.map(i=>{
           const vf = S.vehicleForms[i];
           const expanded = S.vehicleFormsExpanded[i] !== false;
-          const summary = [vf.truckCompany, vf.truckPlate].filter(Boolean).join(' · ') || 'Not filled in yet';
+          const moreExpanded = !!S.vehicleMoreExpanded[i];
+          const showTruck = S.step2VehicleType === 'Truck + Trailer';
+          const summary = [showTruck ? vf.truckPlate : vf.trailerPlate, vf.driverPhone].filter(Boolean).join(' · ') || 'Not filled in yet';
           return `
         <div class="card" style="margin-bottom:16px">
           <div class="card-head">
@@ -1589,13 +1593,21 @@ function screenBookStep3Vehicle(){
             ${!expanded ? `<span style="font-size:12px;color:var(--ink-soft)">${summary}</span>` : ''}
           </div>
           ${expanded ? `<div class="card-body">
+            ${showTruck ? `
             <div class="section-label">Truck</div>
-            <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'truckCompany','Truck company name','Type here…')}${vfInput(i,'truckNum','Truck #','Type here…')}</div>
-            <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'truckMake','Truck make','Type here…')}${vfInput(i,'truckPlate','Truck plate #','Type here…',true)}</div>
-            <div class="grid-2" style="margin-bottom:16px">${vfInput(i,'truckDot','Truck DOT #','Type here…',true)}${vfInput(i,'driverPhone','Driver phone number','(555) 555-0123')}</div>
+            <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'truckNum','Truck #','Type here…')}${vfInput(i,'truckPlate','Truck plate #','Type here…')}</div>
+            <div class="grid-2" style="margin-bottom:16px">${vfInput(i,'truckDot','Truck DOT #','Type here…')}${vfInput(i,'driverPhone','Driver phone number','(555) 555-0123')}</div>
+            ` : `
+            <div class="section-label">Driver</div>
+            <div style="margin-bottom:16px">${vfInput(i,'driverPhone','Driver phone number','(555) 555-0123')}</div>
+            `}
             <div class="section-label">Trailer</div>
-            <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'trailerType','Trailer type','Ex: 53 dry van')}${vfInput(i,'trailerNum','Trailer #','Type here…')}</div>
-            <div class="grid-2">${vfInput(i,'trailerCompany','Trailer company name','Type here…')}${vfInput(i,'trailerPlate','Trailer plate #','Type here…',true)}</div>
+            <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'trailerNum','Trailer #','Type here…')}${vfInput(i,'trailerPlate','Trailer plate #','Type here…')}</div>
+            <button class="btn-text vf-more-toggle" data-togglemore="${i}">${moreExpanded?'Hide more details':'Add more details'}${moreExpanded?ic.chevDown:ic.chevRight}</button>
+            ${moreExpanded ? `
+            ${showTruck ? `<div class="grid-2" style="margin-top:12px">${vfInput(i,'truckCompany','Truck company name','Type here…',true)}${vfInput(i,'truckMake','Truck make','Type here…',true)}</div>` : ''}
+            <div class="grid-2" style="margin-top:12px">${vfInput(i,'trailerType','Trailer type','Ex: 53 dry van',true)}${vfInput(i,'trailerCompany','Trailer company name','Type here…',true)}</div>
+            ` : ''}
           </div>` : ''}
         </div>`;
         }).join('')}
@@ -2222,6 +2234,7 @@ function wireScreen(root){
     // the distinction only matters later, at payment, for pricing/copy
     S.vehicleForms = Array.from({length: S.spots}, ()=>({ truckCompany:'', truckNum:'', truckMake:'', truckPlate:'', truckDot:'', driverPhone:'', trailerType:'', trailerNum:'', trailerCompany:'', trailerPlate:'' }));
     S.vehicleFormsExpanded = Array.from({length: S.spots}, ()=>true);
+    S.vehicleMoreExpanded = Array.from({length: S.spots}, ()=>false);
     S.vehiclePage = 1;
     go('book3');
   });
@@ -2238,6 +2251,11 @@ function wireScreen(root){
   root.querySelectorAll('[data-togglevehicle]').forEach(b=>b.addEventListener('click',()=>{
     const i = parseInt(b.dataset.togglevehicle,10);
     S.vehicleFormsExpanded[i] = !(S.vehicleFormsExpanded[i] !== false);
+    render();
+  }));
+  root.querySelectorAll('[data-togglemore]').forEach(b=>b.addEventListener('click',()=>{
+    const i = parseInt(b.dataset.togglemore,10);
+    S.vehicleMoreExpanded[i] = !S.vehicleMoreExpanded[i];
     render();
   }));
   const expandAllVehicles = root.querySelector('#expandAllVehicles'); if(expandAllVehicles) expandAllVehicles.addEventListener('click',()=>{ S.vehicleFormsExpanded = S.vehicleForms.map(()=>true); render(); });
