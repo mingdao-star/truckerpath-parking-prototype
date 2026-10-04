@@ -489,7 +489,7 @@ const S = {
   ordersHistory: [
     // monthly subscription whose Oct 1 renewal was declined — drives the failed-payment / Retry state
     {id:'tp202609011015096', loc:'Maricopa, AZ — N White Rd Truck & Trailer Yard', lotId:'maricopa', dates:'Since Sep 1, 2026 · monthly', spots:3, paidOn:'Sep 1, 2026, 10:15 AM', status:'Payment failed', type:'batch',
-      subscription:{ start:'Sep 1, 2026', vtype:'Truck + Trailer', cardId:'card_visa', retryBy:'Oct 8, 2026',
+      subscription:{ start:'Sep 1, 2026', vtype:'Truck + Trailer', cardId:'card_visa',
         history:[ {period:'Sep 1 – Sep 30, 2026', on:'Sep 1, 2026, 10:15 AM', status:'Paid'},
                   {period:'Oct 1 – Oct 31, 2026', on:'Oct 1, 2026, 12:00 AM', status:'Failed', reason:'card declined (insufficient funds)'} ] }},
     {id:'tp202607070903104', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 14 – Jul 17, 2026', spots:22, paidOn:'Jul 7, 2026, 9:03 AM', status:'Paid', type:'batch'},
@@ -2056,7 +2056,7 @@ function orderDetailPage(d){
       <div class="pay-alert-ic">${ic.warn}</div>
       <div style="flex:1;min-width:0">
         <div class="pay-alert-title">Monthly payment failed</div>
-        <div class="pay-alert-text">We couldn't charge ${card.brand} •••• ${card.last4} ${fmtUSD(pi.amount)} for ${pi.period}: ${pi.reason}. Retry by <b>${pi.retryBy}</b> to keep your ${d.spots} spots — after that the subscription is cancelled and the spots are released.</div>
+        <div class="pay-alert-text">We couldn't charge ${card.brand} •••• ${card.last4} ${fmtUSD(pi.amount)} for ${pi.period}: ${pi.reason}.</div>
       </div>
       <button class="btn btn-primary" id="retryPaymentBtn">Retry payment</button>
     </div>` : ''}
@@ -2124,9 +2124,9 @@ function detailFromSubscription(order){
     chargeRows: [{ label: `${sub.vtype} parking (${fmtUSD(c.rate)}/month × ${order.spots} spots)`, price: c.subtotal }],
     note: '', tax: c.tax, total: c.total, paidOn: null, refundedOn: null, cardId: sub.cardId,
     billingHistory: sub.history.map(h=>({ ...h, amount: c.total })),
-    paymentIssue: failed ? { period: current.period, reason: current.reason, retryBy: sub.retryBy, amount: c.total } : null,
+    paymentIssue: failed ? { period: current.period, reason: current.reason, amount: c.total } : null,
     gateCode: '1199#',
-    gateCaption: failed ? `${access} Stays active until ${sub.retryBy} while the payment is pending.` : access,
+    gateCaption: access,
     vtype: sub.vtype,
     vehicles: Array.from({length: order.spots}, (_,i)=>buildVehicleFormRow(i)),
   };
