@@ -1692,8 +1692,11 @@ async function handleVehicleUpload(file){
   if(missing.length) return fail('columns', { missing });
   const colIdx = uploadColumns().map(c=>[c.key, header.indexOf(normHeader(c.label))]).filter(([,i])=>i>=0);
   const n = S.vehicleForms.length;
-  data.slice(0, n).forEach((r,i)=>{ const vf = blankVehicleForm(); colIdx.forEach(([k,j])=>{ vf[k] = r[j]||''; }); S.vehicleForms[i] = vf; });
+  // file row i fills Vehicle i+1; with fewer rows than spots the remaining sections are left empty
+  S.vehicleForms = S.vehicleForms.map((_,i)=>{ const vf = blankVehicleForm(); if(data[i]) colIdx.forEach(([k,j])=>{ vf[k] = data[i][j]||''; }); return vf; });
   S.vehicleErrors = {};
+  // an exact match needs no popup — the filled sections speak for themselves
+  if(data.length === n){ render(); toast(`All ${n} vehicle sections filled from your file`); return; }
   S.vehicleUploadModal = { n, fileRowCount: data.length };
   render();
 }
