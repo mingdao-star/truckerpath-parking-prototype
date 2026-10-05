@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Reddit+Sans:wght@700&display=swap" rel="stylesheet">
@@ -307,7 +308,7 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .card-icon-head b{font-size:15px}
 
 .dropzone{border:2px dashed var(--border-input);border-radius:var(--r-lg);padding:30px;text-align:center;background:#fafaf9;cursor:pointer}
-.dropzone:hover{border-color:var(--brand);background:var(--brand-tint)}
+.dropzone:hover,.dropzone.drag{border-color:var(--brand);background:var(--brand-tint)}
 table.dtable{width:100%;border-collapse:collapse;font-size:12.5px}
 table.dtable th{text-align:left;font-size:10.5px;text-transform:uppercase;color:var(--ink-soft);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
 table.dtable td{padding:8px 10px;border-bottom:1px solid #f0f0ee;white-space:nowrap;font-variant-numeric:tabular-nums}
@@ -357,6 +358,10 @@ table.orders tbody tr:hover td{background:var(--paper-dim)}
 /* ---- wallet ---- */
 .wallet-grid{display:grid;grid-template-columns:340px 1fr;gap:20px}
 .modal-overlay{position:fixed;inset:0;background:rgba(14,15,12,.45);display:flex;align-items:center;justify-content:center;z-index:60}
+.upload-err-head{display:flex;align-items:flex-start;gap:12px}
+.upload-err-ic{width:36px;height:36px;border-radius:999px;background:var(--red);display:grid;place-items:center;flex:none}
+.upload-err-file{display:flex;align-items:center;gap:8px;background:var(--paper-dim);border-radius:var(--r-md);padding:9px 12px;font-size:12.5px;color:var(--ink);margin-top:16px;word-break:break-all}
+.upload-err-file svg{flex:none;color:var(--ink-soft)}
 .modal-box{background:#fff;border-radius:var(--r-xl);box-shadow:var(--shadow-lg);padding:24px;width:420px;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);overflow-y:auto}
 /* ---- order detail ---- */
 .od-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
@@ -467,6 +472,7 @@ const S = {
   vehicleFormsExpanded: [true],
   vehicleMoreExpanded: [false],
   vehicleUploadModal: null,
+  vehicleUploadError: null,
   vehicleErrors: {},
   vehiclePage: 1,
 
@@ -1601,18 +1607,124 @@ function vehicleUploadModalHtml(){
   if(!S.vehicleUploadModal) return '';
   const { n, fileRowCount } = S.vehicleUploadModal;
   const truncated = fileRowCount > n;
+  const partial = fileRowCount < n;
   return `
     <div class="modal-overlay" id="vehicleUploadOverlay">
       <div class="modal-box">
         <div style="font-weight:700;font-size:15px;margin-bottom:12px">File uploaded</div>
         <div style="font-size:13.5px;color:var(--ink);line-height:1.5;margin-bottom:20px">
-          ${truncated
+          ${partial
+            ? `We've filled in ${fileRowCount} of ${n} vehicle sections from your file. Fill in the remaining ${n-fileRowCount} below.`
+            : truncated
             ? `We've filled in the first ${n} vehicle section${n===1?'':'s'} from your file. ${fileRowCount-n} additional row${fileRowCount-n===1?'':'s'} in the file weren't included, since this booking only reserved ${n} spot${n===1?'':'s'}.`
             : `All ${n} vehicle section${n===1?'':'s'} have been filled in from your file.`}
         </div>
         <div style="display:flex;gap:10px">
           <button class="btn btn-outline" style="flex:1" id="vehicleUploadReupload">Re-upload</button>
           <button class="btn btn-primary" style="flex:1" id="vehicleUploadGotIt">Got it</button>
+        </div>
+      </div>
+    </div>`;
+}
+// batch-upload file columns — header names are what the template contains and what an uploaded
+// file is matched against (case/space-insensitive); truck columns only exist for Truck + Trailer
+const UPLOAD_COLUMNS = [
+  {key:'driverPhone', label:'Driver phone number'}, {key:'driverEmail', label:'Driver email'},
+  {key:'truckNum', label:'Truck #', truck:true}, {key:'truckPlate', label:'Truck plate #', truck:true}, {key:'truckDot', label:'Truck DOT #', truck:true},
+  {key:'trailerType', label:'Trailer type'}, {key:'trailerPlate', label:'Trailer plate #'},
+  {key:'truckMake', label:'Truck make', truck:true}, {key:'trailerNum', label:'Trailer #'}, {key:'trailerCompany', label:'Trailer company name'},
+];
+const UPLOAD_MAX_BYTES = 10*1024*1024, UPLOAD_MAX_ROWS = 2000;
+const uploadColumns = () => UPLOAD_COLUMNS.filter(c=>!c.truck || S.step2VehicleType==='Truck + Trailer');
+const normHeader = h => String(h??'').toLowerCase().replace(/\s+/g,'');
+function parseCsv(text){
+  const rows=[]; let row=[], cell='', q=false;
+  text = text.replace(/^﻿/,'');
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(q){ if(ch==='"'){ if(text[i+1]==='"'){ cell+='"'; i++; } else q=false; } else cell+=ch; }
+    else if(ch==='"') q=true;
+    else if(ch===','){ row.push(cell); cell=''; }
+    else if(ch==='\n'||ch==='\r'){ if(ch==='\r'&&text[i+1]==='\n') i++; row.push(cell); rows.push(row); row=[]; cell=''; }
+    else cell+=ch;
+  }
+  if(cell!==''||row.length){ row.push(cell); rows.push(row); }
+  return rows;
+}
+function readUploadRows(file){
+  return new Promise((resolve,reject)=>{
+    const r = new FileReader();
+    r.onerror = ()=>reject(r.error);
+    if(/\.csv$/i.test(file.name)){
+      r.onload = ()=>{ try{ resolve(parseCsv(String(r.result))); }catch(e){ reject(e); } };
+      r.readAsText(file);
+    } else {
+      r.onload = ()=>{ try{
+        const wb = XLSX.read(new Uint8Array(r.result), {type:'array'});
+        resolve(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:'', raw:false}));
+      }catch(e){ reject(e); } };
+      r.readAsArrayBuffer(file);
+    }
+  });
+}
+function downloadVehicleTemplate(){
+  const csv = uploadColumns().map(c=>c.label).join(',') + '\n';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = `vehicle-template-${S.step2VehicleType==='Truck + Trailer' ? 'truck-trailer' : 'trailer-only'}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('Template downloaded');
+}
+// file checks run before anything is filled in — any failure leaves the sections untouched
+async function handleVehicleUpload(file){
+  const fail = (kind, extra={}) => { S.vehicleUploadError = { kind, fileName:file.name, ...extra }; render(); };
+  if(!/\.(csv|xlsx)$/i.test(file.name)) return fail('type');
+  if(file.size > UPLOAD_MAX_BYTES) return fail('size');
+  let rows;
+  try{ rows = await readUploadRows(file); }catch(e){ return fail('unreadable'); }
+  rows = rows.map(r=>r.map(v=>String(v??'').trim())).filter(r=>r.some(Boolean));
+  if(rows.length < 2) return fail('unreadable');
+  const data = rows.slice(1);
+  if(data.length > UPLOAD_MAX_ROWS) return fail('rows');
+  const header = rows[0].map(normHeader);
+  const required = vehicleRequiredKeys();
+  const missing = uploadColumns().filter(c=>required.includes(c.key) && !header.includes(normHeader(c.label))).map(c=>c.label);
+  if(missing.length) return fail('columns', { missing });
+  const colIdx = uploadColumns().map(c=>[c.key, header.indexOf(normHeader(c.label))]).filter(([,i])=>i>=0);
+  const n = S.vehicleForms.length;
+  data.slice(0, n).forEach((r,i)=>{ const vf = blankVehicleForm(); colIdx.forEach(([k,j])=>{ vf[k] = r[j]||''; }); S.vehicleForms[i] = vf; });
+  S.vehicleErrors = {};
+  S.vehicleUploadModal = { n, fileRowCount: data.length };
+  render();
+}
+const UPLOAD_ERROR_COPY = {
+  type:       e => ['Unsupported file type', 'Upload a CSV or XLSX file.'],
+  size:       e => ['File too large', 'File is larger than 10MB.'],
+  rows:       e => ['Too many rows', 'File has more than 2,000 rows.'],
+  unreadable: e => ['No vehicles found', "We couldn't read any vehicles from this file. Use the template and try again."],
+  columns:    e => ['Missing columns', `Missing columns: <b>${e.missing.join(', ')}</b>. Download the template to see the format.`],
+};
+function vehicleUploadErrorHtml(){
+  const e = S.vehicleUploadError;
+  if(!e) return '';
+  const [title, msg] = UPLOAD_ERROR_COPY[e.kind](e);
+  const fileName = e.fileName.replace(/[&<>"]/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+  return `
+    <div class="modal-overlay" id="vehicleUploadErrOverlay">
+      <div class="modal-box">
+        <div class="upload-err-head">
+          <div class="upload-err-ic">${ic.warn}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:700;font-size:15px;margin-top:7px">${title}</div>
+          </div>
+          <button class="dp-close" id="vehicleUploadErrX">${ic.x}</button>
+        </div>
+        <div style="font-size:13.5px;color:var(--ink);line-height:1.5;margin-top:12px">${msg}</div>
+        <div class="upload-err-file">${ic.file}<span>${fileName}</span></div>
+        <div style="font-size:12px;color:var(--ink-soft);margin:8px 0 20px">Nothing was filled in — your vehicle details are unchanged.</div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-outline" style="flex:1" id="vehicleUploadErrTemplate">${ic.download}&nbsp;Download template</button>
+          <button class="btn btn-primary" style="flex:1" id="vehicleUploadErrRetry">Upload another file</button>
         </div>
       </div>
     </div>`;
@@ -1691,19 +1803,21 @@ function screenBookStep3Vehicle(){
       <div class="card">
         <div class="card-body">
           <h3 class="card-title" style="font-size:14px;margin-bottom:12px">Batch upload file</h3>
-          <button class="btn btn-outline" style="width:100%;margin-bottom:12px" data-toast="Template downloaded">${ic.download}&nbsp;Download template</button>
+          <button class="btn btn-outline" style="width:100%;margin-bottom:12px" id="downloadVehicleTemplate">${ic.download}&nbsp;Download template</button>
           <div class="dropzone" id="vehicleUploadZone">
             ${ic.file}
             <div style="margin-top:8px;font-size:13.5px">Drag &amp; drop your file or <span style="color:var(--brand);font-weight:600">browse</span> to upload</div>
             <div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px">CSV or XLSX · up to 2,000 rows · 10MB max</div>
           </div>
+          <input type="file" id="vehicleUploadInput" accept=".csv,.xlsx" hidden>
         </div>
       </div>
       <button class="btn btn-primary btn-lg" style="width:100%;margin-top:16px" id="step3Continue">Continue to payment</button>
       </div>
     </div>
   </div>
-  ${vehicleUploadModalHtml()}`;
+  ${vehicleUploadModalHtml()}
+  ${vehicleUploadErrorHtml()}`;
 }
 
 /* ============================================================
@@ -2347,19 +2461,21 @@ function wireScreen(root){
   const expandAllVehicles = root.querySelector('#expandAllVehicles'); if(expandAllVehicles) expandAllVehicles.addEventListener('click',()=>{ S.vehicleFormsExpanded = S.vehicleForms.map(()=>true); render(); });
   const collapseAllVehicles = root.querySelector('#collapseAllVehicles'); if(collapseAllVehicles) collapseAllVehicles.addEventListener('click',()=>{ S.vehicleFormsExpanded = S.vehicleForms.map(()=>false); render(); });
   root.querySelectorAll('[data-vp]').forEach(b=>b.addEventListener('click',()=>{ const n=parseInt(b.dataset.vp,10); if(n>=1){ S.vehiclePage=n; render(); } }));
-  const vehicleUploadZone = root.querySelector('#vehicleUploadZone'); if(vehicleUploadZone) vehicleUploadZone.addEventListener('click',()=>{
-    const n = S.vehicleForms.length;
-    // simulate an uploaded file with an arbitrary row count, independent of how many spots were
-    // actually reserved — mirrors the real-world case where a fleet's spreadsheet doesn't line up 1:1
-    const fileRowCount = Math.max(n + 3, Math.round(n * 1.4) + 2);
-    const rows = Array.from({length: fileRowCount}, (_,i)=>buildVehicleFormRow(i));
-    S.vehicleForms = rows.slice(0, n);
-    // a file silently overwrote every vehicle section — that needs an explicit acknowledgment,
-    // not a toast that can be missed
-    S.vehicleUploadModal = { n, fileRowCount };
-    S.vehicleErrors = {};
-    render();
-  });
+  const vehicleUploadInput = root.querySelector('#vehicleUploadInput');
+  const vehicleUploadZone = root.querySelector('#vehicleUploadZone');
+  if(vehicleUploadZone && vehicleUploadInput){
+    vehicleUploadZone.addEventListener('click',()=>vehicleUploadInput.click());
+    vehicleUploadInput.addEventListener('change',()=>{ const file = vehicleUploadInput.files[0]; vehicleUploadInput.value=''; if(file) handleVehicleUpload(file); });
+    vehicleUploadZone.addEventListener('dragover',e=>{ e.preventDefault(); vehicleUploadZone.classList.add('drag'); });
+    vehicleUploadZone.addEventListener('dragleave',()=>vehicleUploadZone.classList.remove('drag'));
+    vehicleUploadZone.addEventListener('drop',e=>{ e.preventDefault(); vehicleUploadZone.classList.remove('drag'); const file = e.dataTransfer.files[0]; if(file) handleVehicleUpload(file); });
+  }
+  const downloadTemplateBtn = root.querySelector('#downloadVehicleTemplate'); if(downloadTemplateBtn) downloadTemplateBtn.addEventListener('click', downloadVehicleTemplate);
+  const closeUploadErr = ()=>{ S.vehicleUploadError = null; render(); };
+  const vehicleUploadErrX = root.querySelector('#vehicleUploadErrX'); if(vehicleUploadErrX) vehicleUploadErrX.addEventListener('click', closeUploadErr);
+  const vehicleUploadErrOverlay = root.querySelector('#vehicleUploadErrOverlay'); if(vehicleUploadErrOverlay) vehicleUploadErrOverlay.addEventListener('click',e=>{ if(e.target===vehicleUploadErrOverlay) closeUploadErr(); });
+  const vehicleUploadErrTemplate = root.querySelector('#vehicleUploadErrTemplate'); if(vehicleUploadErrTemplate) vehicleUploadErrTemplate.addEventListener('click', downloadVehicleTemplate);
+  const vehicleUploadErrRetry = root.querySelector('#vehicleUploadErrRetry'); if(vehicleUploadErrRetry) vehicleUploadErrRetry.addEventListener('click',()=>{ closeUploadErr(); const inp = document.getElementById('vehicleUploadInput'); if(inp) inp.click(); });
   const vehicleUploadGotIt = root.querySelector('#vehicleUploadGotIt'); if(vehicleUploadGotIt) vehicleUploadGotIt.addEventListener('click',()=>{ S.vehicleUploadModal=null; render(); });
   const vehicleUploadReupload = root.querySelector('#vehicleUploadReupload'); if(vehicleUploadReupload) vehicleUploadReupload.addEventListener('click',()=>{
     S.vehicleForms = Array.from({length: S.vehicleForms.length}, blankVehicleForm);
