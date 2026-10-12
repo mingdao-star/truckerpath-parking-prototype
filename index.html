@@ -1263,28 +1263,32 @@ function screenAllListings(){
   // the top search card's Location/Vehicle Type/Price Range fields actually filter this list —
   // Booking Type doesn't, since day/week/month availability isn't a real per-location distinction here
   const locQuery = S.search.location.trim().toLowerCase();
-  if(locQuery){
-    // "City, State" input is split on the comma so each part can independently match
-    // a location's city, state abbreviation, or full state name (e.g. "Texas" matches every TX row)
-    const tokens = locQuery.split(',').map(s=>s.trim()).filter(Boolean);
-    directoryRows = directoryRows.filter(p=>{
+  // "City, State" input is split on the comma so each part can independently match
+  // a location's city, state abbreviation, or full state name (e.g. "Texas" matches every TX row)
+  const tokens = locQuery.split(',').map(s=>s.trim()).filter(Boolean);
+  const [priceMin, priceMax] = parsePriceRangeLabel(S.search.priceRange);
+  const dq = S.directory.search.trim().toLowerCase();
+  // one filter for every location shown on this page — directory rows and the bookable lots alike
+  const matchesFilters = p => {
+    if(tokens.length){
       const cityL = (p.city||'').toLowerCase();
       const stateAbbrL = (p.state||'').toLowerCase();
       const stateFull = US_STATES.find(([,abbr])=>abbr===p.state);
       const stateFullL = stateFull ? stateFull[0].toLowerCase() : '';
-      return tokens.some(t =>
+      const hit = tokens.some(t =>
         (cityL && (cityL.includes(t) || t.includes(cityL))) ||
         (stateAbbrL && stateAbbrL===t) ||
         (stateFullL && (stateFullL===t || stateFullL.includes(t)))
       );
-    });
-  }
-  if(S.search.vehicleType) directoryRows = directoryRows.filter(p=>p.vtypes.includes(S.search.vehicleType));
-  const [priceMin, priceMax] = parsePriceRangeLabel(S.search.priceRange);
-  directoryRows = directoryRows.filter(p=>p.day>=priceMin && (priceMax===null || p.day<=priceMax));
-
-  const dq = S.directory.search.trim().toLowerCase();
-  if(dq) directoryRows = directoryRows.filter(p=>(p.name+' '+p.partner+' '+p.city).toLowerCase().includes(dq));
+      if(!hit) return false;
+    }
+    if(S.search.vehicleType && !p.vtypes.includes(S.search.vehicleType)) return false;
+    if(p.day < priceMin || (priceMax!==null && p.day > priceMax)) return false;
+    if(dq && !(p.name+' '+p.partner+' '+p.city).toLowerCase().includes(dq)) return false;
+    if(S.directory.state && p.state!==S.directory.state) return false;
+    return true;
+  };
+  directoryRows = directoryRows.filter(matchesFilters);
 
   // the state grid always reflects the real, full dataset — not the top search card's prefilled
   // Location/Vehicle Type/Price filters, which would otherwise hide states that just don't happen
@@ -1294,16 +1298,18 @@ function screenAllListings(){
   PARTNER_LOCATIONS.forEach(p=>{ if(p.state) stateCounts[p.state] = (stateCounts[p.state]||0)+1; });
   const statesWithData = US_STATES.filter(([,abbr])=>stateCounts[abbr]>0);
 
-  if(S.directory.state) directoryRows = directoryRows.filter(p=>p.state===S.directory.state);
 
   // photo-card grid: the real bookable lots first, then every other filtered location — paginated,
   // since the full directory is ~180 rows. Only the real lots are wired to the booking flow; the
   // rest stay browse-only (no data-lot), consistent with this page's real-locations-are-browse-only scope
   const LISTING_PAGE_SIZE = 12;
-  const bookableCards = Object.entries(LOTS).map(([id,l])=>({
-    id, bookable:true, name:l.name, city:l.city, avail:l.avail, rating:l.rating,
-    price: `$${lotRate(l,'Daily').toFixed(0)}/day`,
-  }));
+  const bookableCards = Object.entries(LOTS)
+    .filter(([,l])=>{ const [city,state] = l.city.split(',').map(x=>x.trim());
+      return matchesFilters({ name:l.name, partner:'', city, state, day:lotRate(l,'Daily'), vtypes:Object.keys(l.vtypeAvail) }); })
+    .map(([id,l])=>({
+      id, bookable:true, name:l.name, city:l.city, avail:l.avail, rating:l.rating,
+      price: `$${lotRate(l,'Daily').toFixed(0)}/day`,
+    }));
   const partnerCards = directoryRows.map(p=>({
     id:null, bookable:false, name:p.name, city:p.city||'—', avail:p.avail, rating:null,
     price:`$${p.day}/day`,
@@ -1350,6 +1356,7 @@ function screenAllListings(){
             <span class="listing-price">${c.price}</span>
           </div>
         </div>`).join('')}
+      ${pageCards.length ? '' : '<div style="grid-column:1/-1;text-align:center;color:var(--ink-soft);font-size:13.5px;padding:32px 0;border:1px dashed var(--line);border-radius:var(--r-lg)">No locations match your search. Try another city or state, or change the vehicle type or price range.</div>'}
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
       <span style="font-size:12.5px;color:var(--ink-soft)">${allListingCards.length} total locations · page ${listingPage} of ${listingPages}</span>
