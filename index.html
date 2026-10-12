@@ -455,7 +455,6 @@ const S = {
 
   // All Listings must land blank (no pre-filtered state) — see screenAllListings
   search: { location:'', bookingType:'Daily', checkIn:'2026-07-17', checkInTime:'09:00', checkOut:'2026-07-19', checkOutTime:'12:00', vehicleType:'Truck + Trailer', priceRange:'Any Price' },
-  resultsHeading: 'Brookville, PA',
 
   selectedLotId: 'eloy',
   detailPanelOpen: false,
@@ -1551,8 +1550,7 @@ function screenBookStep1(){
         <div style="padding-left:14px"><button class="btn btn-primary" id="b1SearchBtn">${ic.search}&nbsp;Search</button></div>
       </div>
     </div>
-    <h2 class="page-title" style="margin-top:20px">4 lots near ${S.resultsHeading}</h2>
-    <div class="b1-row">
+    <div class="b1-row" style="margin-top:20px">
       <div class="results-list">${cards}</div>
       ${detailPanel}
       <div class="mapcol" id="liveMapSlot"></div>
@@ -2317,7 +2315,6 @@ function wireScreen(root){
   root.querySelectorAll('#homeLotGrid [data-lot]').forEach(c=>c.addEventListener('click',()=>{ selectLot(c.dataset.lot); S.detailPanelOpen=true; go('book1'); }));
   const homeSearch = root.querySelector('#homeSearchBtn');
   if(homeSearch) homeSearch.addEventListener('click',()=>{
-    S.resultsHeading = S.search.location.split(',')[0] || S.resultsHeading;
     go('book1');
   });
   const seeAll = root.querySelector('#seeAllBtn'); if(seeAll) seeAll.addEventListener('click',()=>go('allListings'));
@@ -2334,7 +2331,7 @@ function wireScreen(root){
   }));
   root.querySelectorAll('.dir-row').forEach(tr=>tr.addEventListener('click',()=>go('book1')));
   root.querySelectorAll('[data-lp]').forEach(b=>b.addEventListener('click',()=>{ const n=parseInt(b.dataset.lp,10); if(n>=1){ S.directory.listingPage=n; render(); } }));
-  const alSearchBtn = root.querySelector('#alSearchBtn'); if(alSearchBtn) alSearchBtn.addEventListener('click',()=>{ S.resultsHeading = S.search.location.split(',')[0] || S.resultsHeading; go('book1'); });
+  const alSearchBtn = root.querySelector('#alSearchBtn'); if(alSearchBtn) alSearchBtn.addEventListener('click',()=>{ go('book1'); });
   bindText(root,'alLocation', v=>S.search.location=v);
   bindSelect(root,'alBookingType', v=>S.search.bookingType=v);
   bindSelect(root,'alVehicleType', v=>S.search.vehicleType=v);
@@ -2376,7 +2373,7 @@ function wireScreen(root){
 
   /* ---- book1 (search results + map; clicking a card/pin opens the detail-rail below) ---- */
   root.querySelectorAll('.results-list [data-lot]').forEach(c=>c.addEventListener('click',()=>{ selectLot(c.dataset.lot); S.detailPanelOpen=true; render(); }));
-  const b1Search = root.querySelector('#b1SearchBtn'); if(b1Search) b1Search.addEventListener('click',()=>{ S.resultsHeading = S.search.location.split(',')[0] || S.resultsHeading; render(); toast('Results updated for '+S.search.location); });
+  const b1Search = root.querySelector('#b1SearchBtn'); if(b1Search) b1Search.addEventListener('click',()=>{ render(); toast('Results updated for '+S.search.location); });
   bindText(root,'b1Location', v=>S.search.location=v);
   bindText(root,'b1CheckIn', v=>S.search.checkIn=v);
   bindText(root,'b1CheckOut', v=>S.search.checkOut=v);
