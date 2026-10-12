@@ -454,7 +454,9 @@ const S = {
   locationDetailsExpanded: false,
 
   // All Listings must land blank (no pre-filtered state) — see screenAllListings
-  search: { location:'', bookingType:'Daily', checkIn:'2026-07-17', checkInTime:'09:00', checkOut:'2026-07-19', checkOutTime:'12:00', vehicleType:'Truck + Trailer', priceRange:'Any Price' },
+  // bookingType/vehicleType '' = All; filterCheckIn/Out are the optional search-card dates (blank = any),
+  // kept apart from checkIn/checkOut, which the booking panel always needs filled
+  search: { location:'', bookingType:'', checkIn:'2026-07-17', checkInTime:'09:00', checkOut:'2026-07-19', checkOutTime:'12:00', vehicleType:'', priceRange:'Any Price', filterCheckIn:'', filterCheckOut:'' },
 
   selectedLotId: 'eloy',
   detailPanelOpen: false,
@@ -1116,6 +1118,16 @@ function computeStep2Total(){
 // selecting a lot with fewer available spots (for the currently chosen vehicle type) than
 // currently requested clamps the request down; if the new lot doesn't offer the currently
 // selected vehicle type at all, fall back to whichever type it does offer
+// carries whatever the search card actually set into the booking panel — blank dates and "All"
+// leave the panel's current values alone
+function commitSearch(){
+  const q = S.search;
+  if(q.filterCheckIn) q.checkIn = q.filterCheckIn;
+  if(q.filterCheckOut) q.checkOut = q.filterCheckOut;
+  if(q.bookingType) S.step2BookingType = q.bookingType;
+  if(S.step2BookingType==='Weekly' && q.checkOut < addDays(q.checkIn,7)) q.checkOut = addDays(q.checkIn,7);
+  if(q.vehicleType && LOTS[S.selectedLotId].vtypeAvail[q.vehicleType]) S.step2VehicleType = q.vehicleType;
+}
 function selectLot(id){
   S.selectedLotId = id;
   const l = LOTS[id];
@@ -1232,14 +1244,14 @@ function screenHomepage(){
       <div class="searchcard">
         <div class="sc-field field"><label>Location</label><input class="control" id="hLocation" value="${S.search.location}"></div>
         <div class="sc-field field"><label>Booking Type</label><select class="control" id="hBookingType">
-          ${['Daily','Weekly','Monthly'].map(v=>`<option ${S.search.bookingType===v?'selected':''}>${v}</option>`).join('')}
+          <option value="" ${S.search.bookingType?'':'selected'}>All</option>${['Daily','Weekly','Monthly'].map(v=>`<option ${S.search.bookingType===v?'selected':''}>${v}</option>`).join('')}
         </select></div>
-        <div class="sc-field field"><label>Check-in</label><input type="date" class="control" id="hCheckIn" value="${S.search.checkIn}"></div>
-        <div class="sc-field field"><label>Check-out</label><input type="date" class="control" id="hCheckOut" value="${S.search.checkOut}"></div>
+        <div class="sc-field field"><label>Check-in</label><input type="date" class="control" id="hCheckIn" value="${S.search.filterCheckIn}"></div>
+        <div class="sc-field field"><label>Check-out</label><input type="date" class="control" id="hCheckOut" value="${S.search.filterCheckOut}"></div>
         <div class="sc-field field"><label>Vehicle Type</label><select class="control" id="hVehicleType">
-          ${['Truck + Trailer','Trailer Only','Bobtail'].map(v=>`<option ${S.search.vehicleType===v?'selected':''}>${v}</option>`).join('')}
+          <option value="" ${S.search.vehicleType?'':'selected'}>All</option>${['Truck + Trailer','Trailer Only','Bobtail'].map(v=>`<option ${S.search.vehicleType===v?'selected':''}>${v}</option>`).join('')}
         </select></div>
-        <div style="padding-left:14px"><button class="btn btn-primary btn-lg" id="homeSearchBtn">${ic.search}&nbsp;Search</button></div>
+        <div style="padding-left:14px"><button class="btn btn-primary btn-lg" id="homeSearchBtn" ${S.search.location.trim() ? '' : 'disabled'}>${ic.search}&nbsp;Search</button></div>
       </div>
     </div>
     <div class="results-head"><h2 class="page-title" style="margin:0">Popular parking near Phoenix, AZ</h2><button class="btn-text" id="seeAllBtn">See all parking →</button></div>
@@ -1329,15 +1341,15 @@ function screenAllListings(){
       <div class="searchcard">
         <div class="sc-field field"><label>Location</label><input class="control" id="alLocation" value="${S.search.location}"></div>
         <div class="sc-field field"><label>Booking Type</label><select class="control" id="alBookingType">
-          ${['Daily','Weekly','Monthly'].map(v=>`<option ${S.search.bookingType===v?'selected':''}>${v}</option>`).join('')}
+          <option value="" ${S.search.bookingType?'':'selected'}>All</option>${['Daily','Weekly','Monthly'].map(v=>`<option ${S.search.bookingType===v?'selected':''}>${v}</option>`).join('')}
         </select></div>
         <div class="sc-field field"><label>Vehicle Type</label><select class="control" id="alVehicleType">
-          ${['Truck + Trailer','Trailer Only','Bobtail'].map(v=>`<option ${S.search.vehicleType===v?'selected':''}>${v}</option>`).join('')}
+          <option value="" ${S.search.vehicleType?'':'selected'}>All</option>${['Truck + Trailer','Trailer Only','Bobtail'].map(v=>`<option ${S.search.vehicleType===v?'selected':''}>${v}</option>`).join('')}
         </select></div>
         <div class="sc-field field"><label>Price Range</label><select class="control" id="alPriceRange">
           ${['Any Price','$10–$25 / day','$25–$45 / day','$45+ / day'].map(v=>`<option ${S.search.priceRange===v?'selected':''}>${v}</option>`).join('')}
         </select></div>
-        <div style="padding-left:14px"><button class="btn btn-primary btn-lg" id="alSearchBtn">${ic.search}&nbsp;Search</button></div>
+        <div style="padding-left:14px"><button class="btn btn-primary btn-lg" id="alSearchBtn" ${S.search.location.trim() ? '' : 'disabled'}>${ic.search}&nbsp;Search</button></div>
       </div>
     </div>
     <div class="listing-grid" id="allListingsGrid">
@@ -1435,8 +1447,9 @@ function screenLogin(){
 ============================================================ */
 // single, prominent price matching the searched booking type — every lot is paid parking
 function resultPriceTag(id, l){
-  const unit = S.search.bookingType==='Weekly' ? '/wk' : S.search.bookingType==='Monthly' ? '/mo' : '/day';
-  return `$${lotRate(l, S.search.bookingType).toFixed(0)}${unit}`;
+  const bt = S.search.bookingType || 'Daily';
+  const unit = bt==='Weekly' ? '/wk' : bt==='Monthly' ? '/mo' : '/day';
+  return `$${lotRate(l, bt).toFixed(0)}${unit}`;
 }
 function resultCard(id, l, selected){
   return `
@@ -1543,11 +1556,11 @@ function screenBookStep1(){
       </div>
       <div class="searchcard" style="padding:14px">
         <div class="sc-field field"><label>Location</label><input class="control" id="b1Location" value="${S.search.location}"></div>
-        <div class="sc-field field"><label>Booking Type</label><select class="control" id="b1BookingType">${['Daily','Weekly','Monthly'].map(v=>`<option ${S.search.bookingType===v?'selected':''}>${v}</option>`).join('')}</select></div>
-        <div class="sc-field field"><label>Check-in</label><input type="date" class="control" id="b1CheckIn" value="${S.search.checkIn}"></div>
-        <div class="sc-field field"><label>Check-out</label><input type="date" class="control" id="b1CheckOut" value="${S.search.checkOut}"></div>
-        <div class="sc-field field"><label>Vehicle Type</label><select class="control" id="b1VehicleType">${['Truck + Trailer','Trailer Only','Bobtail'].map(v=>`<option ${S.search.vehicleType===v?'selected':''}>${v}</option>`).join('')}</select></div>
-        <div style="padding-left:14px"><button class="btn btn-primary" id="b1SearchBtn">${ic.search}&nbsp;Search</button></div>
+        <div class="sc-field field"><label>Booking Type</label><select class="control" id="b1BookingType"><option value="" ${S.search.bookingType?'':'selected'}>All</option>${['Daily','Weekly','Monthly'].map(v=>`<option ${S.search.bookingType===v?'selected':''}>${v}</option>`).join('')}</select></div>
+        <div class="sc-field field"><label>Check-in</label><input type="date" class="control" id="b1CheckIn" value="${S.search.filterCheckIn}"></div>
+        <div class="sc-field field"><label>Check-out</label><input type="date" class="control" id="b1CheckOut" value="${S.search.filterCheckOut}"></div>
+        <div class="sc-field field"><label>Vehicle Type</label><select class="control" id="b1VehicleType"><option value="" ${S.search.vehicleType?'':'selected'}>All</option>${['Truck + Trailer','Trailer Only','Bobtail'].map(v=>`<option ${S.search.vehicleType===v?'selected':''}>${v}</option>`).join('')}</select></div>
+        <div style="padding-left:14px"><button class="btn btn-primary" id="b1SearchBtn" ${S.search.location.trim() ? '' : 'disabled'}>${ic.search}&nbsp;Search</button></div>
       </div>
     </div>
     <div class="b1-row" style="margin-top:20px">
@@ -2315,12 +2328,18 @@ function wireScreen(root){
   root.querySelectorAll('#homeLotGrid [data-lot]').forEach(c=>c.addEventListener('click',()=>{ selectLot(c.dataset.lot); S.detailPanelOpen=true; go('book1'); }));
   const homeSearch = root.querySelector('#homeSearchBtn');
   if(homeSearch) homeSearch.addEventListener('click',()=>{
+    commitSearch();
     go('book1');
   });
   const seeAll = root.querySelector('#seeAllBtn'); if(seeAll) seeAll.addEventListener('click',()=>go('allListings'));
+  // Search stays disabled until a location is entered; text inputs don't rerender, so toggle it live
+  [['hLocation','homeSearchBtn'],['alLocation','alSearchBtn'],['b1Location','b1SearchBtn']].forEach(([inp,btn])=>{
+    const i = root.querySelector('#'+inp), b = root.querySelector('#'+btn);
+    if(i && b) i.addEventListener('input',()=>{ b.disabled = !i.value.trim(); });
+  });
   bindText(root,'hLocation', v=>S.search.location=v);
-  bindText(root,'hCheckIn', v=>S.search.checkIn=v);
-  bindText(root,'hCheckOut', v=>S.search.checkOut=v);
+  bindText(root,'hCheckIn', v=>S.search.filterCheckIn=v);
+  bindText(root,'hCheckOut', v=>S.search.filterCheckOut=v);
   bindSelect(root,'hBookingType', v=>S.search.bookingType=v);
   bindSelect(root,'hVehicleType', v=>S.search.vehicleType=v);
 
@@ -2331,7 +2350,7 @@ function wireScreen(root){
   }));
   root.querySelectorAll('.dir-row').forEach(tr=>tr.addEventListener('click',()=>go('book1')));
   root.querySelectorAll('[data-lp]').forEach(b=>b.addEventListener('click',()=>{ const n=parseInt(b.dataset.lp,10); if(n>=1){ S.directory.listingPage=n; render(); } }));
-  const alSearchBtn = root.querySelector('#alSearchBtn'); if(alSearchBtn) alSearchBtn.addEventListener('click',()=>{ go('book1'); });
+  const alSearchBtn = root.querySelector('#alSearchBtn'); if(alSearchBtn) alSearchBtn.addEventListener('click',()=>{ commitSearch(); go('book1'); });
   bindText(root,'alLocation', v=>S.search.location=v);
   bindSelect(root,'alBookingType', v=>S.search.bookingType=v);
   bindSelect(root,'alVehicleType', v=>S.search.vehicleType=v);
@@ -2373,10 +2392,10 @@ function wireScreen(root){
 
   /* ---- book1 (search results + map; clicking a card/pin opens the detail-rail below) ---- */
   root.querySelectorAll('.results-list [data-lot]').forEach(c=>c.addEventListener('click',()=>{ selectLot(c.dataset.lot); S.detailPanelOpen=true; render(); }));
-  const b1Search = root.querySelector('#b1SearchBtn'); if(b1Search) b1Search.addEventListener('click',()=>{ render(); toast('Results updated for '+S.search.location); });
+  const b1Search = root.querySelector('#b1SearchBtn'); if(b1Search) b1Search.addEventListener('click',()=>{ commitSearch(); render(); toast('Results updated for '+S.search.location); });
   bindText(root,'b1Location', v=>S.search.location=v);
-  bindText(root,'b1CheckIn', v=>S.search.checkIn=v);
-  bindText(root,'b1CheckOut', v=>S.search.checkOut=v);
+  bindText(root,'b1CheckIn', v=>S.search.filterCheckIn=v);
+  bindText(root,'b1CheckOut', v=>S.search.filterCheckOut=v);
   bindSelect(root,'b1BookingType', v=>S.search.bookingType=v);
   bindSelect(root,'b1VehicleType', v=>S.search.vehicleType=v);
   const refreshAvailBtn = root.querySelector('#refreshAvailBtn'); if(refreshAvailBtn) refreshAvailBtn.addEventListener('click',()=>{ S.availRefreshedAt=Date.now(); render(); toast('Availability refreshed'); });
