@@ -170,6 +170,13 @@ select.control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg x
 .login-tabs{display:flex;background:var(--paper-dim);border-radius:var(--r-md);padding:3px;margin:16px 0 18px}
 .login-tab{flex:1;text-align:center;padding:8px;border-radius:6px;font-size:13px;font-weight:600;color:var(--ink-soft)}
 .login-tab.on{background:#fff;color:var(--ink);box-shadow:var(--shadow-sm)}
+.su-sub{font-size:13px;color:var(--ink-soft);margin:-8px 0 16px;line-height:1.5}
+.su-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.su-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.4em;font-size:18px;text-align:center}
+.su-check{list-style:none;padding:0;margin:6px 0 0;display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-muted)}
+.su-check li.ok{color:var(--brand)}
+.su-resend{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-soft);margin-top:6px}
+.su-fine{font-size:11px;color:var(--ink-muted);text-align:center;margin-top:12px;line-height:1.45}
 .field-err{font-size:11.5px;color:var(--red);margin-top:4px}
 .control.has-err{border-color:var(--red)}
 .control.has-err:focus{box-shadow:0 0 0 3px var(--red-tint)}
@@ -445,6 +452,8 @@ const S = {
   profileOpen: false,
   loginForm: { email:'', password:'' },
   loginErr: '',
+  // two-step email sign-up against the TP user API: send a 6-digit code, then register with it
+  signup: { step:'email', email:'', code:'', password:'', firstName:'', lastName:'', company:'', err:'', codeErr:'', attempts:0, resendAt:0 },
   postLoginGoto: null,
   bookingSeq: 112,
   retryOrderId: null,
@@ -1413,6 +1422,41 @@ function screenAllListings(){
 /* ============================================================
    Login
 ============================================================ */
+const SU_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const suPwChecks = pw => [['8+ characters', pw.length>=8], ['A letter', /[A-Za-z]/.test(pw)], ['A number', /\d/.test(pw)]];
+const suReady = su => /^\d{6}$/.test(su.code) && suPwChecks(su.password).every(([,ok])=>ok) && su.company.trim() && su.attempts < 5;
+function suResendLabel(){
+  const left = Math.ceil((S.signup.resendAt - Date.now())/1000);
+  return left > 0 ? `Resend code in ${left}s` : '';
+}
+function signupBody(){
+  const su = S.signup;
+  if(su.step==='email') return `
+    <h2 style="font-size:17px;margin:0 0 14px">Create your account</h2>
+    <p class="su-sub">One TruckerPath account works here and in the TruckerPath app. We'll email you a 6-digit code to confirm your address.</p>
+    <div class="field" style="margin-bottom:4px"><label>Email</label><input class="control ${su.err?'has-err':''}" id="signupEmail" type="email" placeholder="you@company.com" value="${su.email}"></div>
+    ${su.err ? `<div class="field-err">${su.err}</div>` : ''}
+    <button class="btn btn-primary btn-lg" style="width:100%;margin-top:14px" id="signupSendCode" ${su.email.trim()?'':'disabled'}>Send verification code</button>
+    <div style="text-align:center;margin-top:14px;font-size:12.5px;color:var(--ink-soft)">Already have a TruckerPath account? <a href="#" class="btn-text" id="toLoginTab">Log in</a></div>
+    <div class="su-fine">This site is protected by reCAPTCHA.</div>`;
+  const locked = su.attempts >= 5;
+  const pw = suPwChecks(su.password);
+  return `
+    <h2 style="font-size:17px;margin:0 0 14px">Check your email</h2>
+    <p class="su-sub">We sent a 6-digit code to <b style="color:var(--ink)">${su.email}</b>. It expires in 10 minutes. <a href="#" class="btn-text" id="signupChangeEmail" style="font-size:12.5px">Change email</a></p>
+    <div class="field" style="margin-bottom:4px"><label>Verification code</label><input class="control su-code ${su.codeErr?'has-err':''}" id="signupCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" value="${su.code}" ${locked?'disabled':''}></div>
+    ${su.codeErr ? `<div class="field-err">${su.codeErr}</div>` : ''}
+    <div class="su-resend"><span id="signupResendWait">${suResendLabel()}</span><a href="#" class="btn-text" id="signupResend" style="font-size:12px;${suResendLabel()?'display:none':''}">Resend code</a></div>
+    <div class="field" style="margin:14px 0 0"><label>Password</label><input class="control" id="signupPassword" type="password" placeholder="Create a password" value="${su.password}"></div>
+    <ul class="su-check" id="signupPwChecks">${pw.map(([t,ok])=>`<li class="${ok?'ok':''}">${ok?'✓':'○'} ${t}</li>`).join('')}</ul>
+    <div class="su-row" style="margin-top:12px">
+      <div class="field"><label>First name</label><input class="control" id="signupFirst" placeholder="Optional" value="${su.firstName}"></div>
+      <div class="field"><label>Last name</label><input class="control" id="signupLast" placeholder="Optional" value="${su.lastName}"></div>
+    </div>
+    <div class="field" style="margin-top:12px"><label>Company name</label><input class="control" id="signupCompany" placeholder="ABC Logistics" value="${su.company}"></div>
+    <button class="btn btn-primary btn-lg" style="width:100%;margin-top:16px" id="signupCreate" ${suReady(su)?'':'disabled'}>Create account</button>
+    <div class="su-fine">Demo: use any 6 digits except 000000. 000000 shows the wrong-code error.</div>`;
+}
 function screenLogin(){
   return `
   <div class="topbar"><div class="topbar-inner"><div class="brand"><img class="brand-icon" src="images/tp-parking-icon.png" alt=""><div class="brand-text"><span class="l1">TRUCKER PATH</span><span class="l2">PARKING</span></div></div></div></div>
@@ -1425,6 +1469,7 @@ function screenLogin(){
       </div>
       ${S.loginTab==='login' ? `
         <h2 style="font-size:17px;margin:0 0 14px">Welcome back</h2>
+        <p class="su-sub">Log in with your TruckerPath account. It's the same account you use in the TruckerPath app.</p>
         <div class="field" style="margin-bottom:12px"><label>Email</label><input class="control" id="loginEmail" placeholder="you@company.com" value="${S.loginForm.email}"></div>
         <div class="field" style="margin-bottom:4px"><label>Password</label><input class="control" id="loginPassword" type="password" placeholder="••••••••••" value="${S.loginForm.password}"></div>
         ${S.loginErr ? `<div class="field-err">${S.loginErr}</div>` : ''}
@@ -1432,11 +1477,7 @@ function screenLogin(){
         <button class="btn btn-primary btn-lg" style="width:100%" id="loginSubmit">Log in</button>
         <div style="text-align:center;margin-top:14px;font-size:12.5px;color:var(--ink-soft)">New to TruckerPath? <a href="#" class="btn-text" id="toCreateTab">Create an account</a></div>
       ` : `
-        <h2 style="font-size:17px;margin:0 0 14px">Create your account</h2>
-        <div class="field" style="margin-bottom:12px"><label>Company name</label><input class="control" id="signupCompany" placeholder="ABC Logistics"></div>
-        <div class="field" style="margin-bottom:12px"><label>Email</label><input class="control" id="signupEmail" placeholder="you@company.com"></div>
-        <div class="field" style="margin-bottom:16px"><label>Password</label><input class="control" id="signupPassword" type="password" placeholder="Create a password"></div>
-        <button class="btn btn-primary btn-lg" style="width:100%" id="loginSubmit">Create account</button>
+        ${signupBody()}
       `}
     </div>
   </div>`;
@@ -2369,6 +2410,61 @@ function wireScreen(root){
   /* ---- login ---- */
   root.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{ S.loginTab=b.dataset.tab; S.loginErr=''; render(); }));
   const toCreate = root.querySelector('#toCreateTab'); if(toCreate) toCreate.addEventListener('click',(e)=>{e.preventDefault(); S.loginTab='create'; render();});
+  const toLogin = root.querySelector('#toLoginTab'); if(toLogin) toLogin.addEventListener('click',(e)=>{ e.preventDefault(); S.loginTab='login'; S.loginForm.email = S.signup.email; render(); });
+  /* ---- sign-up: step 1 send code, step 2 register ---- */
+  const su = S.signup;
+  const suEmail = root.querySelector('#signupEmail'), suSend = root.querySelector('#signupSendCode');
+  if(suEmail) suEmail.addEventListener('input',()=>{ su.email = suEmail.value; if(su.err){ su.err=''; suEmail.classList.remove('has-err'); const fe=suEmail.closest('.field').nextElementSibling; if(fe && fe.classList.contains('field-err')) fe.remove(); } if(suSend) suSend.disabled = !su.email.trim(); });
+  const suSendCode = ()=>{
+    su.email = su.email.trim().toLowerCase();
+    if(!SU_EMAIL_RE.test(su.email)){ su.err = 'Enter a valid email, e.g. name@company.com'; render(); return; }
+    // demo stand-in for code 60008 (email already registered)
+    if(su.email==='taken@example.com'){ su.err = 'An account with this email already exists. <a href="#" class="btn-text" id="suErrLogin">Log in</a> or <a href="#" class="btn-text" id="suErrForgot">reset your password</a>.'; render(); return; }
+    su.step='verify'; su.code=''; su.codeErr=''; su.attempts=0; su.resendAt = Date.now()+60000;
+    render(); toast('Code sent to '+su.email);
+  };
+  if(suSend) suSend.addEventListener('click', suSendCode);
+  if(suEmail) suEmail.addEventListener('keydown',e=>{ if(e.key==='Enter' && su.email.trim()) suSendCode(); });
+  const suErrLogin = root.querySelector('#suErrLogin'); if(suErrLogin) suErrLogin.addEventListener('click',e=>{ e.preventDefault(); S.loginTab='login'; S.loginForm.email=su.email; su.err=''; render(); });
+  const suErrForgot = root.querySelector('#suErrForgot'); if(suErrForgot) suErrForgot.addEventListener('click',e=>{ e.preventDefault(); toast('Password reset link sent (if an account exists)'); });
+  const suChange = root.querySelector('#signupChangeEmail'); if(suChange) suChange.addEventListener('click',e=>{ e.preventDefault(); su.step='email'; render(); });
+  const suCreate = root.querySelector('#signupCreate');
+  const suRefresh = ()=>{
+    const ul = root.querySelector('#signupPwChecks');
+    if(ul) ul.innerHTML = suPwChecks(su.password).map(([t,ok])=>`<li class="${ok?'ok':''}">${ok?'✓':'○'} ${t}</li>`).join('');
+    if(suCreate) suCreate.disabled = !suReady(su);
+  };
+  [['signupCode','code'],['signupPassword','password'],['signupFirst','firstName'],['signupLast','lastName'],['signupCompany','company']].forEach(([id,key])=>{
+    const el = root.querySelector('#'+id); if(!el) return;
+    el.addEventListener('input',()=>{
+      if(key==='code'){ el.value = el.value.replace(/\D/g,'').slice(0,6); if(su.codeErr){ su.codeErr=''; el.classList.remove('has-err'); const fe=el.closest('.field').nextElementSibling; if(fe && fe.classList.contains('field-err')) fe.remove(); } }
+      su[key] = el.value; suRefresh();
+    });
+  });
+  const suResend = root.querySelector('#signupResend'), suWait = root.querySelector('#signupResendWait');
+  if(suResend) suResend.addEventListener('click',e=>{ e.preventDefault(); su.resendAt = Date.now()+60000; su.code=''; su.codeErr=''; su.attempts=0; render(); toast('New code sent to '+su.email+'. Earlier codes no longer work.'); });
+  clearInterval(window.__suTimer);
+  if(suWait && suResend && su.resendAt > Date.now()){
+    window.__suTimer = setInterval(()=>{
+      const label = suResendLabel(); suWait.textContent = label;
+      if(!label){ suResend.style.display=''; clearInterval(window.__suTimer); }
+    }, 1000);
+  }
+  if(suCreate) suCreate.addEventListener('click',()=>{
+    // demo stand-in for code 60016 (wrong / expired code); 5 wrong tries invalidate the code
+    if(su.code==='000000'){
+      su.attempts++;
+      su.codeErr = su.attempts>=5 ? 'This code no longer works after 5 wrong tries. Resend a new code.' : "That code isn't right. Check the email and try again.";
+      render(); return;
+    }
+    const dest = S.postLoginGoto || 'book1';
+    S.postLoginGoto = null;
+    S.loggedIn = true;
+    const first = su.firstName.trim();
+    S.signup = { step:'email', email:'', code:'', password:'', firstName:'', lastName:'', company:'', err:'', codeErr:'', attempts:0, resendAt:0 };
+    toast(first ? `Account created. Welcome to TruckerPath, ${first}` : 'Account created. Welcome to TruckerPath');
+    go(dest);
+  });
   const forgotPw = root.querySelector('#forgotPw'); if(forgotPw) forgotPw.addEventListener('click',(e)=>{e.preventDefault(); toast('Password reset link sent (if an account exists)');});
   bindText(root,'loginEmail', v=>{ S.loginForm.email=v; S.loginErr=''; });
   bindText(root,'loginPassword', v=>{ S.loginForm.password=v; S.loginErr=''; });
@@ -2383,10 +2479,6 @@ function wireScreen(root){
       const dest = S.postLoginGoto || 'book1';
       S.postLoginGoto = null;
       S.loggedIn=true; toast('Welcome back, Ming'); go(dest);
-    } else {
-      const dest = S.postLoginGoto || 'book1';
-      S.postLoginGoto = null;
-      S.loggedIn=true; toast('Account created — welcome to TruckerPath'); go(dest);
     }
   });
 
