@@ -1423,7 +1423,8 @@ function screenAllListings(){
    Login
 ============================================================ */
 const SU_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const suPwChecks = pw => [['8+ characters', pw.length>=8], ['A letter', /[A-Za-z]/.test(pw)], ['A number', /\d/.test(pw)]];
+// TP account rule: at least 4 characters, nothing else (the API itself only rejects empty)
+const suPwChecks = pw => [['4+ characters', pw.length>=4]];
 const suReady = su => /^\d{6}$/.test(su.code) && suPwChecks(su.password).every(([,ok])=>ok) && su.attempts < 5;
 function suResendLabel(){
   const left = Math.ceil((S.signup.resendAt - Date.now())/1000);
