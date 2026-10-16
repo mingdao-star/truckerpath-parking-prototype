@@ -1425,35 +1425,38 @@ function screenAllListings(){
 const SU_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // TP account rule: at least 4 characters, nothing else (the API itself only rejects empty)
 const suPwChecks = pw => [['4+ characters', pw.length>=4]];
-const suReady = su => /^\d{6}$/.test(su.code) && suPwChecks(su.password).every(([,ok])=>ok) && su.attempts < 5;
+const suStep1Ready = su => su.email.trim() && suPwChecks(su.password).every(([,ok])=>ok);
+const suReady = su => /^\d{6}$/.test(su.code) && su.attempts < 5;
 function suResendLabel(){
   const left = Math.ceil((S.signup.resendAt - Date.now())/1000);
   return left > 0 ? `Resend code in ${left}s` : '';
 }
 function signupBody(){
   const su = S.signup;
-  if(su.step==='email') return `
+  if(su.step==='email'){
+    const pw = suPwChecks(su.password);
+    return `
     <h2 style="font-size:17px;margin:0 0 14px">Create your account</h2>
-    <p class="su-sub">One TruckerPath account works here and in the TruckerPath app. We'll email you a 6-digit code to confirm your address.</p>
-    <div class="field" style="margin-bottom:4px"><label>Email</label><input class="control ${su.err?'has-err':''}" id="signupEmail" type="email" placeholder="you@company.com" value="${su.email}"></div>
+    <p class="su-sub">One TruckerPath account works here and in the TruckerPath app.</p>
+    <div class="su-row">
+      <div class="field"><label>First name</label><input class="control" id="signupFirst" placeholder="Optional" value="${su.firstName}"></div>
+      <div class="field"><label>Last name</label><input class="control" id="signupLast" placeholder="Optional" value="${su.lastName}"></div>
+    </div>
+    <div class="field" style="margin:12px 0 4px"><label>Email</label><input class="control ${su.err?'has-err':''}" id="signupEmail" type="email" placeholder="you@company.com" value="${su.email}"></div>
     ${su.err ? `<div class="field-err">${su.err}</div>` : ''}
-    <button class="btn btn-primary btn-lg" style="width:100%;margin-top:14px" id="signupSendCode" ${su.email.trim()?'':'disabled'}>Send verification code</button>
+    <div class="field" style="margin-top:12px"><label>Password</label><input class="control" id="signupPassword" type="password" placeholder="Create a password" value="${su.password}"></div>
+    <ul class="su-check" id="signupPwChecks">${pw.map(([t,ok])=>`<li class="${ok?'ok':''}">${ok?'✓':'○'} ${t}</li>`).join('')}</ul>
+    <button class="btn btn-primary btn-lg" style="width:100%;margin-top:16px" id="signupSendCode" ${suStep1Ready(su)?'':'disabled'}>Continue</button>
     <div style="text-align:center;margin-top:14px;font-size:12.5px;color:var(--ink-soft)">Already have a TruckerPath account? <a href="#" class="btn-text" id="toLoginTab">Log in</a></div>
     <div class="su-fine">This site is protected by reCAPTCHA.</div>`;
+  }
   const locked = su.attempts >= 5;
-  const pw = suPwChecks(su.password);
   return `
-    <h2 style="font-size:17px;margin:0 0 14px">Check your email</h2>
+    <h2 style="font-size:17px;margin:0 0 14px">Verify your email</h2>
     <p class="su-sub">We sent a 6-digit code to <b style="color:var(--ink)">${su.email}</b>. It expires in 10 minutes. <a href="#" class="btn-text" id="signupChangeEmail" style="font-size:12.5px">Change email</a></p>
     <div class="field" style="margin-bottom:4px"><label>Verification code</label><input class="control su-code ${su.codeErr?'has-err':''}" id="signupCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" value="${su.code}" ${locked?'disabled':''}></div>
     ${su.codeErr ? `<div class="field-err">${su.codeErr}</div>` : ''}
     <div class="su-resend"><span id="signupResendWait">${suResendLabel()}</span><a href="#" class="btn-text" id="signupResend" style="font-size:12px;${suResendLabel()?'display:none':''}">Resend code</a></div>
-    <div class="field" style="margin:14px 0 0"><label>Password</label><input class="control" id="signupPassword" type="password" placeholder="Create a password" value="${su.password}"></div>
-    <ul class="su-check" id="signupPwChecks">${pw.map(([t,ok])=>`<li class="${ok?'ok':''}">${ok?'✓':'○'} ${t}</li>`).join('')}</ul>
-    <div class="su-row" style="margin-top:12px">
-      <div class="field"><label>First name</label><input class="control" id="signupFirst" placeholder="Optional" value="${su.firstName}"></div>
-      <div class="field"><label>Last name</label><input class="control" id="signupLast" placeholder="Optional" value="${su.lastName}"></div>
-    </div>
     <button class="btn btn-primary btn-lg" style="width:100%;margin-top:16px" id="signupCreate" ${suReady(su)?'':'disabled'}>Create account</button>
     <div class="su-fine">Demo: use any 6 digits except 000000. 000000 shows the wrong-code error.</div>`;
 }
@@ -2414,7 +2417,7 @@ function wireScreen(root){
   /* ---- sign-up: step 1 send code, step 2 register ---- */
   const su = S.signup;
   const suEmail = root.querySelector('#signupEmail'), suSend = root.querySelector('#signupSendCode');
-  if(suEmail) suEmail.addEventListener('input',()=>{ su.email = suEmail.value; if(su.err){ su.err=''; suEmail.classList.remove('has-err'); const fe=suEmail.closest('.field').nextElementSibling; if(fe && fe.classList.contains('field-err')) fe.remove(); } if(suSend) suSend.disabled = !su.email.trim(); });
+  if(suEmail) suEmail.addEventListener('input',()=>{ su.email = suEmail.value; if(su.err){ su.err=''; suEmail.classList.remove('has-err'); const fe=suEmail.closest('.field').nextElementSibling; if(fe && fe.classList.contains('field-err')) fe.remove(); } if(suSend) suSend.disabled = !suStep1Ready(su); });
   const suSendCode = ()=>{
     su.email = su.email.trim().toLowerCase();
     if(!SU_EMAIL_RE.test(su.email)){ su.err = 'Enter a valid email, e.g. name@company.com'; render(); return; }
@@ -2424,7 +2427,7 @@ function wireScreen(root){
     render(); toast('Code sent to '+su.email);
   };
   if(suSend) suSend.addEventListener('click', suSendCode);
-  if(suEmail) suEmail.addEventListener('keydown',e=>{ if(e.key==='Enter' && su.email.trim()) suSendCode(); });
+  if(suEmail) suEmail.addEventListener('keydown',e=>{ if(e.key==='Enter' && suStep1Ready(su)) suSendCode(); });
   const suErrLogin = root.querySelector('#suErrLogin'); if(suErrLogin) suErrLogin.addEventListener('click',e=>{ e.preventDefault(); S.loginTab='login'; S.loginForm.email=su.email; su.err=''; render(); });
   const suErrForgot = root.querySelector('#suErrForgot'); if(suErrForgot) suErrForgot.addEventListener('click',e=>{ e.preventDefault(); toast('Password reset link sent (if an account exists)'); });
   const suChange = root.querySelector('#signupChangeEmail'); if(suChange) suChange.addEventListener('click',e=>{ e.preventDefault(); su.step='email'; render(); });
@@ -2433,6 +2436,7 @@ function wireScreen(root){
     const ul = root.querySelector('#signupPwChecks');
     if(ul) ul.innerHTML = suPwChecks(su.password).map(([t,ok])=>`<li class="${ok?'ok':''}">${ok?'✓':'○'} ${t}</li>`).join('');
     if(suCreate) suCreate.disabled = !suReady(su);
+    if(suSend) suSend.disabled = !suStep1Ready(su);
   };
   [['signupCode','code'],['signupPassword','password'],['signupFirst','firstName'],['signupLast','lastName']].forEach(([id,key])=>{
     const el = root.querySelector('#'+id); if(!el) return;
