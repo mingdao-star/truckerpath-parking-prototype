@@ -453,7 +453,7 @@ const S = {
   loginForm: { email:'', password:'' },
   loginErr: '',
   // two-step email sign-up against the TP user API: send a 6-digit code, then register with it
-  signup: { step:'email', email:'', code:'', password:'', firstName:'', lastName:'', company:'', err:'', codeErr:'', attempts:0, resendAt:0 },
+  signup: { step:'email', email:'', code:'', password:'', firstName:'', lastName:'', err:'', codeErr:'', attempts:0, resendAt:0 },
   postLoginGoto: null,
   bookingSeq: 112,
   retryOrderId: null,
@@ -1424,7 +1424,7 @@ function screenAllListings(){
 ============================================================ */
 const SU_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const suPwChecks = pw => [['8+ characters', pw.length>=8], ['A letter', /[A-Za-z]/.test(pw)], ['A number', /\d/.test(pw)]];
-const suReady = su => /^\d{6}$/.test(su.code) && suPwChecks(su.password).every(([,ok])=>ok) && su.company.trim() && su.attempts < 5;
+const suReady = su => /^\d{6}$/.test(su.code) && suPwChecks(su.password).every(([,ok])=>ok) && su.attempts < 5;
 function suResendLabel(){
   const left = Math.ceil((S.signup.resendAt - Date.now())/1000);
   return left > 0 ? `Resend code in ${left}s` : '';
@@ -1453,7 +1453,6 @@ function signupBody(){
       <div class="field"><label>First name</label><input class="control" id="signupFirst" placeholder="Optional" value="${su.firstName}"></div>
       <div class="field"><label>Last name</label><input class="control" id="signupLast" placeholder="Optional" value="${su.lastName}"></div>
     </div>
-    <div class="field" style="margin-top:12px"><label>Company name</label><input class="control" id="signupCompany" placeholder="ABC Logistics" value="${su.company}"></div>
     <button class="btn btn-primary btn-lg" style="width:100%;margin-top:16px" id="signupCreate" ${suReady(su)?'':'disabled'}>Create account</button>
     <div class="su-fine">Demo: use any 6 digits except 000000. 000000 shows the wrong-code error.</div>`;
 }
@@ -2434,7 +2433,7 @@ function wireScreen(root){
     if(ul) ul.innerHTML = suPwChecks(su.password).map(([t,ok])=>`<li class="${ok?'ok':''}">${ok?'✓':'○'} ${t}</li>`).join('');
     if(suCreate) suCreate.disabled = !suReady(su);
   };
-  [['signupCode','code'],['signupPassword','password'],['signupFirst','firstName'],['signupLast','lastName'],['signupCompany','company']].forEach(([id,key])=>{
+  [['signupCode','code'],['signupPassword','password'],['signupFirst','firstName'],['signupLast','lastName']].forEach(([id,key])=>{
     const el = root.querySelector('#'+id); if(!el) return;
     el.addEventListener('input',()=>{
       if(key==='code'){ el.value = el.value.replace(/\D/g,'').slice(0,6); if(su.codeErr){ su.codeErr=''; el.classList.remove('has-err'); const fe=el.closest('.field').nextElementSibling; if(fe && fe.classList.contains('field-err')) fe.remove(); } }
@@ -2461,7 +2460,7 @@ function wireScreen(root){
     S.postLoginGoto = null;
     S.loggedIn = true;
     const first = su.firstName.trim();
-    S.signup = { step:'email', email:'', code:'', password:'', firstName:'', lastName:'', company:'', err:'', codeErr:'', attempts:0, resendAt:0 };
+    S.signup = { step:'email', email:'', code:'', password:'', firstName:'', lastName:'', err:'', codeErr:'', attempts:0, resendAt:0 };
     toast(first ? `Account created. Welcome to TruckerPath, ${first}` : 'Account created. Welcome to TruckerPath');
     go(dest);
   });
