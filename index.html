@@ -317,6 +317,20 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .dropzone{border:2px dashed var(--border-input);border-radius:var(--r-lg);padding:30px;text-align:center;background:#fafaf9;cursor:pointer}
 .dropzone:hover,.dropzone.drag{border-color:var(--brand);background:var(--brand-tint)}
 table.dtable{width:100%;border-collapse:collapse;font-size:12.5px}
+.vtable-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-lg);background:#fff}
+table.vtable{border-collapse:separate;border-spacing:0;min-width:100%;font-size:13px}
+.vtable th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);padding:7px 8px;white-space:nowrap;background:var(--paper-dim)}
+.vtable th.vt-grp{color:var(--brand);border-bottom:1px solid var(--line);border-left:1px solid var(--line)}
+.vtable th.vt-grp.opt{color:var(--ink-muted)}
+.vtable td{padding:4px;border-top:1px solid var(--line)}
+.vtable .vt-idx{position:sticky;left:0;z-index:1;background:#fff;text-align:center;font-weight:700;color:var(--ink-soft);padding:0 12px;border-right:1px solid var(--line)}
+.vtable thead .vt-idx{background:var(--paper-dim)}
+.vtable tr.vt-bad .vt-idx{color:var(--red);box-shadow:inset 3px 0 0 var(--red)}
+.vt-in{width:100%;min-width:120px;border:1px solid transparent;border-radius:6px;padding:7px 8px;font:inherit;color:var(--ink);background:transparent}
+.vt-in.wide{min-width:220px}
+.vt-in:hover{border-color:var(--line)}
+.vt-in:focus{outline:none;border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px var(--brand-tint)}
+.vt-in.has-err{border-color:var(--red);background:var(--red-tint)}
 table.dtable th{text-align:left;font-size:10.5px;text-transform:uppercase;color:var(--ink-soft);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
 table.dtable td{padding:8px 10px;border-bottom:1px solid #f0f0ee;white-space:nowrap;font-variant-numeric:tabular-nums}
 table.dtable tbody tr{transition:background .1s}
@@ -1631,6 +1645,32 @@ function vfInput(i, key, label, placeholder, optional){
   return `<div class="field"><label>${label}${optional?' <span class="opt-tag">(optional)</span>':' <span class="req-star" aria-label="required">*</span>'}</label><input class="control${err?' has-err':''}" id="vf_${i}_${key}" data-vf="${key}" data-vfrow="${i}" placeholder="${placeholder}" value="${S.vehicleForms[i][key]}">${err?`<div class="field-err">${err}</div>`:''}</div>`;
 }
 const VEHICLE_PAGE_SIZE = 5;
+// more than one spot → one editable table (row per vehicle) instead of stacked cards; it fits more rows per page
+const VEHICLE_TABLE_PAGE_SIZE = 10;
+const vehiclePageSize = () => S.vehicleForms.length > 1 ? VEHICLE_TABLE_PAGE_SIZE : VEHICLE_PAGE_SIZE;
+function vehicleTableHtml(pageIndices){
+  const showTruck = S.step2VehicleType === 'Truck + Trailer';
+  const groups = [
+    ['Driver', [['driverPhone','Phone','(555) 555-0123'],['driverEmail','Email','name@example.com']]],
+    ...(showTruck ? [['Truck', [['truckNum','Truck #','Type here…'],['truckPlate','Plate #','Type here…']]]] : []),
+    ['Trailer', [['trailerType','Type','53 dry van'],['trailerPlate','Plate #','Type here…']]],
+    ['Optional', [...(showTruck ? [['truckMake','Truck make','Type here…',true]] : []), ['trailerNum','Trailer #','Type here…',true], ['trailerCompany','Trailer company','Type here…',true]]],
+  ];
+  const cols = groups.flatMap(([,c])=>c);
+  return `
+  <div class="vtable-wrap">
+    <table class="vtable">
+      <thead>
+        <tr><th class="vt-idx" rowspan="2">#</th>${groups.map(([g,c])=>`<th class="vt-grp${g==='Optional'?' opt':''}" colspan="${c.length}">${g}</th>`).join('')}</tr>
+        <tr>${cols.map(([,label,,opt])=>`<th>${label}${opt?'':' <span class="req-star" aria-label="required">*</span>'}</th>`).join('')}</tr>
+      </thead>
+      <tbody>${pageIndices.map(i=>{
+        const vf = S.vehicleForms[i], errs = S.vehicleErrors[i] || {};
+        return `<tr class="${S.vehicleErrors[i]?'vt-bad':''}"><td class="vt-idx" title="${S.vehicleErrors[i]?'Missing required info':''}">${i+1}</td>${cols.map(([key,,ph,opt])=>`<td><input class="vt-in${key==='driverEmail'?' wide':''}${errs[key]?' has-err':''}" id="vf_${i}_${key}" data-vf="${key}" data-vfrow="${i}" placeholder="${ph}" value="${vf[key]}" title="${errs[key]||''}" aria-label="Vehicle ${i+1} ${key}"></td>`).join('')}</tr>`;
+      }).join('')}</tbody>
+    </table>
+  </div>`;
+}
 // every field shown up front on a vehicle section is required; "Add more details" fields are optional
 function vehicleRequiredKeys(){
   return ['driverPhone','driverEmail', ...(S.step2VehicleType==='Truck + Trailer' ? ['truckNum','truckPlate'] : []), 'trailerType','trailerPlate'];
@@ -1799,10 +1839,12 @@ function vehicleUploadErrorHtml(){
 }
 function screenBookStep3Vehicle(){
   const totalVehicles = S.vehicleForms.length;
-  const vehiclePages = Math.max(1, Math.ceil(totalVehicles/VEHICLE_PAGE_SIZE));
+  const tableMode = totalVehicles > 1;
+  const pageSize = vehiclePageSize();
+  const vehiclePages = Math.max(1, Math.ceil(totalVehicles/pageSize));
   const vehiclePage = Math.min(S.vehiclePage||1, vehiclePages);
-  const pageStart = (vehiclePage-1)*VEHICLE_PAGE_SIZE;
-  const pageIndices = Array.from({length: Math.max(0, Math.min(VEHICLE_PAGE_SIZE, totalVehicles-pageStart))}, (_,k)=>pageStart+k);
+  const pageStart = (vehiclePage-1)*pageSize;
+  const pageIndices = Array.from({length: Math.max(0, Math.min(pageSize, totalVehicles-pageStart))}, (_,k)=>pageStart+k);
   let vehiclePageBtns = '';
   for(let i=1;i<=vehiclePages;i++) vehiclePageBtns += `<button class="page-btn ${i===vehiclePage?'on':''}" data-vp="${i}">${i}</button>`;
   return `
@@ -1812,16 +1854,16 @@ function screenBookStep3Vehicle(){
       <button class="btn btn-outline" id="step3Back">← Back</button>
     </div>
     <div class="results-row" style="align-items:flex-start">
-      <div style="flex:1">
+      <div style="flex:1;min-width:0">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px">
           <div style="display:flex;align-items:center;gap:10px">
             <h2 class="card-title" style="margin:0">Vehicle &amp; Trailer Details</h2>
             <span class="autosaved" id="autosaved">${ic.check} Saved</span>
           </div>
-          <div style="display:flex;gap:16px">
+          ${tableMode ? `<span style="font-size:12.5px;color:var(--ink-soft)">${totalVehicles} vehicles · one row each</span>` : `<div style="display:flex;gap:16px">
             <button class="btn-text" id="expandAllVehicles" style="font-size:12.5px">Expand all</button>
             <button class="btn-text" id="collapseAllVehicles" style="font-size:12.5px">Collapse all</button>
-          </div>
+          </div>`}
         </div>
         <p style="font-size:12.5px;color:var(--ink-soft);margin:-6px 0 14px"><span class="req-star">*</span> Required field</p>
         ${S.step2VehicleType==='Truck + Trailer' ? `
@@ -1832,7 +1874,7 @@ function screenBookStep3Vehicle(){
             <div class="field-note" style="margin-top:8px">${ic.info}Your fleet's DOT number. It applies to every vehicle on this booking and is saved to your account for next time.</div>
           </div>
         </div>` : ''}
-        ${pageIndices.map(i=>{
+        ${tableMode ? vehicleTableHtml(pageIndices) : pageIndices.map(i=>{
           const vf = S.vehicleForms[i];
           const expanded = S.vehicleFormsExpanded[i] !== false;
           const moreExpanded = !!S.vehicleMoreExpanded[i];
@@ -2631,7 +2673,7 @@ function wireScreen(root){
     if(bad.length || dotMissing){
       S.vehicleErrors = errs;
       bad.forEach(i=>{ S.vehicleFormsExpanded[i] = true; });
-      if(bad.length) S.vehiclePage = Math.floor(bad[0]/VEHICLE_PAGE_SIZE)+1;
+      if(bad.length) S.vehiclePage = Math.floor(bad[0]/vehiclePageSize())+1;
       render();
       if(dotMissing) window.scrollTo({top:0, behavior:'smooth'});
       toast(bad.length ? `Fill in the required fields for ${bad.length} vehicle${bad.length===1?'':'s'}${dotMissing?' and your USDOT #':''}` : "Enter your fleet's USDOT #");
