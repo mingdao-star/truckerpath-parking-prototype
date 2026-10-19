@@ -537,19 +537,19 @@ const LOTS = {
   eloy:{name:'Eloy, AZ Truck & Trailer Parking at PICACHO RV & TRUCK PARK', city:'Eloy, AZ', avail:9, totalSpots:12, day:15, week:150, month:300, lat:32.7519, lng:-111.5468,
     rating:4.1, address:'4501 W Sunland Gin Rd, Eloy, AZ 85131', highway:'I-10, Exit 226', phone:'1(520) 466-7710',
     reports:[{cls:'some',label:'SOME',time:'12m ago'},{cls:'many',label:'MANY',time:'25m ago'},{cls:'paid',label:'PAID ONLY',time:'2h ago'}],
-    freeSpots:9, wifi:true, scales:false, atmCount:0, vtypeAvail:{'Truck + Trailer':6,'Trailer Only':3},
+    freeSpots:9, wifi:true, scales:false, atmCount:0, vtypeAvail:{'Truck + Trailer':6,'Trailer Only':3,'Truck Only':4},
     amenities:{access247:true, gated:true, electronicAccess:true, wifi:true, restroom:true},
     instructions:'Enter via the main gate on Sunland Gin Rd. Hold your check-in QR up to the scanner at the gate.', accessType:'qr'},
   maricopa:{name:'Maricopa, AZ Truck & Trailer Parking on N White Rd', city:'Maricopa, AZ', avail:12, totalSpots:15, day:18, week:85, month:320, lat:33.0581, lng:-112.0476,
     rating:4.4, address:'41215 N White Rd, Maricopa, AZ 85138', highway:'AZ-347, Exit 12', phone:'1(520) 568-4420',
     reports:[{cls:'some',label:'SOME',time:'6m ago'},{cls:'many',label:'MANY',time:'18m ago'},{cls:'paid',label:'PAID ONLY',time:'45m ago'}],
-    freeSpots:4, wifi:true, scales:true, atmCount:1, vtypeAvail:{'Truck + Trailer':7,'Trailer Only':5},
+    freeSpots:4, wifi:true, scales:true, atmCount:1, vtypeAvail:{'Truck + Trailer':7,'Trailer Only':5,'Truck Only':3},
     amenities:{assignedParking:true, access247:true, gated:true, cctv:true, onSiteStaff:true, lighting:true, showers:true, wifi:true, publicScale:true, restroom:true, fenced:true, pavedSurface:true},
     instructions:'Enter your gate code at the keypad by the site office. Check in there before 9pm; after hours, use the drop-box for your paperwork.', accessType:'gateCode'},
   glendale1:{name:'Glendale-Litchfield Park, AZ at PHX1 Logistics Plus', city:'Glendale, AZ', avail:50, totalSpots:60, day:14, week:65, month:250, lat:33.5387, lng:-112.3576,
     rating:4.6, address:'6900 N 43rd Ave, Glendale, AZ 85301', highway:'I-17, Exit 205', phone:'1(623) 847-1190',
     reports:[{cls:'some',label:'SOME',time:'3m ago'},{cls:'many',label:'MANY',time:'15m ago'},{cls:'paid',label:'PAID ONLY',time:'1h ago'}],
-    freeSpots:20, wifi:false, scales:true, atmCount:1, vtypeAvail:{'Truck + Trailer':30,'Trailer Only':20},
+    freeSpots:20, wifi:false, scales:true, atmCount:1, vtypeAvail:{'Truck + Trailer':30,'Trailer Only':20,'Truck Only':10},
     amenities:{assignedParking:true, wideLanes:true, access247:true, gated:true, cctv:true, onSiteStaff:true, lighting:true, showers:true, publicScale:true, fuel:true, restroom:true, food:true, fenced:true, pavedSurface:true, truckRepair:true},
     // this partner has done even less setup than glendale2 — no entrance photo AND no written
     // instructions either, just the bare QR icon + title
@@ -560,7 +560,7 @@ const LOTS = {
     // Only aren't separately capped, they draw from the same 50 spots at the same price
     sharedPool:true, poolSize:50,
     reports:[{cls:'some',label:'SOME',time:'4m ago'},{cls:'many',label:'MANY',time:'10m ago'},{cls:'paid',label:'PAID ONLY',time:'1h ago'}],
-    freeSpots:15, wifi:true, scales:false, atmCount:0, vtypeAvail:{'Truck + Trailer':50,'Trailer Only':50},
+    freeSpots:15, wifi:true, scales:false, atmCount:0, vtypeAvail:{'Truck + Trailer':50,'Trailer Only':50,'Truck Only':50},
     amenities:{wideLanes:true, access247:true, gated:true, cctv:true, lighting:true, electronicAccess:true, showers:true, wifi:true, restroom:true, fenced:true, pavedSurface:true},
     // this partner hasn't uploaded an entrance photo yet — Access & Check-in should fall back to
     // just the QR icon + text instructions, with no image section
@@ -681,182 +681,182 @@ const US_STATES = [
 ];
 
 const PARTNER_LOCATIONS = [
-  {partner:'Realize',name:'Realize Truck Parking @ La Vergne, TN | Lot A',city:'La Vergne',state:'TN',active:true,avail:12,day:17,vtypes:['Trailer Only','Bobtail']},
+  {partner:'Realize',name:'Realize Truck Parking @ La Vergne, TN | Lot A',city:'La Vergne',state:'TN',active:true,avail:12,day:17,vtypes:['Trailer Only','Truck Only']},
   {partner:'Realize',name:'Realize Truck Parking @ La Vergne, TN | Lot B',city:'La Vergne',state:'TN',active:true,avail:46,day:21,vtypes:['Truck + Trailer']},
-  {partner:'Realize',name:'Realize Truck Parking @ La Vergne, TN | Lot C',city:'La Vergne',state:'TN',active:true,avail:10,day:45,vtypes:['Trailer Only','Bobtail']},
+  {partner:'Realize',name:'Realize Truck Parking @ La Vergne, TN | Lot C',city:'La Vergne',state:'TN',active:true,avail:10,day:45,vtypes:['Trailer Only','Truck Only']},
   {partner:'Realize',name:'Realize Truck Parking @ Loganville, GA | Lot A',city:'Loganville',state:'GA',active:true,avail:4,day:37,vtypes:['Truck + Trailer']},
-  {partner:'Realize',name:'Realize Truck Parking @ Loganville, GA | Lot B',city:'Loganville',state:'GA',active:true,avail:38,day:13,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'Realize',name:'Realize Truck Parking @ S Las Vegas, NV',city:'Sloan',state:'NV',active:true,avail:32,day:41,vtypes:['Truck + Trailer','Bobtail']},
-  {partner:'Realize',name:'Realize Truck Parking @ Jacksonville, FL',city:'Jacksonville',state:'FL',active:true,avail:14,day:49,vtypes:['Trailer Only','Bobtail']},
-  {partner:'Realize',name:'Realize Truck Parking @ Pompano Beach, FL',city:'Pompano Beach',state:'FL',active:true,avail:14,day:17,vtypes:['Truck + Trailer','Bobtail']},
+  {partner:'Realize',name:'Realize Truck Parking @ Loganville, GA | Lot B',city:'Loganville',state:'GA',active:true,avail:38,day:13,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'Realize',name:'Realize Truck Parking @ S Las Vegas, NV',city:'Sloan',state:'NV',active:true,avail:32,day:41,vtypes:['Truck + Trailer','Truck Only']},
+  {partner:'Realize',name:'Realize Truck Parking @ Jacksonville, FL',city:'Jacksonville',state:'FL',active:true,avail:14,day:49,vtypes:['Trailer Only','Truck Only']},
+  {partner:'Realize',name:'Realize Truck Parking @ Pompano Beach, FL',city:'Pompano Beach',state:'FL',active:true,avail:14,day:17,vtypes:['Truck + Trailer','Truck Only']},
   {partner:'Realize',name:'Realize Truck Parking @ Hialeah, FL',city:'Hialeah',state:'FL',active:true,avail:58,day:21,vtypes:['Trailer Only']},
   {partner:'Realize',name:'Realize Truck Parking @ Baltimore, MD',city:'Baltimore',state:'MD',active:true,avail:44,day:21,vtypes:['Truck + Trailer']},
-  {partner:'Realize',name:'Realize Truck Parking @ Memphis, TN',city:'Memphis',state:'TN',active:true,avail:35,day:18,vtypes:['Truck + Trailer','Bobtail']},
+  {partner:'Realize',name:'Realize Truck Parking @ Memphis, TN',city:'Memphis',state:'TN',active:true,avail:35,day:18,vtypes:['Truck + Trailer','Truck Only']},
   {partner:'Realize',name:'Realize Truck Parking @ Dallas, TX',city:'Dallas',state:'TX',active:true,avail:11,day:26,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'Realize',name:'Realize Truck Parking @ Houston, TX',city:'Houston',state:'TX',active:true,avail:23,day:22,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'Realize',name:'Realize Truck Parking @ Hutchins, TX',city:'Hutchins',state:'TX',active:true,avail:39,day:46,vtypes:['Trailer Only','Bobtail']},
-  {partner:'Realize',name:'Realize Truck Parking @ Bradenton, FL',city:'Bradenton',state:'FL',active:true,avail:39,day:22,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
+  {partner:'Realize',name:'Realize Truck Parking @ Houston, TX',city:'Houston',state:'TX',active:true,avail:23,day:22,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'Realize',name:'Realize Truck Parking @ Hutchins, TX',city:'Hutchins',state:'TX',active:true,avail:39,day:46,vtypes:['Trailer Only','Truck Only']},
+  {partner:'Realize',name:'Realize Truck Parking @ Bradenton, FL',city:'Bradenton',state:'FL',active:true,avail:39,day:22,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
   {partner:'Realize',name:'Realize Truck Parking @ N Las Vegas',city:'North Las Vegas',state:'NV',active:true,avail:5,day:14,vtypes:['Trailer Only']},
   {partner:'Realize',name:'Realize Truck Parking @ West Palm Beach, FL',city:'West Palm Beach',state:'FL',active:true,avail:51,day:18,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'Realize',name:'Realize Truck Parking @ Cottage Grove, MN',city:'Cottage Grove',state:'MN',active:true,avail:7,day:30,vtypes:['Trailer Only','Bobtail']},
-  {partner:'Realize',name:'Realize Truck Parking @ Statesville, NC',city:'Statesville',state:'NC',active:true,avail:31,day:18,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'Realize',name:'Realize Truck Parking @ Kernersville, NC',city:'Kernersville',state:'NC',active:true,avail:43,day:26,vtypes:['Trailer Only','Bobtail']},
+  {partner:'Realize',name:'Realize Truck Parking @ Cottage Grove, MN',city:'Cottage Grove',state:'MN',active:true,avail:7,day:30,vtypes:['Trailer Only','Truck Only']},
+  {partner:'Realize',name:'Realize Truck Parking @ Statesville, NC',city:'Statesville',state:'NC',active:true,avail:31,day:18,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'Realize',name:'Realize Truck Parking @ Kernersville, NC',city:'Kernersville',state:'NC',active:true,avail:43,day:26,vtypes:['Trailer Only','Truck Only']},
   {partner:'Realize',name:'Realize Truck Parking @ Staten Island, NY',city:'Staten Island',state:'NY',active:true,avail:20,day:23,vtypes:['Truck + Trailer']},
-  {partner:'Realize',name:'Realize Truck Parking @ Hebron',city:'Hebron',state:'KY',active:true,avail:26,day:31,vtypes:['Trailer Only','Bobtail']},
+  {partner:'Realize',name:'Realize Truck Parking @ Hebron',city:'Hebron',state:'KY',active:true,avail:26,day:31,vtypes:['Trailer Only','Truck Only']},
   {partner:'Realize',name:'Realize Truck Parking @ Grandview, MO',city:'Grandview',state:'MO',active:true,avail:14,day:19,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'Realize',name:'Realize Truck Parking @ Columbus, OH',city:'Columbus',state:'OH',active:true,avail:60,day:43,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'Realize',name:'Realize Truck Parking @ Grand Prairie, TX',city:'Grand Prairie',state:'TX',active:true,avail:36,day:47,vtypes:['Trailer Only','Bobtail']},
-  {partner:'Realize',name:'Realize Truck Parking @ Jefferson, GA',city:'Jefferson',state:'GA',active:true,avail:30,day:31,vtypes:['Trailer Only','Bobtail']},
-  {partner:'Realize',name:'Realize Truck Parking @ Greensboro, NC',city:'Greensboro',state:'NC',active:true,avail:48,day:23,vtypes:['Bobtail']},
-  {partner:'Realize',name:'Realize Truck Parking @ Baltimore, MD | Chesapeake Ave',city:'Curtis Bay',state:'MD',active:true,avail:32,day:35,vtypes:['Bobtail']},
+  {partner:'Realize',name:'Realize Truck Parking @ Columbus, OH',city:'Columbus',state:'OH',active:true,avail:60,day:43,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'Realize',name:'Realize Truck Parking @ Grand Prairie, TX',city:'Grand Prairie',state:'TX',active:true,avail:36,day:47,vtypes:['Trailer Only','Truck Only']},
+  {partner:'Realize',name:'Realize Truck Parking @ Jefferson, GA',city:'Jefferson',state:'GA',active:true,avail:30,day:31,vtypes:['Trailer Only','Truck Only']},
+  {partner:'Realize',name:'Realize Truck Parking @ Greensboro, NC',city:'Greensboro',state:'NC',active:true,avail:48,day:23,vtypes:['Truck Only']},
+  {partner:'Realize',name:'Realize Truck Parking @ Baltimore, MD | Chesapeake Ave',city:'Curtis Bay',state:'MD',active:true,avail:32,day:35,vtypes:['Truck Only']},
   {partner:'Drop Yard',name:'Drop Yard STL',city:'Bridgeton',state:'MO',active:true,avail:4,day:43,vtypes:['Trailer Only']},
-  {partner:'Freight Ninja',name:'Freight Ninja Truck and Trailer Parking - Ontario, CA',city:'Ontario',state:'CA',active:true,avail:24,day:35,vtypes:['Trailer Only','Bobtail']},
+  {partner:'Freight Ninja',name:'Freight Ninja Truck and Trailer Parking - Ontario, CA',city:'Ontario',state:'CA',active:true,avail:24,day:35,vtypes:['Trailer Only','Truck Only']},
   {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - Pompano Beach, FL',city:'Pompano Beach',state:'FL',active:true,avail:29,day:44,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - Deerfield Beach, FL',city:'Pompano Beach',state:'FL',active:true,avail:3,day:12,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - Chicago Heights, IL',city:'Chicago Heights',state:'IL',active:true,avail:23,day:12,vtypes:['Truck + Trailer','Bobtail']},
-  {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - Chicago, IL',city:'Chicago',state:'IL',active:true,avail:49,day:24,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - East Dundee, IL',city:'East Dundee',state:'IL',active:true,avail:37,day:24,vtypes:['Bobtail']},
-  {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - Lemont, IL',city:'Lemont',state:'IL',active:true,avail:19,day:44,vtypes:['Trailer Only','Bobtail']},
+  {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - Deerfield Beach, FL',city:'Pompano Beach',state:'FL',active:true,avail:3,day:12,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - Chicago Heights, IL',city:'Chicago Heights',state:'IL',active:true,avail:23,day:12,vtypes:['Truck + Trailer','Truck Only']},
+  {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - Chicago, IL',city:'Chicago',state:'IL',active:true,avail:49,day:24,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - East Dundee, IL',city:'East Dundee',state:'IL',active:true,avail:37,day:24,vtypes:['Truck Only']},
+  {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - Lemont, IL',city:'Lemont',state:'IL',active:true,avail:19,day:44,vtypes:['Trailer Only','Truck Only']},
   {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - Gary, IN',city:'Gary',state:'IN',active:true,avail:13,day:28,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - La Vergne, TN',city:'La Vergne',state:'TN',active:true,avail:23,day:24,vtypes:['Bobtail']},
-  {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - MT Pleasant, WI',city:'Sturtevant',state:'WI',active:true,avail:15,day:32,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'North Yard',name:'The North Yard LLC',city:'Antelope',state:'CA',active:false,avail:39,day:32,vtypes:['Truck + Trailer','Bobtail']},
+  {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - La Vergne, TN',city:'La Vergne',state:'TN',active:true,avail:23,day:24,vtypes:['Truck Only']},
+  {partner:'Freight Ninja',name:'Freight Ninja Truck & Trailer Parking - MT Pleasant, WI',city:'Sturtevant',state:'WI',active:true,avail:15,day:32,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'North Yard',name:'The North Yard LLC',city:'Antelope',state:'CA',active:false,avail:39,day:32,vtypes:['Truck + Trailer','Truck Only']},
   {partner:'Prime Parking',name:'Prime Parking NWA',city:'Rogers',state:'AR',active:false,avail:27,day:45,vtypes:['Truck + Trailer']},
-  {partner:'Park My Tractor',name:'Park My Tractor',city:'Gary',state:'IN',active:true,avail:44,day:37,vtypes:['Trailer Only','Bobtail']},
-  {partner:'Store My Truck',name:'Jefferson Truck And Trailer Parking',city:'',state:'',active:false,avail:28,day:25,vtypes:['Truck + Trailer','Bobtail']},
-  {partner:'Store My Truck',name:'Dallas Tractor Trailer Truck Parking',city:'',state:'',active:false,avail:10,day:49,vtypes:['Truck + Trailer','Bobtail']},
-  {partner:'Store My Truck',name:'Oklahoma City Tractor Trailer Truck Parking',city:'',state:'',active:false,avail:44,day:49,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
+  {partner:'Park My Tractor',name:'Park My Tractor',city:'Gary',state:'IN',active:true,avail:44,day:37,vtypes:['Trailer Only','Truck Only']},
+  {partner:'Store My Truck',name:'Jefferson Truck And Trailer Parking',city:'',state:'',active:false,avail:28,day:25,vtypes:['Truck + Trailer','Truck Only']},
+  {partner:'Store My Truck',name:'Dallas Tractor Trailer Truck Parking',city:'',state:'',active:false,avail:10,day:49,vtypes:['Truck + Trailer','Truck Only']},
+  {partner:'Store My Truck',name:'Oklahoma City Tractor Trailer Truck Parking',city:'',state:'',active:false,avail:44,day:49,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
   {partner:'Store My Truck',name:'Atlanta High Security Truck Parking',city:'',state:'',active:false,avail:6,day:25,vtypes:['Truck + Trailer','Trailer Only']},
   {partner:'Store My Truck',name:'Braselton Big Rig Truck Parking',city:'',state:'',active:false,avail:46,day:49,vtypes:['Truck + Trailer']},
-  {partner:'Store My Truck',name:'Norcross Truck Terminal',city:'',state:'',active:false,avail:30,day:37,vtypes:['Truck + Trailer','Bobtail']},
-  {partner:'Store My Truck',name:'Charlotte Big Rig Truck Parking',city:'',state:'',active:false,avail:60,day:25,vtypes:['Bobtail']},
-  {partner:'Store My Truck',name:'Metro Chattanooga Tractor Trailer Truck Parking',city:'',state:'',active:false,avail:48,day:37,vtypes:['Trailer Only','Bobtail']},
-  {partner:'Store My Truck',name:'Austell Semi Truck Parking',city:'',state:'',active:false,avail:30,day:54,vtypes:['Truck + Trailer','Bobtail']},
-  {partner:'Store My Truck',name:'Fairburn Tractor Trailer Parking',city:'',state:'',active:false,avail:57,day:50,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'Store My Truck',name:'Brumbley Court Truck Parking & Trailer Storage',city:'',state:'',active:false,avail:43,day:14,vtypes:['Bobtail']},
+  {partner:'Store My Truck',name:'Norcross Truck Terminal',city:'',state:'',active:false,avail:30,day:37,vtypes:['Truck + Trailer','Truck Only']},
+  {partner:'Store My Truck',name:'Charlotte Big Rig Truck Parking',city:'',state:'',active:false,avail:60,day:25,vtypes:['Truck Only']},
+  {partner:'Store My Truck',name:'Metro Chattanooga Tractor Trailer Truck Parking',city:'',state:'',active:false,avail:48,day:37,vtypes:['Trailer Only','Truck Only']},
+  {partner:'Store My Truck',name:'Austell Semi Truck Parking',city:'',state:'',active:false,avail:30,day:54,vtypes:['Truck + Trailer','Truck Only']},
+  {partner:'Store My Truck',name:'Fairburn Tractor Trailer Parking',city:'',state:'',active:false,avail:57,day:50,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'Store My Truck',name:'Brumbley Court Truck Parking & Trailer Storage',city:'',state:'',active:false,avail:43,day:14,vtypes:['Truck Only']},
   {partner:'Store My Truck',name:'Atlanta Tractor Trailer Truck Parking',city:'',state:'',active:false,avail:43,day:30,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'Store My Truck',name:'Graham Road, Fairburn Ga Truck Parking',city:'',state:'',active:false,avail:55,day:22,vtypes:['Bobtail']},
+  {partner:'Store My Truck',name:'Graham Road, Fairburn Ga Truck Parking',city:'',state:'',active:false,avail:55,day:22,vtypes:['Truck Only']},
   {partner:'Store My Truck',name:'Gaffney South Carolina Tractor Trailer Truck Parking',city:'',state:'',active:false,avail:17,day:14,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'Store My Truck',name:'Atlanta Airport Tractor Trailer Truck Parking',city:'',state:'',active:false,avail:23,day:42,vtypes:['Bobtail']},
-  {partner:'Guardian Outdoor',name:'Guardian Outdoor Storage Chattanooga',city:'Chattanooga',state:'TN',active:false,avail:9,day:26,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'Guardian Outdoor',name:'Guardian Outdoor Storage - Montgomery',city:'Montgomery',state:'AL',active:false,avail:39,day:50,vtypes:['Trailer Only','Bobtail']},
+  {partner:'Store My Truck',name:'Atlanta Airport Tractor Trailer Truck Parking',city:'',state:'',active:false,avail:23,day:42,vtypes:['Truck Only']},
+  {partner:'Guardian Outdoor',name:'Guardian Outdoor Storage Chattanooga',city:'Chattanooga',state:'TN',active:false,avail:9,day:26,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'Guardian Outdoor',name:'Guardian Outdoor Storage - Montgomery',city:'Montgomery',state:'AL',active:false,avail:39,day:50,vtypes:['Trailer Only','Truck Only']},
   {partner:'Guardian Outdoor',name:'Guardian Outdoor Storage - Calhoun',city:'Calhoun',state:'GA',active:false,avail:45,day:14,vtypes:['Truck + Trailer','Trailer Only']},
   {partner:'Guardian Outdoor',name:'Guardian Outdoor Storage Lakeland',city:'Lakeland',state:'FL',active:false,avail:29,day:39,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'K&C Logistic',name:'Orange County Truck Stop K&C',city:'',state:'',active:false,avail:38,day:39,vtypes:['Bobtail']},
-  {partner:'K&C Logistic',name:'Koch Truck Parking',city:'Santa Ana',state:'CA',active:false,avail:52,day:35,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'ConGlobal',name:'Truck Parking ConGlobal Columbus',city:'Columbus',state:'OH',active:false,avail:18,day:19,vtypes:['Trailer Only','Bobtail']},
-  {partner:'ConGlobal',name:'Truck Parking ConGlobal Memphis',city:'Memphis',state:'TN',active:false,avail:32,day:51,vtypes:['Bobtail']},
-  {partner:'ConGlobal',name:'Truck Parking ConGlobal Joliet',city:'Joliet',state:'IL',active:false,avail:46,day:15,vtypes:['Trailer Only','Bobtail']},
-  {partner:'ConGlobal',name:'Truck Parking ConGlobal Wilbur',city:'Antioch',state:'CA',active:false,avail:16,day:15,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
+  {partner:'K&C Logistic',name:'Orange County Truck Stop K&C',city:'',state:'',active:false,avail:38,day:39,vtypes:['Truck Only']},
+  {partner:'K&C Logistic',name:'Koch Truck Parking',city:'Santa Ana',state:'CA',active:false,avail:52,day:35,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'ConGlobal',name:'Truck Parking ConGlobal Columbus',city:'Columbus',state:'OH',active:false,avail:18,day:19,vtypes:['Trailer Only','Truck Only']},
+  {partner:'ConGlobal',name:'Truck Parking ConGlobal Memphis',city:'Memphis',state:'TN',active:false,avail:32,day:51,vtypes:['Truck Only']},
+  {partner:'ConGlobal',name:'Truck Parking ConGlobal Joliet',city:'Joliet',state:'IL',active:false,avail:46,day:15,vtypes:['Trailer Only','Truck Only']},
+  {partner:'ConGlobal',name:'Truck Parking ConGlobal Wilbur',city:'Antioch',state:'CA',active:false,avail:16,day:15,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
   {partner:'ConGlobal',name:'Truck Parking ConGlobal Kansas City',city:'Edgerton',state:'KS',active:false,avail:20,day:35,vtypes:['Truck + Trailer','Trailer Only']},
   {partner:'ConGlobal',name:'Truck Parking ConGlobal Cincinnati',city:'West Chester',state:'OH',active:false,avail:38,day:19,vtypes:['Truck + Trailer']},
-  {partner:'ConGlobal',name:'Truck Parking ConGlobal Indianapolis',city:'Indianapolis',state:'IN',active:false,avail:32,day:43,vtypes:['Trailer Only','Bobtail']},
-  {partner:'ConGlobal',name:'Truck Parking ConGlobal Cleveland',city:'Cleveland',state:'OH',active:false,avail:6,day:43,vtypes:['Trailer Only','Bobtail']},
-  {partner:'ConGlobal',name:'Truck Parking ConGlobal Sauget',city:'East St Louis',state:'IL',active:false,avail:51,day:32,vtypes:['Truck + Trailer','Bobtail']},
+  {partner:'ConGlobal',name:'Truck Parking ConGlobal Indianapolis',city:'Indianapolis',state:'IN',active:false,avail:32,day:43,vtypes:['Trailer Only','Truck Only']},
+  {partner:'ConGlobal',name:'Truck Parking ConGlobal Cleveland',city:'Cleveland',state:'OH',active:false,avail:6,day:43,vtypes:['Trailer Only','Truck Only']},
+  {partner:'ConGlobal',name:'Truck Parking ConGlobal Sauget',city:'East St Louis',state:'IL',active:false,avail:51,day:32,vtypes:['Truck + Trailer','Truck Only']},
   {partner:'ConGlobal',name:'Truck Parking ConGlobal Seatle',city:'Seattle',state:'WA',active:false,avail:37,day:24,vtypes:['Trailer Only']},
-  {partner:'ConGlobal',name:'Truck Parking ConGlobal Portland',city:'Portland',state:'OR',active:false,avail:53,day:40,vtypes:['Bobtail']},
-  {partner:'ConGlobal',name:'Truck Parking ConGlobal Atlanta',city:'Hiram',state:'GA',active:false,avail:49,day:16,vtypes:['Bobtail']},
-  {partner:'ConGlobal',name:'Truck Parking ConGlobal New Orleans',city:'New Orleans',state:'LA',active:false,avail:57,day:36,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'ConGlobal',name:'Truck Parking ConGlobal Jacksonville',city:'Jacksonville',state:'FL',active:false,avail:23,day:16,vtypes:['Bobtail']},
+  {partner:'ConGlobal',name:'Truck Parking ConGlobal Portland',city:'Portland',state:'OR',active:false,avail:53,day:40,vtypes:['Truck Only']},
+  {partner:'ConGlobal',name:'Truck Parking ConGlobal Atlanta',city:'Hiram',state:'GA',active:false,avail:49,day:16,vtypes:['Truck Only']},
+  {partner:'ConGlobal',name:'Truck Parking ConGlobal New Orleans',city:'New Orleans',state:'LA',active:false,avail:57,day:36,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'ConGlobal',name:'Truck Parking ConGlobal Jacksonville',city:'Jacksonville',state:'FL',active:false,avail:23,day:16,vtypes:['Truck Only']},
   {partner:'ALC',name:'Houston Yard #06',city:'',state:'',active:false,avail:55,day:48,vtypes:['Truck + Trailer','Trailer Only']},
   {partner:'ALC',name:'Long Beach Yard',city:'',state:'',active:false,avail:39,day:28,vtypes:['Truck + Trailer']},
   {partner:'ALC',name:'Grove Yard',city:'',state:'',active:false,avail:51,day:52,vtypes:['Truck + Trailer']},
-  {partner:'ALC',name:'Milliken Yard',city:'',state:'',active:false,avail:3,day:52,vtypes:['Trailer Only','Bobtail']},
-  {partner:'ALC',name:'Victorville Yard',city:'',state:'',active:false,avail:4,day:41,vtypes:['Bobtail']},
-  {partner:'ALC',name:'Bonview Yard #04',city:'',state:'',active:false,avail:34,day:49,vtypes:['Truck + Trailer','Bobtail']},
+  {partner:'ALC',name:'Milliken Yard',city:'',state:'',active:false,avail:3,day:52,vtypes:['Trailer Only','Truck Only']},
+  {partner:'ALC',name:'Victorville Yard',city:'',state:'',active:false,avail:4,day:41,vtypes:['Truck Only']},
+  {partner:'ALC',name:'Bonview Yard #04',city:'',state:'',active:false,avail:34,day:49,vtypes:['Truck + Trailer','Truck Only']},
   {partner:'PAC Anchor',name:'Truck Parking at Pac Anchor.',city:'Wilmington',state:'CA',active:true,avail:58,day:17,vtypes:['Trailer Only']},
   {partner:'TruxGuard',name:'TruxGuard Canby',city:'Canby',state:'OR',active:true,avail:28,day:53,vtypes:['Trailer Only']},
   {partner:'TruxGuard',name:'TruxGuard Keizer',city:'Keizer',state:'OR',active:false,avail:12,day:37,vtypes:['Truck + Trailer']},
   {partner:'J-Mar',name:'J-Mar Truck Parking',city:'West Fargo',state:'ND',active:true,avail:18,day:49,vtypes:['Trailer Only']},
-  {partner:'287 Truck Parking',name:'287 Truck Parking',city:'Alvord',state:'TX',active:true,avail:22,day:45,vtypes:['Truck + Trailer','Bobtail']},
-  {partner:'26 Industrial Park',name:'26 Industrial Park',city:'Cicero',state:'IL',active:false,avail:60,day:45,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'Forsyth Truck Parking',name:'Forsyth Truck Parking',city:'Forsyth',state:'GA',active:true,avail:44,day:49,vtypes:['Trailer Only','Bobtail']},
+  {partner:'287 Truck Parking',name:'287 Truck Parking',city:'Alvord',state:'TX',active:true,avail:22,day:45,vtypes:['Truck + Trailer','Truck Only']},
+  {partner:'26 Industrial Park',name:'26 Industrial Park',city:'Cicero',state:'IL',active:false,avail:60,day:45,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'Forsyth Truck Parking',name:'Forsyth Truck Parking',city:'Forsyth',state:'GA',active:true,avail:44,day:49,vtypes:['Trailer Only','Truck Only']},
   {partner:'R&R Storage Parking',name:'R&R Storage Parking',city:'Wichita Falls',state:'TX',active:false,avail:18,day:21,vtypes:['Truck + Trailer']},
-  {partner:'Kach Transportation',name:'Kach Transportation',city:'Fresno',state:'CA',active:false,avail:35,day:38,vtypes:['Trailer Only','Bobtail']},
+  {partner:'Kach Transportation',name:'Kach Transportation',city:'Fresno',state:'CA',active:false,avail:35,day:38,vtypes:['Trailer Only','Truck Only']},
   {partner:'E-ZZZ Truck Parking LLC',name:'E-ZZZ Truck Parking LLC',city:'Fremont',state:'IN',active:false,avail:43,day:22,vtypes:['Truck + Trailer']},
-  {partner:'Pioneer Truck Parking',name:'Pioneer Truck Parking',city:'Coupland',state:'TX',active:false,avail:53,day:42,vtypes:['Bobtail']},
-  {partner:'Chain Link Storage and Truck Parking',name:'Chain Link Storage and Truck Parking',city:'Lincoln',state:'NE',active:false,avail:59,day:34,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
+  {partner:'Pioneer Truck Parking',name:'Pioneer Truck Parking',city:'Coupland',state:'TX',active:false,avail:53,day:42,vtypes:['Truck Only']},
+  {partner:'Chain Link Storage and Truck Parking',name:'Chain Link Storage and Truck Parking',city:'Lincoln',state:'NE',active:false,avail:59,day:34,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
   {partner:'Wiz Fuel LLC',name:'Wiz Truck & Equipment Parking',city:'Greenville',state:'TX',active:true,avail:45,day:14,vtypes:['Truck + Trailer','Trailer Only']},
   {partner:'Lambodhar Inc',name:'Americas Best Value inn',city:'San Antonio',state:'TX',active:true,avail:43,day:18,vtypes:['Truck + Trailer','Trailer Only']},
   {partner:'Park Pro Storage & Parking',name:'Park Pro Storage & Parking',city:'Riverdale',state:'IL',active:true,avail:9,day:42,vtypes:['Trailer Only']},
-  {partner:'Bayonne Truck Parking LLC',name:'Bayonne, NJ Bobtail and Box Truck Parking off 5th St.',city:'Bayonne',state:'NJ',active:true,avail:37,day:42,vtypes:['Bobtail']},
+  {partner:'Bayonne Truck Parking LLC',name:'Bayonne, NJ Bobtail and Box Truck Parking off 5th St.',city:'Bayonne',state:'NJ',active:true,avail:37,day:42,vtypes:['Truck Only']},
   {partner:'A & A Intermodal Terminal',name:'A & A Intermodal Terminal',city:'French Camp',state:'CA',active:true,avail:15,day:14,vtypes:['Trailer Only']},
-  {partner:'Safe Truck Parking',name:'SAFE Truck Parking Tucson',city:'Tucson',state:'AZ',active:true,avail:55,day:14,vtypes:['Trailer Only','Bobtail']},
+  {partner:'Safe Truck Parking',name:'SAFE Truck Parking Tucson',city:'Tucson',state:'AZ',active:true,avail:55,day:14,vtypes:['Trailer Only','Truck Only']},
   {partner:'Safe Truck Parking',name:'Safe Truck Parking San Diego',city:'San Diego',state:'CA',active:false,avail:40,day:15,vtypes:['Trailer Only']},
-  {partner:'Safe Truck Parking',name:'Safe Truck Parking Hallandale Beach',city:'Hallandale Beach',state:'FL',active:false,avail:28,day:47,vtypes:['Truck + Trailer','Bobtail']},
-  {partner:'Safe Truck Parking',name:'Safe Truck Parking - Jacksonville, FL',city:'Jacksonville',state:'FL',active:true,avail:12,day:43,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
+  {partner:'Safe Truck Parking',name:'Safe Truck Parking Hallandale Beach',city:'Hallandale Beach',state:'FL',active:false,avail:28,day:47,vtypes:['Truck + Trailer','Truck Only']},
+  {partner:'Safe Truck Parking',name:'Safe Truck Parking - Jacksonville, FL',city:'Jacksonville',state:'FL',active:true,avail:12,day:43,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
   {partner:'Safe Truck Parking',name:'Safe Truck Parking Orlando',city:'Orlando',state:'FL',active:false,avail:36,day:47,vtypes:['Truck + Trailer']},
-  {partner:'Safe Truck Parking',name:'Safe Truck Parking Punta Gorda',city:'Punta Gorda',state:'FL',active:false,avail:36,day:19,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'Safe Truck Parking',name:'Safe Truck Parking Huntsville',city:'Huntsville',state:'AL',active:false,avail:56,day:15,vtypes:['Truck + Trailer','Bobtail']},
-  {partner:'Safe Truck Parking',name:'Safe Truck Parking Bolingbrook',city:'Bolingbrook',state:'IL',active:false,avail:58,day:47,vtypes:['Bobtail']},
-  {partner:'Safe Truck Parking',name:'Safe Truck Parking - Channahon',city:'Wilmington',state:'IL',active:true,avail:14,day:27,vtypes:['Truck + Trailer','Bobtail']},
+  {partner:'Safe Truck Parking',name:'Safe Truck Parking Punta Gorda',city:'Punta Gorda',state:'FL',active:false,avail:36,day:19,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'Safe Truck Parking',name:'Safe Truck Parking Huntsville',city:'Huntsville',state:'AL',active:false,avail:56,day:15,vtypes:['Truck + Trailer','Truck Only']},
+  {partner:'Safe Truck Parking',name:'Safe Truck Parking Bolingbrook',city:'Bolingbrook',state:'IL',active:false,avail:58,day:47,vtypes:['Truck Only']},
+  {partner:'Safe Truck Parking',name:'Safe Truck Parking - Channahon',city:'Wilmington',state:'IL',active:true,avail:14,day:27,vtypes:['Truck + Trailer','Truck Only']},
   {partner:'Safe Truck Parking',name:'Safe Truck Parking - Elgin',city:'Elgin',state:'IL',active:true,avail:6,day:35,vtypes:['Truck + Trailer']},
   {partner:'Safe Truck Parking',name:'Safe Truck Parking - Hammond',city:'Hammond',state:'IN',active:true,avail:14,day:15,vtypes:['Trailer Only']},
-  {partner:'Safe Truck Parking',name:'Safe Truck Parking – Oklahoma City, O',city:'Oklahoma City',state:'OK',active:true,avail:36,day:16,vtypes:['Bobtail']},
+  {partner:'Safe Truck Parking',name:'Safe Truck Parking – Oklahoma City, O',city:'Oklahoma City',state:'OK',active:true,avail:36,day:16,vtypes:['Truck Only']},
   {partner:'Safe Truck Parking',name:'Safe Truck Parking - Greenville-Spartanburg',city:'Greer',state:'SC',active:true,avail:59,day:20,vtypes:['Truck + Trailer','Trailer Only']},
   {partner:'Safe Truck Parking',name:'Safe Truck Parking - Houston',city:'Houston',state:'TX',active:true,avail:7,day:28,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'I-85 Truck and Trailer Storage',name:'I-85 Truck and Trailer Storage',city:'Commerce',state:'GA',active:true,avail:51,day:44,vtypes:['Trailer Only','Bobtail']},
+  {partner:'I-85 Truck and Trailer Storage',name:'I-85 Truck and Trailer Storage',city:'Commerce',state:'GA',active:true,avail:51,day:44,vtypes:['Trailer Only','Truck Only']},
   {partner:'Sunset Truck Yard LLC',name:'Sunset Truck Yard LLC',city:'',state:'',active:false,avail:51,day:36,vtypes:['Truck + Trailer']},
-  {partner:'Chicago Studio City',name:'Chicago Studio City',city:'Chicago',state:'IL',active:true,avail:15,day:48,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
+  {partner:'Chicago Studio City',name:'Chicago Studio City',city:'Chicago',state:'IL',active:true,avail:15,day:48,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
   {partner:'Find Truck Parking',name:'The Truck Depot Truck and Trailer Parking',city:'Portland',state:'OR',active:true,avail:23,day:44,vtypes:['Truck + Trailer','Trailer Only']},
   {partner:'Mount Orab Towing',name:'Mount Orab Towing Truck and Trailer Parking on 480 W Main St',city:'Mt Orab',state:'OH',active:true,avail:43,day:52,vtypes:['Trailer Only']},
   {partner:'Perrysburg Outdoor Storage',name:'Perrysburg Outdoor Storage',city:'Perrysburg',state:'OH',active:true,avail:31,day:12,vtypes:['Truck + Trailer']},
   {partner:'Gixxer Semi Truck Parking',name:'Gixxer Semi Truck Parking',city:'Cleveland',state:'',active:false,avail:15,day:36,vtypes:['Trailer Only']},
   {partner:'Gary Truck Park',name:'Gary Truck Park',city:'Gary',state:'IN',active:true,avail:53,day:21,vtypes:['Trailer Only']},
-  {partner:'Atomic Truck Parking',name:'Atomic Truck Parking',city:'Dallas',state:'TX',active:true,avail:8,day:33,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'Jumbo Parking and Storage',name:'Jumbo Parking and Storage',city:'West Columbia',state:'SC',active:false,avail:16,day:25,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'Park it Plus',name:'Park it Plus',city:'Lebanon',state:'MO',active:false,avail:58,day:13,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'Space City Parking',name:'Space City Parking',city:'Brookshire',state:'TX',active:true,avail:40,day:17,vtypes:['Bobtail']},
+  {partner:'Atomic Truck Parking',name:'Atomic Truck Parking',city:'Dallas',state:'TX',active:true,avail:8,day:33,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'Jumbo Parking and Storage',name:'Jumbo Parking and Storage',city:'West Columbia',state:'SC',active:false,avail:16,day:25,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'Park it Plus',name:'Park it Plus',city:'Lebanon',state:'MO',active:false,avail:58,day:13,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'Space City Parking',name:'Space City Parking',city:'Brookshire',state:'TX',active:true,avail:40,day:17,vtypes:['Truck Only']},
   {partner:'Assure Parking',name:'Assure Parking Secured Drop Yard 24/7',city:'Memphis',state:'TN',active:true,avail:50,day:13,vtypes:['Trailer Only']},
-  {partner:'TSG Parking Services LLC',name:'TSG Parking Services - Haslet',city:'Fort Worth',state:'TX',active:true,avail:60,day:29,vtypes:['Bobtail']},
+  {partner:'TSG Parking Services LLC',name:'TSG Parking Services - Haslet',city:'Fort Worth',state:'TX',active:true,avail:60,day:29,vtypes:['Truck Only']},
   {partner:'TSG Parking Services LLC',name:'TSG Parking Services - Fontana',city:'Fontana',state:'CA',active:true,avail:46,day:29,vtypes:['Trailer Only']},
-  {partner:'AAA Parking',name:'AAA Trailer Services & Parking - Granite City',city:'Granite City',state:'IL',active:true,avail:28,day:45,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'AAA Parking',name:'AAA Trailer Services & Parking - Bridgeton',city:'Bridgeton',state:'MO',active:true,avail:20,day:13,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
+  {partner:'AAA Parking',name:'AAA Trailer Services & Parking - Granite City',city:'Granite City',state:'IL',active:true,avail:28,day:45,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'AAA Parking',name:'AAA Trailer Services & Parking - Bridgeton',city:'Bridgeton',state:'MO',active:true,avail:20,day:13,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
   {partner:'AAA Parking',name:'AAA Trailer Services & Parking - Sikeston',city:'Sikeston',state:'MO',active:false,avail:58,day:18,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'Mesa Truck Parking, LLC',name:'Mesa Truck Parking, LLC',city:'Houston',state:'TX',active:false,avail:39,day:50,vtypes:['Trailer Only','Bobtail']},
-  {partner:'Legit Parking Inc',name:'Legit Parking Inc',city:'Fresno',state:'CA',active:false,avail:23,day:54,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
+  {partner:'Mesa Truck Parking, LLC',name:'Mesa Truck Parking, LLC',city:'Houston',state:'TX',active:false,avail:39,day:50,vtypes:['Trailer Only','Truck Only']},
+  {partner:'Legit Parking Inc',name:'Legit Parking Inc',city:'Fresno',state:'CA',active:false,avail:23,day:54,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
   {partner:'Win Win',name:'Win Win Storage - Roper',city:'Roper',state:'NC',active:false,avail:9,day:46,vtypes:['Truck + Trailer']},
-  {partner:'Win Win',name:'Win Win Storage - Newton Grove',city:'Newton Grove',state:'NC',active:false,avail:35,day:14,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'Dziuk\'s Inc',name:'Dziuk\'s Boat & RV Storage Inc.',city:'Lacoste',state:'TX',active:false,avail:15,day:34,vtypes:['Bobtail']},
+  {partner:'Win Win',name:'Win Win Storage - Newton Grove',city:'Newton Grove',state:'NC',active:false,avail:35,day:14,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'Dziuk\'s Inc',name:'Dziuk\'s Boat & RV Storage Inc.',city:'Lacoste',state:'TX',active:false,avail:15,day:34,vtypes:['Truck Only']},
   {partner:'Gold Lot Macon',name:'Gold Lot Truck Parking',city:'',state:'',active:false,avail:53,day:26,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'Land of Trucks Parking',name:'Land of Trucks Parking',city:'',state:'',active:false,avail:13,day:18,vtypes:['Trailer Only','Bobtail']},
+  {partner:'Land of Trucks Parking',name:'Land of Trucks Parking',city:'',state:'',active:false,avail:13,day:18,vtypes:['Trailer Only','Truck Only']},
   {partner:'Innovative Storage',name:'Innovative Storage',city:'',state:'',active:false,avail:41,day:30,vtypes:['Trailer Only']},
   {partner:'Clark Terminals-Clark-East CFS',name:'Clark Terminals-Clark-East CFS',city:'Tacoma',state:'WA',active:false,avail:55,day:14,vtypes:['Truck + Trailer','Trailer Only']},
   {partner:'F & H Parking',name:'F & H Parking',city:'Mundelein',state:'IL',active:false,avail:47,day:30,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'DNG Transport',name:'DNG Transport',city:'Dallas',state:'TX',active:false,avail:28,day:31,vtypes:['Truck + Trailer','Bobtail']},
+  {partner:'DNG Transport',name:'DNG Transport',city:'Dallas',state:'TX',active:false,avail:28,day:31,vtypes:['Truck + Trailer','Truck Only']},
   {partner:'GCP Truck Storage',name:'GCP Truck Storage – Mt Juliet',city:'',state:'',active:true,avail:6,day:15,vtypes:['Truck + Trailer','Trailer Only']},
   {partner:'GCP Truck Storage',name:'GCP Truck Storage – Fort Worth',city:'Fort Worth',state:'TX',active:false,avail:18,day:55,vtypes:['Trailer Only']},
   {partner:'Palmetto Truck Parking',name:'Palmetto Truck Parking',city:'',state:'',active:true,avail:34,day:43,vtypes:['Truck + Trailer','Trailer Only']},
   {partner:'Dallek Real Estate LLC',name:'Dallek Real Estate LLC',city:'',state:'',active:true,avail:46,day:23,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'Finish Line Truck Parking & Storage',name:'Finish Line Truck Parking & Storage',city:'',state:'',active:false,avail:42,day:31,vtypes:['Bobtail']},
-  {partner:'Premium Parking',name:'Premium Parking The Lakes Mall',city:'Muskegon',state:'MI',active:false,avail:14,day:55,vtypes:['Trailer Only','Bobtail']},
+  {partner:'Finish Line Truck Parking & Storage',name:'Finish Line Truck Parking & Storage',city:'',state:'',active:false,avail:42,day:31,vtypes:['Truck Only']},
+  {partner:'Premium Parking',name:'Premium Parking The Lakes Mall',city:'Muskegon',state:'MI',active:false,avail:14,day:55,vtypes:['Trailer Only','Truck Only']},
   {partner:'Premium Parking',name:'Premium Parking Pullman Park',city:'Chicago',state:'IL',active:false,avail:52,day:23,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'Premium Parking',name:'Premium Parking University Mall',city:'Carbondale',state:'IL',active:false,avail:4,day:31,vtypes:['Truck + Trailer','Bobtail']},
+  {partner:'Premium Parking',name:'Premium Parking University Mall',city:'Carbondale',state:'IL',active:false,avail:4,day:31,vtypes:['Truck + Trailer','Truck Only']},
   {partner:'Premium Parking',name:'Premium Parking Wenatchee Valley Mall',city:'East Wenatchee',state:'WA',active:false,avail:20,day:23,vtypes:['Trailer Only']},
   {partner:'Premium Parking',name:'Premium Parking Outlets at Tuscola',city:'Tuscola',state:'IL',active:false,avail:45,day:16,vtypes:['Truck + Trailer']},
   {partner:'Premium Parking',name:'Premium Parking River Oaks Center',city:'Calumet City',state:'IL',active:false,avail:43,day:16,vtypes:['Truck + Trailer']},
-  {partner:'Premium Parking',name:'Premium Parking Outlets at West Branch',city:'West Branch',state:'MI',active:false,avail:25,day:12,vtypes:['Trailer Only','Bobtail']},
+  {partner:'Premium Parking',name:'Premium Parking Outlets at West Branch',city:'West Branch',state:'MI',active:false,avail:25,day:12,vtypes:['Trailer Only','Truck Only']},
   {partner:'Premium Parking',name:'Premium Parking Uniontown Mall',city:'Uniontown',state:'PA',active:false,avail:57,day:36,vtypes:['Truck + Trailer']},
-  {partner:'Premium Parking',name:'Premium Parking Sierra Vista Mall',city:'Clovis',state:'CA',active:false,avail:41,day:12,vtypes:['Truck + Trailer','Trailer Only','Bobtail']},
-  {partner:'Premium Parking',name:'Premium Parking Acadiana Mall',city:'Lafayette',state:'LA',active:false,avail:21,day:40,vtypes:['Truck + Trailer','Bobtail']},
+  {partner:'Premium Parking',name:'Premium Parking Sierra Vista Mall',city:'Clovis',state:'CA',active:false,avail:41,day:12,vtypes:['Truck + Trailer','Trailer Only','Truck Only']},
+  {partner:'Premium Parking',name:'Premium Parking Acadiana Mall',city:'Lafayette',state:'LA',active:false,avail:21,day:40,vtypes:['Truck + Trailer','Truck Only']},
   {partner:'Premium Parking',name:'Premium Parking Mt. Shasta Mall',city:'Redding',state:'CA',active:false,avail:35,day:36,vtypes:['Truck + Trailer']},
   {partner:'Premium Parking',name:'Premium Parking Westgate Mall TX',city:'Amarillo',state:'TX',active:false,avail:3,day:48,vtypes:['Trailer Only']},
   {partner:'Premium Parking',name:'Premium Parking Crossroads Mall',city:'Mt Hope',state:'WV',active:false,avail:29,day:52,vtypes:['Trailer Only']},
   {partner:'Premium Parking',name:'Premium Parking South Park Mall',city:'San Antonio',state:'TX',active:false,avail:13,day:48,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'Premium Parking',name:'Premium Parking Dothan Mall',city:'Dothan',state:'AL',active:false,avail:42,day:21,vtypes:['Bobtail']},
-  {partner:'Premium Parking',name:'Premium Parking River Valley Mall',city:'Lancaster',state:'OH',active:false,avail:26,day:29,vtypes:['Trailer Only','Bobtail']},
-  {partner:'Premium Parking',name:'Premium Parking 2257 NY-112',city:'Coram',state:'NY',active:false,avail:44,day:49,vtypes:['Bobtail']},
+  {partner:'Premium Parking',name:'Premium Parking Dothan Mall',city:'Dothan',state:'AL',active:false,avail:42,day:21,vtypes:['Truck Only']},
+  {partner:'Premium Parking',name:'Premium Parking River Valley Mall',city:'Lancaster',state:'OH',active:false,avail:26,day:29,vtypes:['Trailer Only','Truck Only']},
+  {partner:'Premium Parking',name:'Premium Parking 2257 NY-112',city:'Coram',state:'NY',active:false,avail:44,day:49,vtypes:['Truck Only']},
   {partner:'Premium Parking',name:'Premium Parking Galleria at Pittsburgh Mall',city:'Tarentum',state:'PA',active:false,avail:14,day:49,vtypes:['Truck + Trailer','Trailer Only']},
   {partner:'Premium Parking',name:'Premium Parking Shops at Ithaca Mall',city:'Ithaca',state:'NY',active:false,avail:6,day:17,vtypes:['Truck + Trailer','Trailer Only']},
   {partner:'Premium Parking',name:'Premium Parking Mesilla Valley Mall',city:'Las Cruces',state:'NM',active:false,avail:60,day:21,vtypes:['Trailer Only']},
   {partner:'Premium Parking',name:'Premium Parking Valley Hills Mall',city:'Hickory',state:'NC',active:false,avail:26,day:29,vtypes:['Truck + Trailer']},
-  {partner:'Premium Parking',name:'Premium Parking Mall de las Aguilas',city:'Eagle Pass',state:'TX',active:false,avail:36,day:53,vtypes:['Bobtail']},
+  {partner:'Premium Parking',name:'Premium Parking Mall de las Aguilas',city:'Eagle Pass',state:'TX',active:false,avail:36,day:53,vtypes:['Truck Only']},
   {partner:'Premium Parking',name:'Premium Parking West Valley Mall',city:'Tracy',state:'CA',active:false,avail:24,day:21,vtypes:['Truck + Trailer','Trailer Only']},
   {partner:'Premium Parking',name:'Premium Parking Jacksonville Regional Center',city:'Jacksonville',state:'FL',active:false,avail:38,day:21,vtypes:['Trailer Only']},
   {partner:'Premium Parking',name:'Premium Parking Mastic Shopping Center',city:'Mastic',state:'NY',active:false,avail:15,day:26,vtypes:['Truck + Trailer','Trailer Only']},
-  {partner:'Premium Parking',name:'Premium Parking Patchogue Sunrise',city:'Patchogue',state:'NY',active:false,avail:51,day:46,vtypes:['Trailer Only','Bobtail']},
-  {partner:'Premium Parking',name:'Premium Parking Green Tree Mall',city:'Clarksville',state:'IN',active:false,avail:27,day:26,vtypes:['Bobtail']},
-  {partner:'Premium Parking',name:'Premium Parking Country Club Mall',city:'Cumberland',state:'MD',active:false,avail:41,day:30,vtypes:['Trailer Only','Bobtail']},
+  {partner:'Premium Parking',name:'Premium Parking Patchogue Sunrise',city:'Patchogue',state:'NY',active:false,avail:51,day:46,vtypes:['Trailer Only','Truck Only']},
+  {partner:'Premium Parking',name:'Premium Parking Green Tree Mall',city:'Clarksville',state:'IN',active:false,avail:27,day:26,vtypes:['Truck Only']},
+  {partner:'Premium Parking',name:'Premium Parking Country Club Mall',city:'Cumberland',state:'MD',active:false,avail:41,day:30,vtypes:['Trailer Only','Truck Only']},
   {partner:'Premium Parking',name:'Premium Parking Central Mall',city:'Fort Smith',state:'AR',active:false,avail:15,day:14,vtypes:['Truck + Trailer']},
   {partner:'Premium Parking',name:'Premium Parking Southland Mall Memphis',city:'Memphis',state:'TN',active:false,avail:23,day:34,vtypes:['Trailer Only']}
 ];
@@ -965,9 +965,13 @@ function parsePriceRangeLabel(label){
   return [0,null]; // "Any Price" or unrecognized
 }
 
+// which vehicle parts a booking's single vehicle type carries
+const vtHasTruck = vt => vt==='Truck + Trailer' || vt==='Truck Only';
+const vtHasTrailer = vt => vt!=='Truck Only';
 const BATCH_VEHICLE_RATES = {
   'Truck + Trailer': { Daily:45, Weekly:220, Monthly:800 },
   'Trailer Only': { Daily:35, Weekly:170, Monthly:620 },
+  'Truck Only': { Daily:30, Weekly:150, Monthly:540 },
 };
 // a lot with a shared inventory pool (see LOTS.glendale2) charges every vehicle type the same
 // rate — its own single lotRate() — instead of the fixed per-type BATCH_VEHICLE_RATES table
@@ -1277,7 +1281,7 @@ function screenHomepage(){
         <div class="sc-field field"><label>Check-in</label><input type="date" class="control" id="hCheckIn" value="${S.search.filterCheckIn}"></div>
         <div class="sc-field field"><label>Check-out</label><input type="date" class="control" id="hCheckOut" value="${S.search.filterCheckOut}"></div>
         <div class="sc-field field"><label>Vehicle Type</label><select class="control" id="hVehicleType">
-          <option value="" ${S.search.vehicleType?'':'selected'}>All</option>${['Truck + Trailer','Trailer Only','Bobtail'].map(v=>`<option ${S.search.vehicleType===v?'selected':''}>${v}</option>`).join('')}
+          <option value="" ${S.search.vehicleType?'':'selected'}>All</option>${['Truck + Trailer','Trailer Only','Truck Only'].map(v=>`<option ${S.search.vehicleType===v?'selected':''}>${v}</option>`).join('')}
         </select></div>
         <div style="padding-left:14px"><button class="btn btn-primary btn-lg" id="homeSearchBtn" ${S.search.location.trim() ? '' : 'disabled'}>${ic.search}&nbsp;Search</button></div>
       </div>
@@ -1372,7 +1376,7 @@ function screenAllListings(){
           <option value="" ${S.search.bookingType?'':'selected'}>All</option>${['Daily','Weekly','Monthly'].map(v=>`<option ${S.search.bookingType===v?'selected':''}>${v}</option>`).join('')}
         </select></div>
         <div class="sc-field field"><label>Vehicle Type</label><select class="control" id="alVehicleType">
-          <option value="" ${S.search.vehicleType?'':'selected'}>All</option>${['Truck + Trailer','Trailer Only','Bobtail'].map(v=>`<option ${S.search.vehicleType===v?'selected':''}>${v}</option>`).join('')}
+          <option value="" ${S.search.vehicleType?'':'selected'}>All</option>${['Truck + Trailer','Trailer Only','Truck Only'].map(v=>`<option ${S.search.vehicleType===v?'selected':''}>${v}</option>`).join('')}
         </select></div>
         <div class="sc-field field"><label>Price Range</label><select class="control" id="alPriceRange">
           ${['Any Price','$10–$25 / day','$25–$45 / day','$45+ / day'].map(v=>`<option ${S.search.priceRange===v?'selected':''}>${v}</option>`).join('')}
@@ -1622,7 +1626,7 @@ function screenBookStep1(){
         <div class="sc-field field"><label>Booking Type</label><select class="control" id="b1BookingType"><option value="" ${S.search.bookingType?'':'selected'}>All</option>${['Daily','Weekly','Monthly'].map(v=>`<option ${S.search.bookingType===v?'selected':''}>${v}</option>`).join('')}</select></div>
         <div class="sc-field field"><label>Check-in</label><input type="date" class="control" id="b1CheckIn" value="${S.search.filterCheckIn}"></div>
         <div class="sc-field field"><label>Check-out</label><input type="date" class="control" id="b1CheckOut" value="${S.search.filterCheckOut}"></div>
-        <div class="sc-field field"><label>Vehicle Type</label><select class="control" id="b1VehicleType"><option value="" ${S.search.vehicleType?'':'selected'}>All</option>${['Truck + Trailer','Trailer Only','Bobtail'].map(v=>`<option ${S.search.vehicleType===v?'selected':''}>${v}</option>`).join('')}</select></div>
+        <div class="sc-field field"><label>Vehicle Type</label><select class="control" id="b1VehicleType"><option value="" ${S.search.vehicleType?'':'selected'}>All</option>${['Truck + Trailer','Trailer Only','Truck Only'].map(v=>`<option ${S.search.vehicleType===v?'selected':''}>${v}</option>`).join('')}</select></div>
         <div style="padding-left:14px"><button class="btn btn-primary" id="b1SearchBtn" ${S.search.location.trim() ? '' : 'disabled'}>${ic.search}&nbsp;Search</button></div>
       </div>
     </div>
@@ -1649,12 +1653,12 @@ const VEHICLE_PAGE_SIZE = 5;
 const VEHICLE_TABLE_PAGE_SIZE = 10;
 const vehiclePageSize = () => S.vehicleForms.length > 1 ? VEHICLE_TABLE_PAGE_SIZE : VEHICLE_PAGE_SIZE;
 function vehicleTableHtml(pageIndices){
-  const showTruck = S.step2VehicleType === 'Truck + Trailer';
+  const showTruck = vtHasTruck(S.step2VehicleType), showTrailer = vtHasTrailer(S.step2VehicleType);
   const groups = [
     ['Driver', [['driverPhone','Phone','(555) 555-0123'],['driverEmail','Email','name@example.com']]],
     ...(showTruck ? [['Truck', [['truckPlate','Plate #','Type here…']]]] : []),
-    ['Trailer', [['trailerType','Type','53 dry van'],['trailerPlate','Plate #','Type here…']]],
-    ['Optional', [...(showTruck ? [['truckNum','Truck #','Type here…',true],['truckMake','Truck make','Type here…',true]] : []), ['trailerNum','Trailer #','Type here…',true], ['trailerCompany','Trailer company','Type here…',true]]],
+    ...(showTrailer ? [['Trailer', [['trailerType','Type','53 dry van'],['trailerPlate','Plate #','Type here…']]]] : []),
+    ['Optional', [...(showTruck ? [['truckNum','Truck #','Type here…',true],['truckMake','Truck make','Type here…',true]] : []), ...(showTrailer ? [['trailerNum','Trailer #','Type here…',true], ['trailerCompany','Trailer company','Type here…',true]] : [])]],
   ];
   const cols = groups.flatMap(([,c])=>c);
   return `
@@ -1673,7 +1677,8 @@ function vehicleTableHtml(pageIndices){
 }
 // every field shown up front on a vehicle section is required; "Add more details" fields are optional
 function vehicleRequiredKeys(){
-  return ['driverPhone','driverEmail', ...(S.step2VehicleType==='Truck + Trailer' ? ['truckPlate'] : []), 'trailerType','trailerPlate'];
+  const vt = S.step2VehicleType;
+  return ['driverPhone','driverEmail', ...(vtHasTruck(vt) ? ['truckPlate'] : []), ...(vtHasTrailer(vt) ? ['trailerType','trailerPlate'] : [])];
 }
 // { vehicleIndex: { fieldKey: message } } for every vehicle with a missing/invalid required field
 function validateVehicleForms(){
@@ -1736,11 +1741,11 @@ function vehicleUploadModalHtml(){
 const UPLOAD_COLUMNS = [
   {key:'driverPhone', label:'Driver phone number'}, {key:'driverEmail', label:'Driver email'},
   {key:'truckNum', label:'Truck #', truck:true}, {key:'truckPlate', label:'Truck plate #', truck:true},
-  {key:'trailerType', label:'Trailer type'}, {key:'trailerPlate', label:'Trailer plate #'},
-  {key:'truckMake', label:'Truck make', truck:true}, {key:'trailerNum', label:'Trailer #'}, {key:'trailerCompany', label:'Trailer company name'},
+  {key:'trailerType', label:'Trailer type', trailer:true}, {key:'trailerPlate', label:'Trailer plate #', trailer:true},
+  {key:'truckMake', label:'Truck make', truck:true}, {key:'trailerNum', label:'Trailer #', trailer:true}, {key:'trailerCompany', label:'Trailer company name', trailer:true},
 ];
 const UPLOAD_MAX_BYTES = 10*1024*1024, UPLOAD_MAX_ROWS = 2000;
-const uploadColumns = () => UPLOAD_COLUMNS.filter(c=>!c.truck || S.step2VehicleType==='Truck + Trailer');
+const uploadColumns = () => UPLOAD_COLUMNS.filter(c=>(!c.truck || vtHasTruck(S.step2VehicleType)) && (!c.trailer || vtHasTrailer(S.step2VehicleType)));
 const normHeader = h => String(h??'').toLowerCase().replace(/\s+/g,'');
 function parseCsv(text){
   const rows=[]; let row=[], cell='', q=false;
@@ -1776,7 +1781,7 @@ function downloadVehicleTemplate(){
   const csv = uploadColumns().map(c=>c.label).join(',') + '\n';
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
-  a.download = `vehicle-template-${S.step2VehicleType==='Truck + Trailer' ? 'truck-trailer' : 'trailer-only'}.csv`;
+  a.download = `vehicle-template-${S.step2VehicleType.toLowerCase().replace(/[^a-z]+/g,'-')}.csv`;
   document.body.appendChild(a); a.click(); a.remove();
   toast('Template downloaded');
 }
@@ -1866,7 +1871,7 @@ function screenBookStep3Vehicle(){
           </div>`}
         </div>
         <p style="font-size:12.5px;color:var(--ink-soft);margin:-6px 0 14px"><span class="req-star">*</span> Required field</p>
-        ${S.step2VehicleType==='Truck + Trailer' ? `
+        ${vtHasTruck(S.step2VehicleType) ? `
         <div class="card" style="margin-bottom:16px">
           <div class="card-body">
             <div class="section-label">Fleet</div>
@@ -1878,7 +1883,7 @@ function screenBookStep3Vehicle(){
           const vf = S.vehicleForms[i];
           const expanded = S.vehicleFormsExpanded[i] !== false;
           const moreExpanded = !!S.vehicleMoreExpanded[i];
-          const showTruck = S.step2VehicleType === 'Truck + Trailer';
+          const showTruck = vtHasTruck(S.step2VehicleType), showTrailer = vtHasTrailer(S.step2VehicleType);
           const summary = [showTruck ? vf.truckPlate : vf.trailerPlate, vf.driverPhone].filter(Boolean).join(' · ') || 'Not filled in yet';
           return `
         <div class="card" style="margin-bottom:16px">
@@ -1896,13 +1901,14 @@ function screenBookStep3Vehicle(){
             <div class="section-label">Truck</div>
             <div class="grid-2" style="margin-bottom:16px">${vfInput(i,'truckPlate','Truck plate #','Type here…')}</div>
             ` : ''}
+            ${showTrailer ? `
             <div class="section-label">Trailer</div>
             <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'trailerType','Trailer type','Ex: 53 dry van')}${vfInput(i,'trailerPlate','Trailer plate #','Type here…')}</div>
+            ` : ''}
             <button class="btn-text vf-more-toggle" data-togglemore="${i}">${moreExpanded?'Hide more details':'Add more details'}${moreExpanded?ic.chevDown:ic.chevRight}</button>
             ${moreExpanded ? `
-            ${showTruck ? `<div class="grid-2" style="margin-top:12px">${vfInput(i,'truckNum','Truck #','Type here…',true)}${vfInput(i,'truckMake','Truck make','Type here…',true)}</div>
-            <div class="grid-2" style="margin-top:12px">${vfInput(i,'trailerNum','Trailer #','Type here…',true)}${vfInput(i,'trailerCompany','Trailer company name','Type here…',true)}</div>`
-            : `<div class="grid-2" style="margin-top:12px">${vfInput(i,'trailerNum','Trailer #','Type here…',true)}${vfInput(i,'trailerCompany','Trailer company name','Type here…',true)}</div>`}
+            ${showTruck ? `<div class="grid-2" style="margin-top:12px">${vfInput(i,'truckNum','Truck #','Type here…',true)}${vfInput(i,'truckMake','Truck make','Type here…',true)}</div>` : ''}
+            ${showTrailer ? `<div class="grid-2" style="margin-top:12px">${vfInput(i,'trailerNum','Trailer #','Type here…',true)}${vfInput(i,'trailerCompany','Trailer company name','Type here…',true)}</div>` : ''}
             ` : ''}
           </div>` : ''}
         </div>`;
@@ -2232,7 +2238,7 @@ function detailFromLiveBooking(id, paidAt){
 }
 
 function orderVehiclesSection(d){
-  const showTruck = d.vtype === 'Truck + Trailer';
+  const showTruck = vtHasTruck(d.vtype), showTrailer = vtHasTrailer(d.vtype);
   const v = x => x || '—';
   if(d.vehicles.length === 1){
     const vf = d.vehicles[0];
@@ -2243,10 +2249,11 @@ function orderVehiclesSection(d){
         <div class="info-row"><span class="k">Truck plate #</span><span>${v(vf.truckPlate)}</span></div>` : ''}
         <div class="info-row"><span class="k">Driver phone</span><span>${v(vf.driverPhone)}</span></div>
         <div class="info-row"><span class="k">Email</span><span>${v(vf.driverEmail)}</span></div>
+        ${showTrailer ? `
         <div class="info-row"><span class="k">Trailer type</span><span>${v(vf.trailerType)}</span></div>
         <div class="info-row"><span class="k">Trailer #</span><span>${v(vf.trailerNum)}</span></div>
         <div class="info-row"><span class="k">Trailer company</span><span>${v(vf.trailerCompany)}</span></div>
-        <div class="info-row"><span class="k">Trailer plate #</span><span>${v(vf.trailerPlate)}</span></div>
+        <div class="info-row"><span class="k">Trailer plate #</span><span>${v(vf.trailerPlate)}</span></div>` : ''}
         ${showTruck ? `
         <div class="info-row"><span class="k">Truck make</span><span>${v(vf.truckMake)}</span></div>
         <div class="info-row"><span class="k">Truck #</span><span>${v(vf.truckNum)}</span></div>` : ''}
@@ -2255,7 +2262,7 @@ function orderVehiclesSection(d){
   }
   const q = S.confirmSearch.trim().toLowerCase();
   const rows = d.vehicles.map((vf,i)=>({vf,i})).filter(({vf}) => !q || [vf.truckPlate, vf.trailerPlate, vf.driverPhone, vf.driverEmail, vf.truckNum, vf.trailerNum].join(' ').toLowerCase().includes(q));
-  const cols = showTruck ? 9 : 6;
+  const cols = 4 + (showTruck?2:0) + (showTrailer?2:0);
   return `<div class="card" style="margin-top:16px">
     <div class="card-head">
       <button class="drivers-toggle" id="toggleDriversSection">
@@ -2270,8 +2277,8 @@ function orderVehiclesSection(d){
     ${S.driversSectionExpanded ? `<div class="card-body">
       <div class="search-box">${ic.search}<input id="odSearchInput" placeholder="Search plate, phone, email, or truck/trailer #" value="${S.confirmSearch}"></div>
       <div class="dtable-scroll"><table class="dtable">
-        <thead><tr><th>Vehicle</th>${showTruck?'<th>Truck #</th><th>Truck Plate</th>':''}<th>Driver Phone</th><th>Email</th><th>Trailer Type</th><th>Trailer Plate</th><th></th></tr></thead>
-        <tbody>${rows.length ? rows.map(({vf,i})=>`<tr><td>Vehicle ${i+1}</td>${showTruck?`<td>${v(vf.truckNum)}</td><td>${v(vf.truckPlate)}</td>`:''}<td>${v(vf.driverPhone)}</td><td>${v(vf.driverEmail)}</td><td>${v(vf.trailerType)}</td><td>${v(vf.trailerPlate)}</td><td><button class="icon-btn" data-pdfrow="Vehicle ${i+1}" title="Download this driver's parking pass">${ic.download}</button></td></tr>`).join('') : `<tr><td colspan="${cols}" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>`}</tbody>
+        <thead><tr><th>Vehicle</th>${showTruck?'<th>Truck #</th><th>Truck Plate</th>':''}<th>Driver Phone</th><th>Email</th>${showTrailer?'<th>Trailer Type</th><th>Trailer Plate</th>':''}<th></th></tr></thead>
+        <tbody>${rows.length ? rows.map(({vf,i})=>`<tr><td>Vehicle ${i+1}</td>${showTruck?`<td>${v(vf.truckNum)}</td><td>${v(vf.truckPlate)}</td>`:''}<td>${v(vf.driverPhone)}</td><td>${v(vf.driverEmail)}</td>${showTrailer?`<td>${v(vf.trailerType)}</td><td>${v(vf.trailerPlate)}</td>`:''}<td><button class="icon-btn" data-pdfrow="Vehicle ${i+1}" title="Download this driver's parking pass">${ic.download}</button></td></tr>`).join('') : `<tr><td colspan="${cols}" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>`}</tbody>
       </table></div>
       <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${d.vehicles.length} drivers on this order.</div>
     </div>` : ''}
@@ -2303,7 +2310,7 @@ function orderDetailPage(d){
           <div class="info-row"><span class="k">Duration</span><span>${d.duration}</span></div>
           <div class="info-row"><span class="k">Booking Type</span><span>${d.bookingType}</span></div>
           <div class="info-row"><span class="k">Spots Reserved</span><span>${d.spots}</span></div>
-          ${d.vtype==='Truck + Trailer' && (d.fleetDot || (d.vehicles[0] && d.vehicles[0].truckDot)) ? `<div class="info-row"><span class="k">USDOT #</span><span>${d.fleetDot || d.vehicles[0].truckDot}</span></div>` : ''}
+          ${vtHasTruck(d.vtype) && (d.fleetDot || (d.vehicles[0] && d.vehicles[0].truckDot)) ? `<div class="info-row"><span class="k">USDOT #</span><span>${d.fleetDot || d.vehicles[0].truckDot}</span></div>` : ''}
           <div class="section-label" style="color:var(--ink);margin:12px 0 8px">${d.chargesTitle || 'Charges'}</div>
           ${d.chargeRows.map(r=>`<div class="info-row"><span class="k">${r.label}</span><span>${fmtUSD(r.price)}</span></div>`).join('')}
           ${d.note ? `<div class="orderline-note">${ic.info}${d.note}</div>` : ''}
@@ -2668,7 +2675,7 @@ function wireScreen(root){
   const step3Continue = root.querySelector('#step3Continue'); if(step3Continue) step3Continue.addEventListener('click',()=>{
     const errs = validateVehicleForms();
     const bad = Object.keys(errs).map(Number);
-    const dotMissing = S.step2VehicleType==='Truck + Trailer' && !S.fleetDot.trim();
+    const dotMissing = vtHasTruck(S.step2VehicleType) && !S.fleetDot.trim();
     S.fleetDotErr = dotMissing ? 'Required' : '';
     if(bad.length || dotMissing){
       S.vehicleErrors = errs;
