@@ -179,6 +179,8 @@ select.control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg x
 .su-fine{font-size:11px;color:var(--ink-muted);text-align:center;margin-top:12px;line-height:1.45}
 .field-err{font-size:11.5px;color:var(--red);margin-top:4px}
 .control.has-err{border-color:var(--red)}
+.req-star{color:var(--red);font-weight:700}
+.opt-tag{text-transform:none;font-weight:400;color:var(--ink-muted);letter-spacing:0}
 .control.has-err:focus{box-shadow:0 0 0 3px var(--red-tint)}
 
 /* ---- search results (book step1) ---- */
@@ -480,6 +482,9 @@ const S = {
   vehicleFormsExpanded: [true],
   vehicleMoreExpanded: [false],
   vehicleUploadModal: null,
+  // fleet (account) DOT #: one value for every vehicle, saved to the account and prefilled on later bookings
+  fleetDot: '',
+  fleetDotErr: '',
   vehicleUploadError: null,
   vehicleErrors: {},
   vehiclePage: 1,
@@ -1623,12 +1628,12 @@ function screenBookStep1(){
 ============================================================ */
 function vfInput(i, key, label, placeholder, optional){
   const err = S.vehicleErrors[i] && S.vehicleErrors[i][key];
-  return `<div class="field"><label>${label}${optional?' <span style="text-transform:none;font-weight:400">(optional)</span>':''}</label><input class="control${err?' has-err':''}" id="vf_${i}_${key}" data-vf="${key}" data-vfrow="${i}" placeholder="${placeholder}" value="${S.vehicleForms[i][key]}">${err?`<div class="field-err">${err}</div>`:''}</div>`;
+  return `<div class="field"><label>${label}${optional?' <span class="opt-tag">(optional)</span>':' <span class="req-star" aria-label="required">*</span>'}</label><input class="control${err?' has-err':''}" id="vf_${i}_${key}" data-vf="${key}" data-vfrow="${i}" placeholder="${placeholder}" value="${S.vehicleForms[i][key]}">${err?`<div class="field-err">${err}</div>`:''}</div>`;
 }
 const VEHICLE_PAGE_SIZE = 5;
 // every field shown up front on a vehicle section is required; "Add more details" fields are optional
 function vehicleRequiredKeys(){
-  return ['driverPhone','driverEmail', ...(S.step2VehicleType==='Truck + Trailer' ? ['truckNum','truckPlate','truckDot'] : []), 'trailerType','trailerPlate'];
+  return ['driverPhone','driverEmail', ...(S.step2VehicleType==='Truck + Trailer' ? ['truckNum','truckPlate'] : []), 'trailerType','trailerPlate'];
 }
 // { vehicleIndex: { fieldKey: message } } for every vehicle with a missing/invalid required field
 function validateVehicleForms(){
@@ -1690,7 +1695,7 @@ function vehicleUploadModalHtml(){
 // file is matched against (case/space-insensitive); truck columns only exist for Truck + Trailer
 const UPLOAD_COLUMNS = [
   {key:'driverPhone', label:'Driver phone number'}, {key:'driverEmail', label:'Driver email'},
-  {key:'truckNum', label:'Truck #', truck:true}, {key:'truckPlate', label:'Truck plate #', truck:true}, {key:'truckDot', label:'Truck DOT #', truck:true},
+  {key:'truckNum', label:'Truck #', truck:true}, {key:'truckPlate', label:'Truck plate #', truck:true},
   {key:'trailerType', label:'Trailer type'}, {key:'trailerPlate', label:'Trailer plate #'},
   {key:'truckMake', label:'Truck make', truck:true}, {key:'trailerNum', label:'Trailer #'}, {key:'trailerCompany', label:'Trailer company name'},
 ];
@@ -1818,6 +1823,15 @@ function screenBookStep3Vehicle(){
             <button class="btn-text" id="collapseAllVehicles" style="font-size:12.5px">Collapse all</button>
           </div>
         </div>
+        <p style="font-size:12.5px;color:var(--ink-soft);margin:-6px 0 14px"><span class="req-star">*</span> Required field</p>
+        ${S.step2VehicleType==='Truck + Trailer' ? `
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-body">
+            <div class="section-label">Fleet</div>
+            <div class="grid-2"><div class="field"><label>USDOT # <span class="req-star" aria-label="required">*</span></label><input class="control${S.fleetDotErr?' has-err':''}" id="fleetDot" inputmode="numeric" placeholder="e.g. 3104527" value="${S.fleetDot}">${S.fleetDotErr?`<div class="field-err">${S.fleetDotErr}</div>`:''}</div></div>
+            <div class="field-note" style="margin-top:8px">${ic.info}Your fleet's DOT number. It applies to every vehicle on this booking and is saved to your account for next time.</div>
+          </div>
+        </div>` : ''}
         ${pageIndices.map(i=>{
           const vf = S.vehicleForms[i];
           const expanded = S.vehicleFormsExpanded[i] !== false;
@@ -1838,8 +1852,7 @@ function screenBookStep3Vehicle(){
             <div class="grid-2" style="margin-bottom:16px">${vfInput(i,'driverPhone','Driver phone number','(555) 555-0123')}${vfInput(i,'driverEmail','Driver email','name@example.com')}</div>
             ${showTruck ? `
             <div class="section-label">Truck</div>
-            <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'truckNum','Truck #','Type here…')}${vfInput(i,'truckPlate','Truck plate #','Type here…')}</div>
-            <div class="grid-2" style="margin-bottom:16px">${vfInput(i,'truckDot','Truck DOT #','Type here…')}</div>
+            <div class="grid-2" style="margin-bottom:16px">${vfInput(i,'truckNum','Truck #','Type here…')}${vfInput(i,'truckPlate','Truck plate #','Type here…')}</div>
             ` : ''}
             <div class="section-label">Trailer</div>
             <div class="grid-2" style="margin-bottom:12px">${vfInput(i,'trailerType','Trailer type','Ex: 53 dry van')}${vfInput(i,'trailerPlate','Trailer plate #','Type here…')}</div>
@@ -2171,6 +2184,7 @@ function detailFromLiveBooking(id, paidAt){
     gateCaption: accessCaption(l, b.spots, dates),
     vtype: b.vtype,
     vehicles: S.vehicleForms.map(vf=>({...vf})),
+    fleetDot: S.fleetDot,
     listDates: `${new Date(b.checkInDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${fmtLongDate(endDate)}`,
   };
 }
@@ -2184,8 +2198,7 @@ function orderVehiclesSection(d){
       <div class="card-head"><h2 class="card-title">Driver & Vehicle</h2></div>
       <div class="card-body"><div class="grid-2">
         ${showTruck ? `
-        <div class="info-row"><span class="k">Truck plate #</span><span>${v(vf.truckPlate)}</span></div>
-        <div class="info-row"><span class="k">Truck DOT #</span><span>${v(vf.truckDot)}</span></div>` : ''}
+        <div class="info-row"><span class="k">Truck plate #</span><span>${v(vf.truckPlate)}</span></div>` : ''}
         <div class="info-row"><span class="k">Driver phone</span><span>${v(vf.driverPhone)}</span></div>
         <div class="info-row"><span class="k">Email</span><span>${v(vf.driverEmail)}</span></div>
         <div class="info-row"><span class="k">Trailer type</span><span>${v(vf.trailerType)}</span></div>
@@ -2215,8 +2228,8 @@ function orderVehiclesSection(d){
     ${S.driversSectionExpanded ? `<div class="card-body">
       <div class="search-box">${ic.search}<input id="odSearchInput" placeholder="Search plate, phone, email, or truck/trailer #" value="${S.confirmSearch}"></div>
       <div class="dtable-scroll"><table class="dtable">
-        <thead><tr><th>Vehicle</th>${showTruck?'<th>Truck #</th><th>Truck Plate</th><th>Truck DOT #</th>':''}<th>Driver Phone</th><th>Email</th><th>Trailer Type</th><th>Trailer Plate</th><th></th></tr></thead>
-        <tbody>${rows.length ? rows.map(({vf,i})=>`<tr><td>Vehicle ${i+1}</td>${showTruck?`<td>${v(vf.truckNum)}</td><td>${v(vf.truckPlate)}</td><td>${v(vf.truckDot)}</td>`:''}<td>${v(vf.driverPhone)}</td><td>${v(vf.driverEmail)}</td><td>${v(vf.trailerType)}</td><td>${v(vf.trailerPlate)}</td><td><button class="icon-btn" data-pdfrow="Vehicle ${i+1}" title="Download this driver's parking pass">${ic.download}</button></td></tr>`).join('') : `<tr><td colspan="${cols}" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>`}</tbody>
+        <thead><tr><th>Vehicle</th>${showTruck?'<th>Truck #</th><th>Truck Plate</th>':''}<th>Driver Phone</th><th>Email</th><th>Trailer Type</th><th>Trailer Plate</th><th></th></tr></thead>
+        <tbody>${rows.length ? rows.map(({vf,i})=>`<tr><td>Vehicle ${i+1}</td>${showTruck?`<td>${v(vf.truckNum)}</td><td>${v(vf.truckPlate)}</td>`:''}<td>${v(vf.driverPhone)}</td><td>${v(vf.driverEmail)}</td><td>${v(vf.trailerType)}</td><td>${v(vf.trailerPlate)}</td><td><button class="icon-btn" data-pdfrow="Vehicle ${i+1}" title="Download this driver's parking pass">${ic.download}</button></td></tr>`).join('') : `<tr><td colspan="${cols}" style="text-align:center;color:var(--ink-soft);padding:16px">No drivers match your search.</td></tr>`}</tbody>
       </table></div>
       <div style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Showing ${rows.length} of ${d.vehicles.length} drivers on this order.</div>
     </div>` : ''}
@@ -2248,6 +2261,7 @@ function orderDetailPage(d){
           <div class="info-row"><span class="k">Duration</span><span>${d.duration}</span></div>
           <div class="info-row"><span class="k">Booking Type</span><span>${d.bookingType}</span></div>
           <div class="info-row"><span class="k">Spots Reserved</span><span>${d.spots}</span></div>
+          ${d.vtype==='Truck + Trailer' && (d.fleetDot || (d.vehicles[0] && d.vehicles[0].truckDot)) ? `<div class="info-row"><span class="k">USDOT #</span><span>${d.fleetDot || d.vehicles[0].truckDot}</span></div>` : ''}
           <div class="section-label" style="color:var(--ink);margin:12px 0 8px">${d.chargesTitle || 'Charges'}</div>
           ${d.chargeRows.map(r=>`<div class="info-row"><span class="k">${r.label}</span><span>${fmtUSD(r.price)}</span></div>`).join('')}
           ${d.note ? `<div class="orderline-note">${ic.info}${d.note}</div>` : ''}
@@ -2482,7 +2496,7 @@ function wireScreen(root){
       if(!S.loginForm.email || !S.loginForm.password){ S.loginErr='Enter your email and password to continue.'; rerenderKeepFocus(); return; }
       const dest = S.postLoginGoto || 'book1';
       S.postLoginGoto = null;
-      S.loggedIn=true; toast('Welcome back, Ming'); go(dest);
+      S.loggedIn=true; if(!S.fleetDot) S.fleetDot = '3104527'; toast('Welcome back, Ming'); go(dest);
     }
   });
 
@@ -2604,15 +2618,23 @@ function wireScreen(root){
     render();
   });
   const vehicleUploadOverlay = root.querySelector('#vehicleUploadOverlay'); if(vehicleUploadOverlay) vehicleUploadOverlay.addEventListener('click',(e)=>{ if(e.target===vehicleUploadOverlay){ S.vehicleUploadModal=null; render(); } });
+  const fleetDotIn = root.querySelector('#fleetDot');
+  if(fleetDotIn) fleetDotIn.addEventListener('input',()=>{
+    S.fleetDot = fleetDotIn.value;
+    if(S.fleetDotErr){ S.fleetDotErr=''; fleetDotIn.classList.remove('has-err'); const fe=fleetDotIn.nextElementSibling; if(fe && fe.classList.contains('field-err')) fe.remove(); }
+  });
   const step3Continue = root.querySelector('#step3Continue'); if(step3Continue) step3Continue.addEventListener('click',()=>{
     const errs = validateVehicleForms();
     const bad = Object.keys(errs).map(Number);
-    if(bad.length){
+    const dotMissing = S.step2VehicleType==='Truck + Trailer' && !S.fleetDot.trim();
+    S.fleetDotErr = dotMissing ? 'Required' : '';
+    if(bad.length || dotMissing){
       S.vehicleErrors = errs;
       bad.forEach(i=>{ S.vehicleFormsExpanded[i] = true; });
-      S.vehiclePage = Math.floor(bad[0]/VEHICLE_PAGE_SIZE)+1;
+      if(bad.length) S.vehiclePage = Math.floor(bad[0]/VEHICLE_PAGE_SIZE)+1;
       render();
-      toast(`Fill in the required fields for ${bad.length} vehicle${bad.length===1?'':'s'}`);
+      if(dotMissing) window.scrollTo({top:0, behavior:'smooth'});
+      toast(bad.length ? `Fill in the required fields for ${bad.length} vehicle${bad.length===1?'':'s'}${dotMissing?' and your USDOT #':''}` : "Enter your fleet's USDOT #");
       return;
     }
     const dest = S.spots<=1 ? 'book4' : 'batchPayment';
