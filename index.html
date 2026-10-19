@@ -317,22 +317,20 @@ select.pill-select{-webkit-appearance:none;appearance:none;width:100%;height:38p
 .dropzone{border:2px dashed var(--border-input);border-radius:var(--r-lg);padding:30px;text-align:center;background:#fafaf9;cursor:pointer}
 .dropzone:hover,.dropzone.drag{border-color:var(--brand);background:var(--brand-tint)}
 table.dtable{width:100%;border-collapse:collapse;font-size:12.5px}
-.vt-empty{color:var(--ink-muted)}
-table.vrev td{padding:12px 10px}
-table.vrev th{padding:10px}
-table.vrev tbody tr.vrev-row{cursor:pointer}
-table.vrev .vt-n{color:var(--ink-soft);font-weight:600;width:32px}
-.vr{display:flex;flex-direction:column;gap:8px}
-.vr-head{display:grid;gap:10px;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);padding:0 0 2px}
-.vr-row{display:grid;gap:10px;align-items:center}
-.vr-row .control{min-width:0}
-.vr-idx{width:28px;height:28px;border-radius:999px;background:var(--paper-dim);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--ink-soft)}
-.vr-item.bad .vr-idx{background:var(--red-tint);color:var(--red)}
-.vr-more-btn{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;color:var(--ink-soft)}
-.vr-more-btn:hover{background:var(--paper-dim)}
-.vr-opt{margin:8px 0 6px 46px;padding:12px 14px;background:var(--paper-dim);border-radius:var(--r-md)}
-.vr-opt-label{display:block;font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
-.vr-opt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.vtable-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-lg);background:#fff}
+table.vtable{border-collapse:separate;border-spacing:0;min-width:100%;font-size:13px}
+.vtable th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);padding:7px 8px;white-space:nowrap;background:var(--paper-dim)}
+.vtable th.vt-grp{color:var(--brand);border-bottom:1px solid var(--line);border-left:1px solid var(--line)}
+.vtable th.vt-grp.opt{color:var(--ink-muted)}
+.vtable td{padding:4px;border-top:1px solid var(--line)}
+.vtable .vt-idx{position:sticky;left:0;z-index:1;background:#fff;text-align:center;font-weight:700;color:var(--ink-soft);padding:0 12px;border-right:1px solid var(--line)}
+.vtable thead .vt-idx{background:var(--paper-dim)}
+.vtable tr.vt-bad .vt-idx{color:var(--red);box-shadow:inset 3px 0 0 var(--red)}
+.vt-in{width:100%;min-width:120px;border:1px solid transparent;border-radius:6px;padding:7px 8px;font:inherit;color:var(--ink);background:transparent}
+.vt-in.wide{min-width:220px}
+.vt-in:hover{border-color:var(--line)}
+.vt-in:focus{outline:none;border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px var(--brand-tint)}
+.vt-in.has-err{border-color:var(--red);background:var(--red-tint)}
 table.dtable th{text-align:left;font-size:10.5px;text-transform:uppercase;color:var(--ink-soft);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
 table.dtable td{padding:8px 10px;border-bottom:1px solid #f0f0ee;white-space:nowrap;font-variant-numeric:tabular-nums}
 table.dtable tbody tr{transition:background .1s}
@@ -498,8 +496,6 @@ const S = {
   vehicleFormsExpanded: [true],
   vehicleMoreExpanded: [false],
   vehicleUploadModal: null,
-  vehicleLayout: 'review',
-  vehicleEditIdx: null,
   // fleet (account) DOT #: one value for every vehicle, saved to the account and prefilled on later bookings
   fleetDot: '',
   fleetDotErr: '',
@@ -1652,82 +1648,27 @@ const VEHICLE_PAGE_SIZE = 5;
 // more than one spot → one editable table (row per vehicle) instead of stacked cards; it fits more rows per page
 const VEHICLE_TABLE_PAGE_SIZE = 10;
 const vehiclePageSize = () => S.vehicleForms.length > 1 ? VEHICLE_TABLE_PAGE_SIZE : VEHICLE_PAGE_SIZE;
-const vtFields = () => {
-  const showTruck = S.step2VehicleType === 'Truck + Trailer';
-  return {
-    req: [['driverPhone','Driver phone','(555) 555-0123'],['driverEmail','Driver email','name@example.com'],
-      ...(showTruck ? [['truckPlate','Truck plate #','ABC-1234']] : []), ['trailerType','Trailer type','Ex: 53 dry van'], ['trailerPlate','Trailer plate #','TRL-5678']],
-    opt: [...(showTruck ? [['truckNum','Truck #','Type here…'],['truckMake','Truck make','Type here…']] : []), ['trailerNum','Trailer #','Type here…'], ['trailerCompany','Trailer company name','Type here…']],
-  };
-};
-const vehicleMissing = vf => vehicleRequiredKeys().filter(k=>!String(vf[k]||'').trim()).length;
-// more than one spot: S.vehicleLayout picks 'review' (read-only table + edit popup) or 'rows' (inline input rows)
 function vehicleTableHtml(pageIndices){
-  const { req, opt } = vtFields();
-  const total = S.vehicleForms.length, done = S.vehicleForms.filter(vf=>!vehicleMissing(vf)).length;
-  if(S.vehicleLayout === 'rows'){
-    const tpl = `36px ${req.map(([k])=>k==='driverEmail'?'1.5fr':'1fr').join(' ')} 34px`;
-    return `
-    <div class="card"><div class="card-body vr">
-      <div class="vr-head" style="grid-template-columns:${tpl}"><span></span>${req.map(([,l])=>`<span>${l} <span class="req-star">*</span></span>`).join('')}<span></span></div>
-      ${pageIndices.map(i=>{
-        const vf = S.vehicleForms[i], errs = S.vehicleErrors[i] || {}, more = !!S.vehicleMoreExpanded[i];
-        return `<div class="vr-item${S.vehicleErrors[i]?' bad':''}">
-          <div class="vr-row" style="grid-template-columns:${tpl}">
-            <span class="vr-idx">${i+1}</span>
-            ${req.map(([k,l,ph])=>`<input class="control${errs[k]?' has-err':''}" id="vf_${i}_${k}" data-vf="${k}" data-vfrow="${i}" placeholder="${errs[k]?'Required':ph}" value="${vf[k]}" aria-label="Vehicle ${i+1} ${l}">`).join('')}
-            <button class="vr-more-btn" data-togglemore="${i}" title="${more?'Hide':'Show'} optional fields" aria-expanded="${more}">${more?ic.chevDown:ic.chevRight}</button>
-          </div>
-          ${more ? `<div class="vr-opt"><span class="vr-opt-label">Optional</span><div class="vr-opt-grid">${opt.map(([k,l,ph])=>vfInput(i,k,l,ph,true)).join('')}</div></div>` : ''}
-        </div>`;
-      }).join('')}
-    </div></div>`;
-  }
-  const v = x => x ? x : '<span class="vt-empty">—</span>';
   const showTruck = S.step2VehicleType === 'Truck + Trailer';
+  const groups = [
+    ['Driver', [['driverPhone','Phone','(555) 555-0123'],['driverEmail','Email','name@example.com']]],
+    ...(showTruck ? [['Truck', [['truckPlate','Plate #','Type here…']]]] : []),
+    ['Trailer', [['trailerType','Type','53 dry van'],['trailerPlate','Plate #','Type here…']]],
+    ['Optional', [...(showTruck ? [['truckNum','Truck #','Type here…',true],['truckMake','Truck make','Type here…',true]] : []), ['trailerNum','Trailer #','Type here…',true], ['trailerCompany','Trailer company','Type here…',true]]],
+  ];
+  const cols = groups.flatMap(([,c])=>c);
   return `
-  <div class="card">
-    <div class="card-head"><h3 class="card-title" style="margin:0;font-size:15px">Vehicles</h3><span style="font-size:12.5px;color:var(--ink-soft)"><b style="color:var(--ink)">${done}</b> of ${total} complete</span></div>
-    <div style="overflow-x:auto">
-    <table class="dtable vrev">
-      <thead><tr><th>#</th><th>Driver phone</th><th>Driver email</th>${showTruck?'<th>Truck plate #</th>':''}<th>Trailer</th><th>Status</th><th></th></tr></thead>
+  <div class="vtable-wrap">
+    <table class="vtable">
+      <thead>
+        <tr><th class="vt-idx" rowspan="2">#</th>${groups.map(([g,c])=>`<th class="vt-grp${g==='Optional'?' opt':''}" colspan="${c.length}">${g}</th>`).join('')}</tr>
+        <tr>${cols.map(([,label,,opt])=>`<th>${label}${opt?'':' <span class="req-star" aria-label="required">*</span>'}</th>`).join('')}</tr>
+      </thead>
       <tbody>${pageIndices.map(i=>{
-        const vf = S.vehicleForms[i], miss = vehicleMissing(vf), touched = Object.values(vf).some(x=>String(x||'').trim());
-        const pill = !miss ? '<span class="status-pill status-paid">Complete</span>'
-          : S.vehicleErrors[i] ? `<span class="status-pill status-failed">Missing ${miss}</span>`
-          : touched ? `<span class="status-pill status-draft">Missing ${miss}</span>` : '<span class="status-pill status-refunded">Not started</span>';
-        const trailer = [vf.trailerType, vf.trailerPlate].filter(Boolean).join(' · ');
-        return `<tr class="vrev-row" data-vedit="${i}"><td class="vt-n">${i+1}</td><td>${v(vf.driverPhone)}</td><td>${v(vf.driverEmail)}</td>${showTruck?`<td>${v(vf.truckPlate)}</td>`:''}<td>${v(trailer)}</td><td>${pill}</td><td style="text-align:right"><span class="btn-text" style="font-size:12.5px">${touched?'Edit':'Add details'}</span></td></tr>`;
+        const vf = S.vehicleForms[i], errs = S.vehicleErrors[i] || {};
+        return `<tr class="${S.vehicleErrors[i]?'vt-bad':''}"><td class="vt-idx" title="${S.vehicleErrors[i]?'Missing required info':''}">${i+1}</td>${cols.map(([key,,ph,opt])=>`<td><input class="vt-in${key==='driverEmail'?' wide':''}${errs[key]?' has-err':''}" id="vf_${i}_${key}" data-vf="${key}" data-vfrow="${i}" placeholder="${ph}" value="${vf[key]}" title="${errs[key]||''}" aria-label="Vehicle ${i+1} ${key}"></td>`).join('')}</tr>`;
       }).join('')}</tbody>
     </table>
-    </div>
-  </div>`;
-}
-function vehicleEditModalHtml(){
-  const i = S.vehicleEditIdx;
-  if(i==null || !S.vehicleForms[i]) return '';
-  const { req, opt } = vtFields(), total = S.vehicleForms.length;
-  const grid = list => list.map(([k,l,ph])=>vfInput(i,k,l,ph,false)).join('');
-  const drv = req.filter(([k])=>k.startsWith('driver')), trk = req.filter(([k])=>k.startsWith('truck')), trl = req.filter(([k])=>k.startsWith('trailer'));
-  return `
-  <div class="modal-overlay" id="veOverlay">
-    <div class="modal-box" style="width:560px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div style="font-weight:700;font-size:15px">Vehicle ${i+1} <span style="color:var(--ink-soft);font-weight:500">of ${total}</span></div>
-        <button class="dp-close" id="veClose">${ic.x}</button>
-      </div>
-      <div class="section-label">Driver</div><div class="grid-2" style="margin-bottom:14px">${grid(drv)}</div>
-      ${trk.length ? `<div class="section-label">Truck</div><div class="grid-2" style="margin-bottom:14px">${grid(trk)}</div>` : ''}
-      <div class="section-label">Trailer</div><div class="grid-2" style="margin-bottom:14px">${grid(trl)}</div>
-      <div class="section-label" style="color:var(--ink-soft)">Optional</div><div class="grid-2" style="margin-bottom:6px">${opt.map(([k,l,ph])=>vfInput(i,k,l,ph,true)).join('')}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px">
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-outline" id="vePrev" ${i<=0?'disabled':''}>‹ Previous</button>
-          <button class="btn btn-outline" id="veNext" ${i>=total-1?'disabled':''}>Next ›</button>
-        </div>
-        <button class="btn btn-primary" id="veDone">Done</button>
-      </div>
-    </div>
   </div>`;
 }
 // every field shown up front on a vehicle section is required; "Add more details" fields are optional
@@ -1994,8 +1935,7 @@ function screenBookStep3Vehicle(){
     </div>
   </div>
   ${vehicleUploadModalHtml()}
-  ${vehicleUploadErrorHtml()}
-  ${vehicleEditModalHtml()}`;
+  ${vehicleUploadErrorHtml()}`;
 }
 
 /* ============================================================
@@ -2720,12 +2660,6 @@ function wireScreen(root){
     render();
   });
   const vehicleUploadOverlay = root.querySelector('#vehicleUploadOverlay'); if(vehicleUploadOverlay) vehicleUploadOverlay.addEventListener('click',(e)=>{ if(e.target===vehicleUploadOverlay){ S.vehicleUploadModal=null; render(); } });
-  root.querySelectorAll('[data-vedit]').forEach(tr=>tr.addEventListener('click',()=>{ S.vehicleEditIdx = parseInt(tr.dataset.vedit,10); render(); }));
-  const veClose = ()=>{ S.vehicleEditIdx = null; render(); };
-  ['veClose','veDone'].forEach(id=>{ const b = root.querySelector('#'+id); if(b) b.addEventListener('click', veClose); });
-  const veOverlay = root.querySelector('#veOverlay'); if(veOverlay) veOverlay.addEventListener('click',e=>{ if(e.target===veOverlay) veClose(); });
-  const vePrev = root.querySelector('#vePrev'); if(vePrev) vePrev.addEventListener('click',()=>{ S.vehicleEditIdx--; render(); });
-  const veNext = root.querySelector('#veNext'); if(veNext) veNext.addEventListener('click',()=>{ S.vehicleEditIdx++; render(); });
   const fleetDotIn = root.querySelector('#fleetDot');
   if(fleetDotIn) fleetDotIn.addEventListener('input',()=>{
     S.fleetDot = fleetDotIn.value;
@@ -2857,8 +2791,6 @@ function wireScreen(root){
   });
 }
 
-// layout comparison: open the prototype with #rows to see the inline-rows variant of the multi-vehicle form
-if(location.hash==='#rows') S.vehicleLayout='rows';
 render();
 </script>
 </body>
