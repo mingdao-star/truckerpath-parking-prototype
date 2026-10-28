@@ -541,10 +541,9 @@ const S = {
       subscription:{ start:'Sep 1, 2026', vtype:'Truck + Trailer', cardId:'card_visa',
         history:[ {period:'Sep 1 – Sep 30, 2026', on:'Sep 1, 2026, 10:15 AM', status:'Paid'},
                   {period:'Oct 1 – Oct 31, 2026', on:'Oct 1, 2026, 12:00 AM', status:'Failed', reason:'card declined (insufficient funds)'} ] }},
-    // upcoming orders that can still be cancelled: more than 2 hours out (full refund), inside the
-    // 2-hour window (no refund), and a monthly subscription that hasn't started (Unsubscribe refunds it)
+    // upcoming orders that can still be cancelled: a daily order (cancel, never refunded) and a monthly
+    // subscription starting more than 1 day out (Unsubscribe refunds it in full)
     {id:'tp202610271130118', loc:'Glendale, AZ — PHX1 Logistics Plus', lotId:'glendale1', dates:'Nov 3 – Nov 6, 2026', spots:22, paidOn:'Oct 27, 2026, 11:30 AM', status:'Paid', type:'batch'},
-    {id:'tp202610280645122', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Oct 28 – Oct 31, 2026', spots:22, paidOn:'Oct 28, 2026, 6:45 AM', status:'Paid', type:'batch', startsWithin2h:true},
     {id:'tp202610271620131', loc:'Maricopa, AZ — N White Rd Truck & Trailer Yard', lotId:'maricopa', dates:'Starts Nov 1, 2026 · monthly', spots:2, paidOn:'Oct 27, 2026, 4:20 PM', status:'Paid', type:'batch',
       subscription:{ start:'Nov 1, 2026', notStarted:true, vtype:'Truck + Trailer', cardId:'card_visa',
         history:[ {period:'Nov 1 – Nov 30, 2026', on:'Oct 27, 2026, 4:20 PM', status:'Paid'} ] }},
@@ -2364,14 +2363,12 @@ function orderDetailPage(d){
   ${retryPaymentModalHtml(d)}
   ${cancelModalHtml(d)}`;
 }
-// what cancelling would return, decided the way the backend's refund-info does: more than 2 hours
-// before start is a full refund of the total paid (tax included), anything later refunds nothing
+// what cancelling would return, following the TP App's cancel: a daily order is never refunded;
+// a monthly subscription unsubscribed more than 1 day before it starts refunds the total paid (tax included)
 function cancelOutcome(order, d){
-  let refundable;
-  if(order.subscription) refundable = !!order.subscription.notStarted;
-  else if(order.startsWithin2h) refundable = false;
-  else if(d.startIso) refundable = new Date(d.startIso) - Date.now() > 2 * 3600 * 1000;
-  else refundable = true;
+  let refundable = false;
+  if(order.subscription) refundable = !!order.subscription.notStarted && !order.subscription.startsWithin1d;
+  else if(d.bookingType === 'Monthly' && d.startIso) refundable = new Date(d.startIso) - Date.now() > 24 * 3600 * 1000;
   return { refundable, amount: refundable ? d.total : 0 };
 }
 function cancelledAccessPanel(d){
@@ -2379,7 +2376,7 @@ function cancelledAccessPanel(d){
   const when = d.refundedOn || d.cancelledOn;
   return `<div class="card gate-panel">
     <div class="card-head"><h2 class="card-title">${qr ? 'Check-in QR' : 'Gate Code'}</h2></div>
-    <div class="card-body"><div class="cancel-notice"><b>This order was cancelled</b>Cancelled on ${when}. ${qr ? `Every driver's QR code has expired.` : 'The gate code no longer works for this order.'}</div></div>
+    <div class="card-body"><div class="cancel-notice"><b>This order was ${d.refundedOn ? 'unsubscribed and refunded' : 'cancelled'}</b>${d.refundedOn ? 'Refunded' : 'Cancelled'} on ${when}. ${qr ? `Every driver's QR code has expired.` : 'The gate code no longer works for this order.'}</div></div>
   </div>`;
 }
 function cancelModalHtml(d){
@@ -2391,20 +2388,16 @@ function cancelModalHtml(d){
   let title, body, confirm, keep = 'Keep order';
   if(d.isMonthly && o.refundable){
     title = 'Unsubscribe and get a refund?';
-    body = `Your parking hasn't started yet, so you get everything back. The subscription ends now and your card won't be charged again. ${drivers} and get an email.`;
+    body = `Your parking starts more than 1 day from now, so you get everything back. The subscription ends now and your card won't be charged again. ${drivers} and get an email.`;
     confirm = 'Unsubscribe and refund'; keep = 'Keep subscription';
   } else if(d.isMonthly){
     title = 'Unsubscribe?';
     body = `Your spots stay active until the end of the current billing period, then end. Your card won't be charged again. This month isn't refundable.`;
     confirm = 'Unsubscribe'; keep = 'Keep subscription';
-  } else if(o.refundable){
-    title = 'Cancel this order?';
-    body = `${drivers} to ${lotName} and get an email.`;
-    confirm = 'Cancel order';
   } else {
-    title = 'Cancel without a refund?';
-    body = `This order starts within 2 hours, so it can't be refunded. ${drivers} and get an email.`;
-    confirm = 'Cancel without refund';
+    title = 'Cancel this order?';
+    body = `Daily orders aren't refundable, so you won't get money back. ${drivers} to ${lotName} and get an email.`;
+    confirm = 'Cancel order';
   }
   const showRefund = !(d.isMonthly && !o.refundable);
   return `<div class="modal-overlay" id="cancelOverlay">
