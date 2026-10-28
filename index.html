@@ -367,7 +367,22 @@ table.orders tbody tr{transition:background .1s}
 table.orders tbody tr:hover td{background:var(--paper-dim)}
 .status-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px}
 .status-paid{background:var(--green-tint);color:var(--green-deep)}
-.status-refunded{background:var(--paper-dim);color:var(--ink-soft)}
+.status-refunded,.status-cancelled{background:var(--paper-dim);color:var(--ink-soft)}
+.btn-danger{background:var(--red);color:#fff;box-shadow:var(--shadow-sm)}
+.btn-danger:hover{filter:brightness(.92)}
+.btn-danger:disabled{opacity:.6;cursor:default}
+.btn-danger-outline{background:#fff;border:1px solid #f3c4b3;color:var(--red);box-shadow:var(--shadow-sm)}
+.btn-danger-outline:hover{background:var(--red-tint)}
+.cx-sum{background:var(--paper-dim);border-radius:var(--r-md);padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:13px;margin-top:14px}
+.cx-row{display:flex;justify-content:space-between;gap:12px}
+.cx-row .k{color:var(--ink-soft)}
+.cx-row b.ok{color:var(--green-deep)}
+.cx-row b.no{color:var(--red)}
+.cx-err{display:flex;gap:10px;align-items:flex-start;background:var(--red-tint);border:1px solid #f3c4b3;border-radius:var(--r-md);padding:10px 12px;font-size:12.5px;line-height:1.45;color:var(--ink);margin-top:14px}
+.cx-err b{display:block;color:var(--red)}
+.cx-sim{display:flex;gap:8px;align-items:center;margin-top:14px;padding:8px 10px;border:1px dashed var(--border-input);border-radius:var(--r-md);font-size:11.5px;color:var(--ink-soft)}
+.cancel-notice{background:var(--paper-dim);border-radius:var(--r-md);padding:16px;text-align:center;font-size:12.5px;color:var(--ink-soft);line-height:1.5}
+.cancel-notice b{display:block;font-size:14.5px;color:var(--ink);margin-bottom:2px}
 .status-draft{background:var(--orange-tint);color:var(--orange-deep)}
 .status-failed{background:var(--red-tint);color:var(--red)}
 .pay-alert{display:flex;align-items:center;gap:14px;background:var(--red-tint);border:1px solid #f3c4b3;border-radius:var(--r-lg);padding:14px 18px;margin-bottom:16px}
@@ -473,6 +488,7 @@ const S = {
   postLoginGoto: null,
   bookingSeq: 112,
   retryOrderId: null,
+  cancelOrderId: null, cancelError: false, cancelSimFail: false,
   amenitiesExpanded: false,
   hoursExpanded: false,
   driversSectionExpanded: false,
@@ -525,10 +541,17 @@ const S = {
       subscription:{ start:'Sep 1, 2026', vtype:'Truck + Trailer', cardId:'card_visa',
         history:[ {period:'Sep 1 – Sep 30, 2026', on:'Sep 1, 2026, 10:15 AM', status:'Paid'},
                   {period:'Oct 1 – Oct 31, 2026', on:'Oct 1, 2026, 12:00 AM', status:'Failed', reason:'card declined (insufficient funds)'} ] }},
-    {id:'tp202607070903104', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 14 – Jul 17, 2026', spots:22, paidOn:'Jul 7, 2026, 9:03 AM', status:'Paid', type:'batch'},
-    {id:'tp202606151120087', loc:'Maricopa, AZ — N White Rd Truck & Trailer Yard', lotId:'maricopa', dates:'Jun 22 – Jun 25, 2026', spots:22, paidOn:'Jun 15, 2026, 11:20 AM', status:'Paid', type:'batch'},
+    // upcoming orders that can still be cancelled: more than 2 hours out (full refund), inside the
+    // 2-hour window (no refund), and a monthly subscription that hasn't started (Unsubscribe refunds it)
+    {id:'tp202610271130118', loc:'Glendale, AZ — PHX1 Logistics Plus', lotId:'glendale1', dates:'Nov 3 – Nov 6, 2026', spots:22, paidOn:'Oct 27, 2026, 11:30 AM', status:'Paid', type:'batch'},
+    {id:'tp202610280645122', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Oct 28 – Oct 31, 2026', spots:22, paidOn:'Oct 28, 2026, 6:45 AM', status:'Paid', type:'batch', startsWithin2h:true},
+    {id:'tp202610271620131', loc:'Maricopa, AZ — N White Rd Truck & Trailer Yard', lotId:'maricopa', dates:'Starts Nov 1, 2026 · monthly', spots:2, paidOn:'Oct 27, 2026, 4:20 PM', status:'Paid', type:'batch',
+      subscription:{ start:'Nov 1, 2026', notStarted:true, vtype:'Truck + Trailer', cardId:'card_visa',
+        history:[ {period:'Nov 1 – Nov 30, 2026', on:'Oct 27, 2026, 4:20 PM', status:'Paid'} ] }},
+    {id:'tp202607070903104', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 14 – Jul 17, 2026', spots:22, paidOn:'Jul 7, 2026, 9:03 AM', status:'Paid', type:'batch', ended:true},
+    {id:'tp202606151120087', loc:'Maricopa, AZ — N White Rd Truck & Trailer Yard', lotId:'maricopa', dates:'Jun 22 – Jun 25, 2026', spots:22, paidOn:'Jun 15, 2026, 11:20 AM', status:'Paid', type:'batch', ended:true},
     {id:'tp202605241547063', loc:'Glendale, AZ — PHX1 Logistics Plus', lotId:'glendale1', dates:'May 30 – Jun 2, 2026', spots:22, paidOn:'May 24, 2026, 3:47 PM', status:'Refunded', type:'batch', refundedOn:'May 26, 2026, 9:12 AM'},
-    {id:'tp202607241415121', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 31 – Aug 7, 2026', spots:1, paidOn:'Jul 24, 2026, 2:15 PM', status:'Paid', type:'single'},
+    {id:'tp202607241415121', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Jul 31 – Aug 7, 2026', spots:1, paidOn:'Jul 24, 2026, 2:15 PM', status:'Paid', type:'single', ended:true},
     {id:'tp202608031015139', loc:'Glendale, AZ — PHX2 Logistics Plus', lotId:'glendale2', dates:'Aug 10 – Aug 13, 2026', spots:22, paidOn:'Aug 3, 2026, 10:15 AM', status:'Draft', type:'batch'},
   ],
 };
@@ -2072,7 +2095,7 @@ function locationSummaryCard(l, opts){
    Orders, Wallet, Order Detail
 ============================================================ */
 function screenOrders(){
-  const statusClass = {Paid:'status-paid',Refunded:'status-refunded',Draft:'status-draft','Payment failed':'status-failed'};
+  const statusClass = {Paid:'status-paid',Refunded:'status-refunded',Cancelled:'status-cancelled',Unsubscribed:'status-cancelled',Draft:'status-draft','Payment failed':'status-failed'};
   return `
   ${topNav('orders')}
   <div class="page">
@@ -2233,6 +2256,7 @@ function detailFromLiveBooking(id, paidAt){
     vtype: b.vtype,
     vehicles: S.vehicleForms.map(vf=>({...vf})),
     fleetDot: S.fleetDot,
+    startIso: `${b.checkInDate}T${b.checkInTime}`,
     listDates: `${new Date(b.checkInDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${fmtLongDate(endDate)}`,
   };
 }
@@ -2271,7 +2295,7 @@ function orderVehiclesSection(d){
       </button>
       <div style="display:flex;gap:8px">
         <button class="btn btn-outline" data-toast="CSV exported (${d.vehicles.length} rows)">${ic.download}&nbsp;Export CSV</button>
-        <button class="btn btn-primary" data-toast="Email queued to ${d.vehicles.length} drivers">${ic.mail}&nbsp;Send email to all drivers</button>
+        ${d.cancelled ? '' : `<button class="btn btn-primary" data-toast="Email queued to ${d.vehicles.length} drivers">${ic.mail}&nbsp;Send email to all drivers</button>`}
       </div>
     </div>
     ${S.driversSectionExpanded ? `<div class="card-body">
@@ -2302,8 +2326,11 @@ function orderDetailPage(d){
     <div class="orderdetail-grid">
       <div class="card">
         <div class="card-head">
-          <h2 class="card-title">Booking Details - ${d.id}</h2>
-          <button class="btn btn-outline" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
+          <h2 class="card-title" style="display:flex;align-items:center;gap:8px">Booking Details - ${d.id}${d.statusPill ? `<span class="status-pill status-cancelled">${d.statusPill}</span>` : ''}</h2>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-outline" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
+            ${d.canCancel ? `<button class="btn btn-danger-outline" id="cancelOrderBtn">${d.isMonthly ? 'Unsubscribe' : 'Cancel order'}</button>` : ''}
+          </div>
         </div>
         <div class="card-body">
           <div class="info-row"><span class="k">Reservation Dates</span><span>${d.reservationDates}</span></div>
@@ -2323,15 +2350,83 @@ function orderDetailPage(d){
           ${d.refundedOn ? `
           <div class="info-row"><span class="k">Refunded on</span><span>${d.refundedOn}</span></div>
           <div class="info-row"><span class="k"><b style="color:var(--ink)">Refund amount</b></span><span><b>-${fmtUSD(d.total)}</b></span></div>` : ''}
+          ${d.cancelledOn ? `
+          <div class="info-row"><span class="k">Cancelled on</span><span>${d.cancelledOn}</span></div>
+          <div class="info-row"><span class="k"><b style="color:var(--ink)">Refund amount</b></span><span><b>${fmtUSD(0)}</b></span></div>` : ''}
         </div>
       </div>
-      ${gateCodePanel(d.gateCode, d.gateCaption, d.lot, d.id)}
+      ${d.cancelled ? cancelledAccessPanel(d) : gateCodePanel(d.gateCode, d.gateCaption, d.lot, d.id)}
     </div>
     ${orderVehiclesSection(d)}
     <div style="margin-top:16px">${locationSummaryCard(d.lot, { address: d.lot.address })}</div>
     <button class="btn btn-outline" style="margin-top:16px" id="backToOrders">← Back to Orders</button>
   </div>
-  ${retryPaymentModalHtml(d)}`;
+  ${retryPaymentModalHtml(d)}
+  ${cancelModalHtml(d)}`;
+}
+// what cancelling would return, decided the way the backend's refund-info does: more than 2 hours
+// before start is a full refund of the total paid (tax included), anything later refunds nothing
+function cancelOutcome(order, d){
+  let refundable;
+  if(order.subscription) refundable = !!order.subscription.notStarted;
+  else if(order.startsWithin2h) refundable = false;
+  else if(d.startIso) refundable = new Date(d.startIso) - Date.now() > 2 * 3600 * 1000;
+  else refundable = true;
+  return { refundable, amount: refundable ? d.total : 0 };
+}
+function cancelledAccessPanel(d){
+  const qr = d.lot.accessType === 'qr';
+  const when = d.refundedOn || d.cancelledOn;
+  return `<div class="card gate-panel">
+    <div class="card-head"><h2 class="card-title">${qr ? 'Check-in QR' : 'Gate Code'}</h2></div>
+    <div class="card-body"><div class="cancel-notice"><b>This order was cancelled</b>Cancelled on ${when}. ${qr ? `Every driver's QR code has expired.` : 'The gate code no longer works for this order.'}</div></div>
+  </div>`;
+}
+function cancelModalHtml(d){
+  if(!d.canCancel || S.cancelOrderId !== d.id) return '';
+  const card = (d.cardId && S.walletCards.find(c=>c.id===d.cardId)) || defaultCard();
+  const o = d.outcome;
+  const drivers = d.spots === 1 ? 'Your driver loses access' : `All ${d.spots} drivers lose access`;
+  const lotName = d.lot.name.split(' at ').pop();
+  let title, body, confirm, keep = 'Keep order';
+  if(d.isMonthly && o.refundable){
+    title = 'Unsubscribe and get a refund?';
+    body = `Your parking hasn't started yet, so you get everything back. The subscription ends now and your card won't be charged again. ${drivers} and get an email.`;
+    confirm = 'Unsubscribe and refund'; keep = 'Keep subscription';
+  } else if(d.isMonthly){
+    title = 'Unsubscribe?';
+    body = `Your spots stay active until the end of the current billing period, then end. Your card won't be charged again. This month isn't refundable.`;
+    confirm = 'Unsubscribe'; keep = 'Keep subscription';
+  } else if(o.refundable){
+    title = 'Cancel this order?';
+    body = `${drivers} to ${lotName} and get an email.`;
+    confirm = 'Cancel order';
+  } else {
+    title = 'Cancel without a refund?';
+    body = `This order starts within 2 hours, so it can't be refunded. ${drivers} and get an email.`;
+    confirm = 'Cancel without refund';
+  }
+  const showRefund = !(d.isMonthly && !o.refundable);
+  return `<div class="modal-overlay" id="cancelOverlay">
+    <div class="modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-weight:700;font-size:15px">${title}</div>
+        <button class="dp-close" id="cancelX" aria-label="Close">${ic.x}</button>
+      </div>
+      <div style="font-size:13px;color:var(--ink-soft);line-height:1.5">${body}</div>
+      ${S.cancelError ? `<div class="cx-err"><span class="pay-alert-ic" style="width:28px;height:28px">${ic.warn}</span><div><b>We couldn't process your refund.</b>Your order is still active and nothing changed. Try again, or contact support@truckerpath.com.</div></div>` : ''}
+      ${showRefund ? `<div class="cx-sum">
+        <div class="cx-row"><span class="k">Total paid</span><b>${fmtUSD(d.total)}</b></div>
+        <div class="cx-row"><span class="k">${o.refundable ? `Refund to ${card.brand} •••• ${card.last4}` : 'Refund'}</span><b class="${o.refundable ? 'ok' : 'no'}">${fmtUSD(o.amount)}</b></div>
+      </div>
+      ${o.refundable ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:8px">Refunds take 5–10 business days to show on your card.</div>` : ''}` : ''}
+      ${o.refundable ? `<label class="cx-sim"><input type="checkbox" id="cancelSimFail" ${S.cancelSimFail?'checked':''}> Prototype only: simulate a refund failure</label>` : ''}
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-outline" style="flex:1" id="cancelKeep">${keep}</button>
+        <button class="btn btn-danger" style="flex:1" id="cancelConfirm">${S.cancelError ? 'Try again' : confirm}</button>
+      </div>
+    </div>
+  </div>`;
 }
 function retryPaymentModalHtml(d){
   if(!d.paymentIssue || S.retryOrderId !== d.id) return '';
@@ -2358,7 +2453,7 @@ function detailFromSubscription(order){
   const failed = current.status === 'Failed';
   const access = accessCaption(l, order.spots, '');
   return {
-    id: order.id, lot: l, reservationDates: `Started ${sub.start} · renews on the 1st of each month`, duration: 'Monthly subscription',
+    id: order.id, lot: l, reservationDates: `${sub.notStarted ? 'Starts' : 'Started'} ${sub.start} · renews on the 1st of each month`, duration: 'Monthly subscription',
     bookingType: 'Monthly', spots: order.spots,
     chargesTitle: `Charges — current period (${current.period})`,
     chargeRows: [{ label: `${sub.vtype} parking (${fmtUSD(c.rate)}/month × ${order.spots} spots)`, price: c.subtotal }],
@@ -2379,7 +2474,20 @@ function orderDetailFor(order){
 // My Orders -> View, and the screen right after payment (which is just that new order's detail)
 function screenOrderDetail(){
   const order = S.ordersHistory.find(o=>o.id===S.selectedOrderId) || S.ordersHistory[0];
-  return orderDetailPage(orderDetailFor(order));
+  return orderDetailPage(withCancelState(order, orderDetailFor(order)));
+}
+// order-level cancel state layered over the detail, so a frozen payment snapshot never has to change
+function withCancelState(order, base){
+  const d = { ...base };
+  d.isMonthly = !!order.subscription || d.bookingType === 'Monthly';
+  d.cancelled = order.status === 'Refunded' || order.status === 'Cancelled';
+  d.canCancel = order.status === 'Paid' && !order.ended;
+  d.outcome = cancelOutcome(order, d);
+  if(order.refundedOn) d.refundedOn = order.refundedOn;
+  if(order.cancelledOn) d.cancelledOn = order.cancelledOn;
+  if(order.status !== 'Paid' && order.status !== 'Payment failed') d.statusPill = order.status;
+  if(order.status === 'Unsubscribed') d.reservationDates = `${d.reservationDates.split(' · ')[0]} · unsubscribed, active until the end of the current billing period`;
+  return d;
 }
 
 /* ============================================================
@@ -2733,6 +2841,31 @@ function wireScreen(root){
       S.retryOrderId = null;
       render();
       toast('Payment successful — subscription renewed');
+    }, 800);
+  });
+  const cancelOrderBtn = root.querySelector('#cancelOrderBtn'); if(cancelOrderBtn) cancelOrderBtn.addEventListener('click',()=>{
+    S.cancelOrderId = S.selectedOrderId; S.cancelError = false; S.cancelSimFail = false; render();
+  });
+  const closeCancel = ()=>{ S.cancelOrderId = null; S.cancelError = false; render(); };
+  ['#cancelKeep','#cancelX'].forEach(sel=>{ const b = root.querySelector(sel); if(b) b.addEventListener('click', closeCancel); });
+  const cancelOverlay = root.querySelector('#cancelOverlay'); if(cancelOverlay) cancelOverlay.addEventListener('click',(e)=>{ if(e.target===cancelOverlay) closeCancel(); });
+  const cancelSimFail = root.querySelector('#cancelSimFail'); if(cancelSimFail) cancelSimFail.addEventListener('change',()=>{ S.cancelSimFail = cancelSimFail.checked; });
+  const cancelConfirm = root.querySelector('#cancelConfirm'); if(cancelConfirm) cancelConfirm.addEventListener('click',()=>{
+    cancelConfirm.textContent = 'Processing…'; cancelConfirm.disabled = true;
+    setTimeout(()=>{
+      const order = S.ordersHistory.find(o=>o.id===S.cancelOrderId);
+      const d = withCancelState(order, orderDetailFor(order));
+      // a failed refund writes nothing: the order stays as it was and the modal stays open
+      if(d.outcome.refundable && S.cancelSimFail){ S.cancelError = true; S.cancelSimFail = false; render(); return; }
+      const now = fmtPaidOn(new Date());
+      const card = (d.cardId && S.walletCards.find(c=>c.id===d.cardId)) || defaultCard();
+      if(d.outcome.refundable){ order.status = 'Refunded'; order.refundedOn = now; }
+      else if(d.isMonthly){ order.status = 'Unsubscribed'; }
+      else { order.status = 'Cancelled'; order.cancelledOn = now; }
+      S.cancelOrderId = null; S.cancelError = false;
+      render();
+      toast(d.outcome.refundable ? `Order cancelled — ${fmtUSD(d.total)} refunded to ${card.brand} •••• ${card.last4}`
+        : d.isMonthly ? `Unsubscribed — your card won't be charged again` : 'Order cancelled — no refund');
     }, 800);
   });
   const amenitiesToggle = root.querySelector('#amenitiesToggle'); if(amenitiesToggle) amenitiesToggle.addEventListener('click',()=>{ S.amenitiesExpanded=!S.amenitiesExpanded; render(); });
