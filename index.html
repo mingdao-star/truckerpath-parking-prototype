@@ -488,7 +488,7 @@ const S = {
   postLoginGoto: null,
   bookingSeq: 112,
   retryOrderId: null,
-  cancelOrderId: null, cancelError: false, cancelSimFail: false,
+  cancelOrderId: null, cancelStep: 'confirm', cancelSimFail: false,
   amenitiesExpanded: false,
   hoursExpanded: false,
   driversSectionExpanded: false,
@@ -541,9 +541,10 @@ const S = {
       subscription:{ start:'Sep 1, 2026', vtype:'Truck + Trailer', cardId:'card_visa',
         history:[ {period:'Sep 1 – Sep 30, 2026', on:'Sep 1, 2026, 10:15 AM', status:'Paid'},
                   {period:'Oct 1 – Oct 31, 2026', on:'Oct 1, 2026, 12:00 AM', status:'Failed', reason:'card declined (insufficient funds)'} ] }},
-    // upcoming orders that can still be cancelled: a daily order (cancel, never refunded) and a monthly
-    // subscription starting more than 1 day out (Unsubscribe refunds it in full)
+    // upcoming orders that can still be cancelled, one per refund state of the TP App's cancel flow:
+    // daily > 2 hours before check-in (full refund), daily within 2 hours (no refund), monthly > 1 day before check-in (full refund)
     {id:'tp202610271130118', loc:'Glendale, AZ — PHX1 Logistics Plus', lotId:'glendale1', dates:'Nov 3 – Nov 6, 2026', spots:22, paidOn:'Oct 27, 2026, 11:30 AM', status:'Paid', type:'batch'},
+    {id:'tp202610280645122', loc:'Eloy, AZ — PICACHO RV & TRUCK PARK', lotId:'eloy', dates:'Oct 28 – Oct 31, 2026', spots:22, paidOn:'Oct 28, 2026, 6:45 AM', status:'Paid', type:'batch', startsWithin2h:true},
     {id:'tp202610271620131', loc:'Maricopa, AZ — N White Rd Truck & Trailer Yard', lotId:'maricopa', dates:'Starts Nov 1, 2026 · monthly', spots:2, paidOn:'Oct 27, 2026, 4:20 PM', status:'Paid', type:'batch',
       subscription:{ start:'Nov 1, 2026', notStarted:true, vtype:'Truck + Trailer', cardId:'card_visa',
         history:[ {period:'Nov 1 – Nov 30, 2026', on:'Oct 27, 2026, 4:20 PM', status:'Paid'} ] }},
@@ -2328,7 +2329,8 @@ function orderDetailPage(d){
           <h2 class="card-title" style="display:flex;align-items:center;gap:8px">Booking Details - ${d.id}${d.statusPill ? `<span class="status-pill status-cancelled">${d.statusPill}</span>` : ''}</h2>
           <div style="display:flex;gap:8px">
             <button class="btn btn-outline" data-toast="Receipt downloaded">${ic.download}&nbsp;Download receipt</button>
-            ${d.canCancel ? `<button class="btn btn-danger-outline" id="cancelOrderBtn">${d.isMonthly ? 'Unsubscribe' : 'Cancel order'}</button>` : ''}
+            ${d.canCancel ? `<button class="btn btn-danger-outline" id="cancelOrderBtn">${d.isMonthly ? 'Cancel Subscription' : 'Cancel Order'}</button>` : ''}
+            ${d.cancelled ? `<button class="btn btn-primary" id="bookAgainBtn">Book Parking Again</button>` : ''}
           </div>
         </div>
         <div class="card-body">
@@ -2349,9 +2351,12 @@ function orderDetailPage(d){
           ${d.refundedOn ? `
           <div class="info-row"><span class="k">Refunded on</span><span>${d.refundedOn}</span></div>
           <div class="info-row"><span class="k"><b style="color:var(--ink)">Refund amount</b></span><span><b>-${fmtUSD(d.total)}</b></span></div>` : ''}
-          ${d.cancelledOn ? `
+          ${d.refundSummary ? `<div class="section-label" style="color:var(--ink);margin:12px 0 8px">Refund Summary</div>
           <div class="info-row"><span class="k">Cancelled on</span><span>${d.cancelledOn}</span></div>
-          <div class="info-row"><span class="k"><b style="color:var(--ink)">Refund amount</b></span><span><b>${fmtUSD(0)}</b></span></div>` : ''}
+          <div class="info-row"><span class="k">Original amount</span><span>${fmtUSD(d.refundSummary.original)}</span></div>
+          <div class="info-row"><span class="k">Cancellation fee</span><span>${fmtUSD(d.refundSummary.fee)}</span></div>
+          <div class="info-row"><span class="k"><b style="color:var(--ink)">Refund amount</b></span><span><b>${fmtUSD(d.refundSummary.refund)}</b></span></div>
+          ${d.refundSummary.refund > 0 ? `<div class="info-row"><span class="k">Refunded to</span><span>${d.refundSummary.card}</span></div>` : ''}` : ''}
         </div>
       </div>
       ${d.cancelled ? cancelledAccessPanel(d) : gateCodePanel(d.gateCode, d.gateCaption, d.lot, d.id)}
@@ -2363,63 +2368,88 @@ function orderDetailPage(d){
   ${retryPaymentModalHtml(d)}
   ${cancelModalHtml(d)}`;
 }
-// what cancelling would return, following the TP App's cancel: a daily order is never refunded;
-// a monthly subscription unsubscribed more than 1 day before it starts refunds the total paid (tax included)
+// refund state for a cancel, per the TP App's cancel flow ([PHASE 3] PRD - Parking (TP App)):
+//   daily  — Full Refund when cancelled > 2 hours before check-in, No Refund within 2 hours (still Booked)
+//   monthly — Booked: Full Refund when > 1 day before check-in; otherwise the original cancel subscription flow
 function cancelOutcome(order, d){
-  let refundable = false;
-  if(order.subscription) refundable = !!order.subscription.notStarted && !order.subscription.startsWithin1d;
-  else if(d.bookingType === 'Monthly' && d.startIso) refundable = new Date(d.startIso) - Date.now() > 24 * 3600 * 1000;
-  return { refundable, amount: refundable ? d.total : 0 };
+  if(d.isMonthly){
+    const booked = order.subscription ? !!order.subscription.notStarted : true;
+    if(!booked) return { flow: 'subscription' };
+    return { flow: 'refund', state: 'full', rule: 'More than 1 day before check-in', amount: d.total };
+  }
+  let full;
+  if(order.startsWithin2h) full = false;
+  else if(d.startIso) full = new Date(d.startIso) - Date.now() > 2 * 3600 * 1000;
+  else full = true;
+  return full ? { flow: 'refund', state: 'full', rule: 'Cancelled more than 2 hours before check-in', amount: d.total }
+              : { flow: 'refund', state: 'none', rule: 'Within 2 hours of check-in', amount: 0 };
+}
+function lastBillingDay(order){
+  const h = order.subscription.history[order.subscription.history.length-1];
+  return h.period.split(' – ')[1];
 }
 function cancelledAccessPanel(d){
   const qr = d.lot.accessType === 'qr';
-  const when = d.refundedOn || d.cancelledOn;
   return `<div class="card gate-panel">
     <div class="card-head"><h2 class="card-title">${qr ? 'Check-in QR' : 'Gate Code'}</h2></div>
-    <div class="card-body"><div class="cancel-notice"><b>This order was ${d.refundedOn ? 'unsubscribed and refunded' : 'cancelled'}</b>${d.refundedOn ? 'Refunded' : 'Cancelled'} on ${when}. ${qr ? `Every driver's QR code has expired.` : 'The gate code no longer works for this order.'}</div></div>
+    <div class="card-body"><div class="cancel-notice"><b>Order cancelled</b>Cancelled on ${d.cancelledOn}. ${qr ? `Every driver's QR code has expired.` : 'The gate code no longer works for this order.'}</div></div>
   </div>`;
 }
 function cancelModalHtml(d){
-  if(!d.canCancel || S.cancelOrderId !== d.id) return '';
+  if(S.cancelOrderId !== d.id || (S.cancelStep !== 'success' && !d.canCancel)) return '';
   const card = (d.cardId && S.walletCards.find(c=>c.id===d.cardId)) || defaultCard();
+  const cardTxt = `${card.brand} •••• ${card.last4}`;
   const o = d.outcome;
-  const drivers = d.spots === 1 ? 'Your driver loses access' : `All ${d.spots} drivers lose access`;
-  const lotName = d.lot.name.split(' at ').pop();
-  let title, body, confirm, keep = 'Keep order';
-  if(d.isMonthly && o.refundable){
-    title = 'Unsubscribe and get a refund?';
-    body = `Your parking starts more than 1 day from now, so you get everything back. The subscription ends now and your card won't be charged again. ${drivers} and get an email.`;
-    confirm = 'Unsubscribe and refund'; keep = 'Keep subscription';
-  } else if(d.isMonthly){
-    title = 'Unsubscribe?';
-    body = `Your spots stay active until the end of the current billing period, then end. Your card won't be charged again. This month isn't refundable.`;
-    confirm = 'Unsubscribe'; keep = 'Keep subscription';
-  } else {
-    title = 'Cancel this order?';
-    body = `Daily orders aren't refundable, so you won't get money back. ${drivers} to ${lotName} and get an email.`;
-    confirm = 'Cancel order';
-  }
-  const showRefund = !(d.isMonthly && !o.refundable);
-  return `<div class="modal-overlay" id="cancelOverlay">
-    <div class="modal-box">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <div style="font-weight:700;font-size:15px">${title}</div>
-        <button class="dp-close" id="cancelX" aria-label="Close">${ic.x}</button>
-      </div>
-      <div style="font-size:13px;color:var(--ink-soft);line-height:1.5">${body}</div>
-      ${S.cancelError ? `<div class="cx-err"><span class="pay-alert-ic" style="width:28px;height:28px">${ic.warn}</span><div><b>We couldn't process your refund.</b>Your order is still active and nothing changed. Try again, or contact support@truckerpath.com.</div></div>` : ''}
-      ${showRefund ? `<div class="cx-sum">
-        <div class="cx-row"><span class="k">Total paid</span><b>${fmtUSD(d.total)}</b></div>
-        <div class="cx-row"><span class="k">${o.refundable ? `Refund to ${card.brand} •••• ${card.last4}` : 'Refund'}</span><b class="${o.refundable ? 'ok' : 'no'}">${fmtUSD(o.amount)}</b></div>
-      </div>
-      ${o.refundable ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:8px">Refunds take 5–10 business days to show on your card.</div>` : ''}` : ''}
-      ${o.refundable ? `<label class="cx-sim"><input type="checkbox" id="cancelSimFail" ${S.cancelSimFail?'checked':''}> Prototype only: simulate a refund failure</label>` : ''}
+  const title = d.isMonthly ? 'Cancel Subscription' : 'Cancel Order';
+  const head = t => `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-weight:700;font-size:15px">${t}</div>
+        <button class="dp-close" id="cancelX" aria-label="Close">${ic.x}</button></div>`;
+  let inner;
+  if(S.cancelStep === 'success'){
+    const r = S.cancelResult;
+    inner = `${head(d.isMonthly ? 'Subscription Cancelled' : 'Order Cancelled')}
+      ${r.flow === 'subscription'
+        ? `<div style="font-size:13px;color:var(--ink-soft);line-height:1.5">Your subscription is cancelled. Your spot stays active until ${r.lastDay}.</div>`
+        : `<div class="cx-sum">
+            <div class="cx-row"><span class="k">Refund amount</span><b class="${r.amount>0?'ok':''}">${fmtUSD(r.amount)}</b></div>
+            ${r.amount > 0 ? `<div class="cx-row"><span class="k">Refund to</span><b>${cardTxt}</b></div>
+            <div class="cx-row"><span class="k">Processing time</span><b>5–10 business days</b></div>` : ''}
+          </div>`}
       <div style="display:flex;gap:10px;margin-top:16px">
-        <button class="btn btn-outline" style="flex:1" id="cancelKeep">${keep}</button>
-        <button class="btn btn-danger" style="flex:1" id="cancelConfirm">${S.cancelError ? 'Try again' : confirm}</button>
+        <button class="btn btn-outline" style="flex:1" id="cancelKeep">View Order</button>
+        <button class="btn btn-primary" style="flex:1" id="bookAgainBtn">Book Parking Again</button>
+      </div>`;
+  } else if(S.cancelStep === 'failed'){
+    inner = `${head('Cancellation Failed')}
+      <div class="cx-err"><span class="pay-alert-ic" style="width:28px;height:28px">${ic.warn}</span><div><b>We couldn't cancel your order.</b>Your order hasn't changed. Try again, or contact support.</div></div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-outline" style="flex:1" id="cancelSupport">Contact Support</button>
+        <button class="btn btn-primary" style="flex:1" id="cancelKeep">Try Again</button>
+      </div>`;
+  } else if(o.flow === 'subscription'){
+    inner = `${head(title)}
+      <div style="font-size:13px;color:var(--ink-soft);line-height:1.5">This spot stays active until ${lastBillingDay(d.order)}, then ends. Your card won't be charged again.</div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-outline" style="flex:1" id="cancelKeep">Keep Subscription</button>
+        <button class="btn btn-danger" style="flex:1" id="cancelConfirm">Cancel Subscription</button>
+      </div>`;
+  } else {
+    const full = o.state === 'full';
+    inner = `${head(title)}
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px"><span class="status-pill ${full?'status-paid':'status-failed'}">${full ? 'Full Refund' : 'No Refund'}</span><span style="color:var(--ink-soft)">${o.rule}</span></div>
+      <div class="cx-sum">
+        <div class="cx-row"><span class="k">Original amount</span><b>${fmtUSD(d.total)}</b></div>
+        <div class="cx-row"><span class="k">Cancellation fee</span><b>${fmtUSD(d.total - o.amount)}</b></div>
+        <div class="cx-row"><span class="k">Refund amount</span><b class="${full?'ok':'no'}">${fmtUSD(o.amount)}</b></div>
       </div>
-    </div>
-  </div>`;
+      ${full ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:8px">Refunded to your original payment method (${cardTxt}).</div>` : ''}
+      <label class="cx-sim"><input type="checkbox" id="cancelSimFail" ${S.cancelSimFail?'checked':''}> Prototype only: simulate a failed cancellation</label>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-outline" style="flex:1" id="cancelKeep">${d.isMonthly ? 'Keep Subscription' : 'Keep Order'}</button>
+        <button class="btn btn-danger" style="flex:1" id="cancelConfirm">${title}</button>
+      </div>`;
+  }
+  return `<div class="modal-overlay" id="cancelOverlay"><div class="modal-box">${inner}</div></div>`;
 }
 function retryPaymentModalHtml(d){
   if(!d.paymentIssue || S.retryOrderId !== d.id) return '';
@@ -2471,15 +2501,19 @@ function screenOrderDetail(){
 }
 // order-level cancel state layered over the detail, so a frozen payment snapshot never has to change
 function withCancelState(order, base){
-  const d = { ...base };
+  const d = { ...base, order };
   d.isMonthly = !!order.subscription || d.bookingType === 'Monthly';
-  d.cancelled = order.status === 'Refunded' || order.status === 'Cancelled';
-  d.canCancel = order.status === 'Paid' && !order.ended;
+  // a monthly subscription cancelled inside its billing period keeps access until the last day billed
+  d.cancelled = order.status === 'Refunded' || (order.status === 'Cancelled' && !order.activeUntil);
+  d.canCancel = d.isMonthly ? (order.status === 'Paid' || order.status === 'Payment failed') && !order.ended
+                            : order.status === 'Paid' && !order.ended && !order.checkedIn;
   d.outcome = cancelOutcome(order, d);
   if(order.refundedOn) d.refundedOn = order.refundedOn;
   if(order.cancelledOn) d.cancelledOn = order.cancelledOn;
+  if(order.refundSummary) d.refundSummary = order.refundSummary;
   if(order.status !== 'Paid' && order.status !== 'Payment failed') d.statusPill = order.status;
-  if(order.status === 'Unsubscribed') d.reservationDates = `${d.reservationDates.split(' · ')[0]} · unsubscribed, active until the end of the current billing period`;
+  if(order.activeUntil) d.paymentIssue = null;
+  if(order.activeUntil) d.reservationDates = `${d.reservationDates.split(' · ')[0]} · subscription cancelled, last day of billing ${order.activeUntil}`;
   return d;
 }
 
@@ -2837,28 +2871,37 @@ function wireScreen(root){
     }, 800);
   });
   const cancelOrderBtn = root.querySelector('#cancelOrderBtn'); if(cancelOrderBtn) cancelOrderBtn.addEventListener('click',()=>{
-    S.cancelOrderId = S.selectedOrderId; S.cancelError = false; S.cancelSimFail = false; render();
+    S.cancelOrderId = S.selectedOrderId; S.cancelStep = 'confirm'; S.cancelSimFail = false; render();
   });
-  const closeCancel = ()=>{ S.cancelOrderId = null; S.cancelError = false; render(); };
+  const closeCancel = ()=>{ S.cancelOrderId = null; S.cancelStep = 'confirm'; render(); };
   ['#cancelKeep','#cancelX'].forEach(sel=>{ const b = root.querySelector(sel); if(b) b.addEventListener('click', closeCancel); });
   const cancelOverlay = root.querySelector('#cancelOverlay'); if(cancelOverlay) cancelOverlay.addEventListener('click',(e)=>{ if(e.target===cancelOverlay) closeCancel(); });
   const cancelSimFail = root.querySelector('#cancelSimFail'); if(cancelSimFail) cancelSimFail.addEventListener('change',()=>{ S.cancelSimFail = cancelSimFail.checked; });
+  const cancelSupport = root.querySelector('#cancelSupport'); if(cancelSupport) cancelSupport.addEventListener('click',()=>toast('Opens Trucker Path support chat'));
+  const bookAgainBtn = root.querySelector('#bookAgainBtn'); if(bookAgainBtn) bookAgainBtn.addEventListener('click',()=>{
+    const order = S.ordersHistory.find(o=>o.id===S.selectedOrderId);
+    S.cancelOrderId = null; S.cancelStep = 'confirm';
+    selectLot(order.lotId); S.detailPanelOpen = true; go('book1');
+  });
   const cancelConfirm = root.querySelector('#cancelConfirm'); if(cancelConfirm) cancelConfirm.addEventListener('click',()=>{
     cancelConfirm.textContent = 'Processing…'; cancelConfirm.disabled = true;
     setTimeout(()=>{
       const order = S.ordersHistory.find(o=>o.id===S.cancelOrderId);
       const d = withCancelState(order, orderDetailFor(order));
-      // a failed refund writes nothing: the order stays as it was and the modal stays open
-      if(d.outcome.refundable && S.cancelSimFail){ S.cancelError = true; S.cancelSimFail = false; render(); return; }
-      const now = fmtPaidOn(new Date());
+      // a failed cancellation writes nothing: the order stays as it was
+      if(S.cancelSimFail){ S.cancelStep = 'failed'; S.cancelSimFail = false; render(); return; }
       const card = (d.cardId && S.walletCards.find(c=>c.id===d.cardId)) || defaultCard();
-      if(d.outcome.refundable){ order.status = 'Refunded'; order.refundedOn = now; }
-      else if(d.isMonthly){ order.status = 'Unsubscribed'; }
-      else { order.status = 'Cancelled'; order.cancelledOn = now; }
-      S.cancelOrderId = null; S.cancelError = false;
+      order.status = 'Cancelled';
+      order.cancelledOn = fmtPaidOn(new Date());
+      if(d.outcome.flow === 'subscription'){
+        order.activeUntil = lastBillingDay(order);
+        S.cancelResult = { flow: 'subscription', lastDay: order.activeUntil };
+      } else {
+        order.refundSummary = { original: d.total, fee: d.total - d.outcome.amount, refund: d.outcome.amount, card: `${card.brand} •••• ${card.last4}` };
+        S.cancelResult = { flow: 'refund', amount: d.outcome.amount };
+      }
+      S.cancelStep = 'success';
       render();
-      toast(d.outcome.refundable ? `Order cancelled — ${fmtUSD(d.total)} refunded to ${card.brand} •••• ${card.last4}`
-        : d.isMonthly ? `Unsubscribed — your card won't be charged again` : 'Order cancelled — no refund');
     }, 800);
   });
   const amenitiesToggle = root.querySelector('#amenitiesToggle'); if(amenitiesToggle) amenitiesToggle.addEventListener('click',()=>{ S.amenitiesExpanded=!S.amenitiesExpanded; render(); });
